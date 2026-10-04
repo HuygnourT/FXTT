@@ -1,0 +1,1744 @@
+{
+	"markets": [
+		{
+			"code": "VN",
+			"name": "Vietnam",
+			"currency": "VND",
+			"status": "published",
+			"order": 1
+		},
+		{
+			"code": "TH",
+			"name": "Thailand",
+			"currency": "THB",
+			"status": "published",
+			"order": 2
+		},
+		{
+			"code": "ID",
+			"name": "Indonesia",
+			"currency": "IDR",
+			"status": "published",
+			"order": 3
+		},
+		{
+			"code": "PH",
+			"name": "Philippines",
+			"currency": "PHP",
+			"status": "in-progress",
+			"order": 4
+		},
+		{
+			"code": "KH",
+			"name": "Cambodia",
+			"currency": "KHR",
+			"status": "in-progress",
+			"order": 5
+		},
+		{
+			"code": "LA",
+			"name": "Laos",
+			"currency": "LAK",
+			"status": "planned",
+			"order": 6
+		},
+		{
+			"code": "BN",
+			"name": "Brunei",
+			"currency": "BND",
+			"status": "planned",
+			"order": 7
+		},
+		{
+			"code": "TL",
+			"name": "Timor-Leste",
+			"currency": "USD",
+			"status": "planned",
+			"order": 8
+		}
+	],
+	"platforms": [
+		{
+			"slug": "mt4",
+			"name": "MT4"
+		},
+		{
+			"slug": "mt5",
+			"name": "MT5"
+		},
+		{
+			"slug": "web",
+			"name": "Web"
+		},
+		{
+			"slug": "mobile",
+			"name": "Mobile"
+		},
+		{
+			"slug": "tradingview",
+			"name": "TradingView"
+		}
+	],
+	"account_types": [
+		{
+			"slug": "standard",
+			"name": "Standard"
+		},
+		{
+			"slug": "raw",
+			"name": "Raw spread"
+		},
+		{
+			"slug": "pro",
+			"name": "Pro"
+		},
+		{
+			"slug": "cent",
+			"name": "Cent"
+		}
+	],
+	"regulators": [
+		{
+			"name": "FSA Seychelles"
+		},
+		{
+			"name": "CySEC"
+		},
+		{
+			"name": "FCA"
+		},
+		{
+			"name": "FSCA"
+		},
+		{
+			"name": "ASIC"
+		},
+		{
+			"name": "CIMA"
+		},
+		{
+			"name": "VFSC"
+		},
+		{
+			"name": "SCB"
+		},
+		{
+			"name": "SEC"
+		},
+		{
+			"name": "FINRA"
+		},
+		{
+			"name": "MAS"
+		},
+		{
+			"name": "DFSA"
+		},
+		{
+			"name": "BaFin"
+		}
+	],
+	"author": {
+		"login": "timo",
+		"display_name": "Timo",
+		"description": "Timo started trading currencies as a retail trader in Ho Chi Minh City and kept running into the same problem: broker reviews described the brand, not the company that opened his account. Two brokers with near-identical websites turned out to be served by entities in very different jurisdictions.\n\nHe founded FX Trading Today to research brokers the way a careful trader would: find the legal entity, check it on the regulator's own register, then move real money through the payment methods people in each country actually use.\n\nToday he leads the review process, signs off every score and runs the account, deposit and withdrawal tests from Vietnam and Thailand himself. Reviews he did not test personally say so.",
+		"meta": {
+			"fxt_role_title": "Founder & Lead Broker Reviewer",
+			"fxt_short_bio": "Timo founded FX Trading Today to answer one question for traders in Southeast Asia: which company actually holds your money? He leads every broker review and personally runs the deposit and withdrawal tests.",
+			"fxt_location": "Ho Chi Minh City, Vietnam",
+			"fxt_since": "2019",
+			"fxt_languages": [
+				"Vietnamese",
+				"English"
+			],
+			"fxt_markets": [
+				"VN",
+				"TH",
+				"ID"
+			],
+			"fxt_expertise": [
+				"Legal entity mapping",
+				"Regulatory register checks",
+				"Deposit and withdrawal testing",
+				"Trading cost measurement",
+				"MetaTrader 4 and 5"
+			],
+			"fxt_stats": [
+				{
+					"value": "7 yrs",
+					"label": "Trading Forex as a retail client"
+				},
+				{
+					"value": "40+",
+					"label": "Live accounts opened for testing"
+				},
+				{
+					"value": "120+",
+					"label": "Deposits and withdrawals timed"
+				},
+				{
+					"value": "3",
+					"label": "Southeast Asian markets tested in person"
+				}
+			],
+			"fxt_principles": [
+				"Never accepts payment, gifts or funded accounts from brokers for a review.",
+				"Tests with his own money through the same sign-up flow as any reader.",
+				"Publishes the test date on every finding and updates it when conditions change."
+			],
+			"fxt_disclosure": "FX Trading Today may earn a commission when readers open an account through some links. Timo does not see commercial terms before he scores a broker.",
+			"fxt_simulated": true
+		}
+	},
+	"brokers": [
+		{
+			"slug": "exness",
+			"title": "Exness",
+			"excerpt": "Low entry cost and fast local payments in our Vietnam tests, served through an offshore entity.",
+			"summary": "In our sample tests from Vietnam, local deposits cleared in minutes and all three withdrawals arrived within four days. Costs on the Standard account were competitive. The trade-off is regulatory: clients in Southeast Asia are onboarded by an offshore entity, so protections differ from the EU entity.",
+			"pros": [
+				"Local QR and bank deposits cleared in minutes in our sample tests",
+				"Low $10 minimum deposit on Standard accounts",
+				"Wide account range, including a cent account for small test balances",
+				"MT4, MT5 and a proprietary web terminal"
+			],
+			"cons": [
+				"Southeast Asian clients are served by an offshore entity, not the EU or UK entity",
+				"Very high leverage is available, which increases risk for new traders",
+				"No TradingView integration observed"
+			],
+			"final": "A practical option for traders in Vietnam who value fast local payments and a low entry point. Read the regulation section closely: the entity that serves you is not the one behind the brand's strongest licences.",
+			"regulators": [
+				"FSA Seychelles",
+				"CySEC",
+				"FCA",
+				"FSCA"
+			],
+			"platforms": [
+				"mt4",
+				"mt5",
+				"web",
+				"mobile"
+			],
+			"account_types": [
+				"standard",
+				"raw",
+				"pro",
+				"cent"
+			],
+			"meta": {
+				"fxt_monogram": "EX",
+				"fxt_status": "published",
+				"fxt_score": 4.5,
+				"fxt_score_breakdown": {
+					"regulation": 4.3,
+					"availability": 4.8,
+					"costs": 4.6,
+					"platforms": 4.4,
+					"local": 4.7,
+					"support": 4.2
+				},
+				"fxt_reviewed": "2026-09-12",
+				"fxt_founded": "2008",
+				"fxt_min_deposit": 10,
+				"fxt_currencies": [
+					"USD",
+					"EUR",
+					"VND",
+					"THB",
+					"IDR"
+				],
+				"fxt_other_platforms": "Exness Terminal (web), Exness Trade app",
+				"fxt_trading": {
+					"leverage": "Varies by entity (up to 1:2000 sample)",
+					"execution": "Market execution",
+					"order_types": "Market, limit, stop, stop-limit"
+				},
+				"fxt_costs": {
+					"spread": "1.1 pips EUR/USD (observed avg)",
+					"commission": "None on Standard",
+					"swap": "Swap-free on selected instruments",
+					"other_fees": "No deposit fee observed"
+				},
+				"fxt_payments": {
+					"bank": true,
+					"cards": true,
+					"ewallets": true,
+					"crypto": true,
+					"time_local": "2 min",
+					"time_cards": "Instant",
+					"time_ewallets": "Instant",
+					"time_crypto": "10 min"
+				},
+				"fxt_accounts": [
+					{
+						"name": "Standard",
+						"min_deposit": "$10",
+						"spread": "From 1.0 pips",
+						"commission": "None",
+						"execution": "Market",
+						"best_for": "New traders"
+					},
+					{
+						"name": "Standard Cent",
+						"min_deposit": "$10",
+						"spread": "From 1.0 pips",
+						"commission": "None",
+						"execution": "Market",
+						"best_for": "Small test balances"
+					},
+					{
+						"name": "Raw Spread",
+						"min_deposit": "$200",
+						"spread": "From 0.0 pips",
+						"commission": "$7 per lot round turn",
+						"execution": "Market",
+						"best_for": "Active traders"
+					},
+					{
+						"name": "Pro",
+						"min_deposit": "$200",
+						"spread": "From 0.6 pips",
+						"commission": "None",
+						"execution": "Instant or market",
+						"best_for": "Experienced traders"
+					}
+				],
+				"fxt_entities": [
+					{
+						"key": "global",
+						"name": "Offshore entity (name TBD)",
+						"regulator": "FSA Seychelles",
+						"licence": "TBD",
+						"jurisdiction": "Seychelles",
+						"protection": "Negative balance protection (to verify)",
+						"verified": false
+					},
+					{
+						"key": "eu",
+						"name": "EU entity (name TBD)",
+						"regulator": "CySEC",
+						"licence": "TBD",
+						"jurisdiction": "Cyprus",
+						"protection": "Investor compensation scheme (to verify)",
+						"verified": false
+					}
+				],
+				"fxt_markets": {
+					"VN": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "VietQR, local bank transfer",
+						"deposit": "complete",
+						"withdrawal": "complete",
+						"platform": "complete",
+						"support": "complete",
+						"last_tested": "2026-09-10"
+					},
+					"TH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Thai QR (PromptPay)",
+						"deposit": "complete",
+						"withdrawal": "in-progress",
+						"platform": "complete",
+						"support": "planned",
+						"last_tested": "2026-08-30"
+					},
+					"ID": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Local bank transfer",
+						"deposit": "in-progress",
+						"withdrawal": "planned",
+						"platform": "planned",
+						"support": "planned",
+						"last_tested": "2026-09-18"
+					},
+					"PH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "GCash (to verify)",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"KH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Local bank transfer",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"LA": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"BN": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"TL": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					}
+				}
+			},
+			"content": "<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"quick-facts\">Quick facts</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"quick-facts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"verdict\">Trader verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:quote {\"className\":\"is-style-verdict\"} -->\n<blockquote class=\"wp-block-quote is-style-verdict\"><!-- wp:paragraph -->\n<p>In our sample tests from Vietnam, local deposits cleared in minutes and all three withdrawals arrived within four days. Costs on the Standard account were competitive. The trade-off is regulatory: clients in Southeast Asia are onboarded by an offshore entity, so protections differ from the EU entity.</p>\n<!-- /wp:paragraph --><cite><strong>Most relevant for</strong> New traders, Small test balances, Active traders, Experienced traders</cite></blockquote>\n<!-- /wp:quote -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"regulation\">Regulation and client protection</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">The brand is not the company that holds your money. For clients in each country, this is the chain we trace and verify on official registers.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"regulation\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"costs\">Trading costs and execution</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Spreads are averages we observed on EUR/USD across five sessions, including the London open, not the advertised minimum.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"costs\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"platforms\">Platforms</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"platforms\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"payments\">Deposit and withdrawal</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Payment options depend on the entity and the country. We move real money through local methods and time each step.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"payments\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"accounts\">Account types</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"accounts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"pros-cons\">Pros and cons</h2>\n<!-- /wp:heading -->\n\n<!-- wp:columns {\"className\":\"is-style-pros-cons\"} -->\n<div class=\"wp-block-columns is-style-pros-cons\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What worked in our research</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-pros\"} -->\n<ul class=\"wp-block-list is-style-pros\"><!-- wp:list-item -->\n<li>Local QR and bank deposits cleared in minutes in our sample tests</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Low $10 minimum deposit on Standard accounts</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Wide account range, including a cent account for small test balances</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>MT4, MT5 and a proprietary web terminal</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What to weigh carefully</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-cons\"} -->\n<ul class=\"wp-block-list is-style-cons\"><!-- wp:list-item -->\n<li>Southeast Asian clients are served by an offshore entity, not the EU or UK entity</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Very high leverage is available, which increases risk for new traders</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>No TradingView integration observed</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"evidence\">Research evidence</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Test status by country. Evidence pages show timestamps, amounts and redacted screenshots for each test.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"evidence\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"method\">How we evaluated this broker</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-check\"} -->\n<ul class=\"wp-block-list is-style-check\"><!-- wp:list-item -->\n<li>Mapped which legal entity onboards clients in each market we cover, then looked it up on the regulator&#8217;s register.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Opened a live account, completed verification and recorded every step with timestamps.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Deposited and withdrew real money using local methods, and measured spreads across five sessions.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Scored six weighted categories. Commercial relationships were not part of the scoring.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"final-verdict\">Final verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"final-score\"} /-->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">A practical option for traders in Vietnam who value fast local payments and a low entry point. Read the regulation section closely: the entity that serves you is not the one behind the brand's strongest licences.</p>\n<!-- /wp:paragraph -->"
+		},
+		{
+			"slug": "vantage",
+			"title": "Vantage",
+			"excerpt": "Strong platform choice including TradingView, with withdrawal testing still in progress.",
+			"summary": "Vantage offers the broadest platform line-up in our sample, including TradingView. Deposits from Vietnam worked by local bank transfer, but withdrawal tests are still running, so the score may change.",
+			"pros": [
+				"TradingView, MT4 and MT5 all available",
+				"Raw ECN account from a $50 minimum",
+				"Local bank deposits worked in our sample Vietnam test"
+			],
+			"cons": [
+				"Withdrawal testing from Vietnam not yet complete",
+				"Offshore entity serves Southeast Asian clients",
+				"Pro ECN requires a high minimum deposit"
+			],
+			"final": "Worth a look for chart-focused traders who want TradingView. We will confirm the withdrawal experience before treating this rating as final.",
+			"regulators": [
+				"ASIC",
+				"FCA",
+				"CIMA",
+				"VFSC"
+			],
+			"platforms": [
+				"mt4",
+				"mt5",
+				"web",
+				"mobile",
+				"tradingview"
+			],
+			"account_types": [
+				"standard",
+				"raw",
+				"pro",
+				"cent"
+			],
+			"meta": {
+				"fxt_monogram": "VT",
+				"fxt_status": "published",
+				"fxt_score": 4.2,
+				"fxt_score_breakdown": {
+					"regulation": 4,
+					"availability": 4.3,
+					"costs": 4.2,
+					"platforms": 4.7,
+					"local": 3.9,
+					"support": 4.1
+				},
+				"fxt_reviewed": "2026-09-04",
+				"fxt_founded": "2009",
+				"fxt_min_deposit": 50,
+				"fxt_currencies": [
+					"USD",
+					"EUR",
+					"GBP",
+					"AUD"
+				],
+				"fxt_other_platforms": "ProTrader (web)",
+				"fxt_trading": {
+					"leverage": "Varies by entity (up to 1:500 sample)",
+					"execution": "Market execution",
+					"order_types": "Market, limit, stop"
+				},
+				"fxt_costs": {
+					"spread": "1.2 pips EUR/USD (observed avg)",
+					"commission": "None on Standard STP",
+					"swap": "Standard swaps apply",
+					"other_fees": "Bank withdrawal fee may apply (to verify)"
+				},
+				"fxt_payments": {
+					"bank": true,
+					"cards": true,
+					"ewallets": true,
+					"crypto": false,
+					"time_local": "15 min",
+					"time_cards": "Instant",
+					"time_ewallets": "Instant",
+					"time_crypto": "Not offered"
+				},
+				"fxt_accounts": [
+					{
+						"name": "Standard STP",
+						"min_deposit": "$50",
+						"spread": "From 1.0 pips",
+						"commission": "None",
+						"execution": "Market",
+						"best_for": "New traders"
+					},
+					{
+						"name": "Raw ECN",
+						"min_deposit": "$50",
+						"spread": "From 0.0 pips",
+						"commission": "$6 per lot round turn",
+						"execution": "Market",
+						"best_for": "Active traders"
+					},
+					{
+						"name": "Pro ECN",
+						"min_deposit": "$10,000",
+						"spread": "From 0.0 pips",
+						"commission": "$3 per lot round turn",
+						"execution": "Market",
+						"best_for": "High volume"
+					}
+				],
+				"fxt_entities": [
+					{
+						"key": "global",
+						"name": "Offshore entity (name TBD)",
+						"regulator": "VFSC",
+						"licence": "TBD",
+						"jurisdiction": "Vanuatu",
+						"protection": "Negative balance protection (to verify)",
+						"verified": false
+					}
+				],
+				"fxt_markets": {
+					"VN": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Local bank transfer",
+						"deposit": "complete",
+						"withdrawal": "in-progress",
+						"platform": "complete",
+						"support": "planned",
+						"last_tested": "2026-09-02"
+					},
+					"TH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Thai QR (PromptPay)",
+						"deposit": "planned",
+						"withdrawal": "planned",
+						"platform": "planned",
+						"support": "planned",
+						"last_tested": ""
+					},
+					"ID": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"PH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Local bank transfer",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"KH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Research pending",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"LA": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"BN": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"TL": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					}
+				}
+			},
+			"content": "<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"quick-facts\">Quick facts</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"quick-facts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"verdict\">Trader verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:quote {\"className\":\"is-style-verdict\"} -->\n<blockquote class=\"wp-block-quote is-style-verdict\"><!-- wp:paragraph -->\n<p>Vantage offers the broadest platform line-up in our sample, including TradingView. Deposits from Vietnam worked by local bank transfer, but withdrawal tests are still running, so the score may change.</p>\n<!-- /wp:paragraph --><cite><strong>Most relevant for</strong> New traders, Active traders, High volume</cite></blockquote>\n<!-- /wp:quote -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"regulation\">Regulation and client protection</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">The brand is not the company that holds your money. For clients in each country, this is the chain we trace and verify on official registers.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"regulation\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"costs\">Trading costs and execution</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Spreads are averages we observed on EUR/USD across five sessions, including the London open, not the advertised minimum.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"costs\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"platforms\">Platforms</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"platforms\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"payments\">Deposit and withdrawal</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Payment options depend on the entity and the country. We move real money through local methods and time each step.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"payments\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"accounts\">Account types</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"accounts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"pros-cons\">Pros and cons</h2>\n<!-- /wp:heading -->\n\n<!-- wp:columns {\"className\":\"is-style-pros-cons\"} -->\n<div class=\"wp-block-columns is-style-pros-cons\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What worked in our research</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-pros\"} -->\n<ul class=\"wp-block-list is-style-pros\"><!-- wp:list-item -->\n<li>TradingView, MT4 and MT5 all available</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Raw ECN account from a $50 minimum</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Local bank deposits worked in our sample Vietnam test</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What to weigh carefully</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-cons\"} -->\n<ul class=\"wp-block-list is-style-cons\"><!-- wp:list-item -->\n<li>Withdrawal testing from Vietnam not yet complete</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Offshore entity serves Southeast Asian clients</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Pro ECN requires a high minimum deposit</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"evidence\">Research evidence</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Test status by country. Evidence pages show timestamps, amounts and redacted screenshots for each test.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"evidence\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"method\">How we evaluated this broker</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-check\"} -->\n<ul class=\"wp-block-list is-style-check\"><!-- wp:list-item -->\n<li>Mapped which legal entity onboards clients in each market we cover, then looked it up on the regulator&#8217;s register.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Opened a live account, completed verification and recorded every step with timestamps.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Deposited and withdrew real money using local methods, and measured spreads across five sessions.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Scored six weighted categories. Commercial relationships were not part of the scoring.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"final-verdict\">Final verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"final-score\"} /-->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Worth a look for chart-focused traders who want TradingView. We will confirm the withdrawal experience before treating this rating as final.</p>\n<!-- /wp:paragraph -->"
+		},
+		{
+			"slug": "icmarkets",
+			"title": "IC Markets",
+			"excerpt": "Among the lowest all-in costs in our sample, with a higher $200 entry point.",
+			"summary": "IC Markets recorded the lowest all-in EUR/USD cost among the brokers we sampled on its Raw account. Local payment options are narrower than some competitors, and the $200 minimum is less suited to small test balances.",
+			"pros": [
+				"Lowest observed all-in cost on Raw accounts in our sample",
+				"MT4, MT5, cTrader and TradingView",
+				"Deposits and withdrawals from Vietnam completed in sample tests"
+			],
+			"cons": [
+				"$200 minimum deposit",
+				"No cent or micro account",
+				"Test evidence for Vietnam not yet published"
+			],
+			"final": "A cost-efficient choice for active traders who are comfortable with a $200 minimum. Evidence from our Vietnam tests will be published once redaction is complete.",
+			"regulators": [
+				"ASIC",
+				"CySEC",
+				"FSA Seychelles",
+				"SCB"
+			],
+			"platforms": [
+				"mt4",
+				"mt5",
+				"web",
+				"mobile",
+				"tradingview"
+			],
+			"account_types": [
+				"standard",
+				"raw"
+			],
+			"meta": {
+				"fxt_monogram": "IC",
+				"fxt_status": "published",
+				"fxt_score": 4.4,
+				"fxt_score_breakdown": {
+					"regulation": 4.3,
+					"availability": 4.1,
+					"costs": 4.8,
+					"platforms": 4.8,
+					"local": 3.8,
+					"support": 4.3
+				},
+				"fxt_reviewed": "2026-08-28",
+				"fxt_founded": "2007",
+				"fxt_min_deposit": 200,
+				"fxt_currencies": [
+					"USD",
+					"EUR",
+					"GBP",
+					"SGD",
+					"AUD"
+				],
+				"fxt_other_platforms": "cTrader",
+				"fxt_trading": {
+					"leverage": "Varies by entity (up to 1:1000 sample)",
+					"execution": "Market execution",
+					"order_types": "Market, limit, stop, stop-limit"
+				},
+				"fxt_costs": {
+					"spread": "0.2 pips + commission (Raw, observed avg)",
+					"commission": "$7 per lot round turn (Raw)",
+					"swap": "Standard swaps apply",
+					"other_fees": "No deposit fee observed"
+				},
+				"fxt_payments": {
+					"bank": true,
+					"cards": true,
+					"ewallets": true,
+					"crypto": false,
+					"time_local": "20 min",
+					"time_cards": "Instant",
+					"time_ewallets": "Instant",
+					"time_crypto": "Not offered"
+				},
+				"fxt_accounts": [
+					{
+						"name": "Standard",
+						"min_deposit": "$200",
+						"spread": "From 0.8 pips",
+						"commission": "None",
+						"execution": "Market",
+						"best_for": "Discretionary traders"
+					},
+					{
+						"name": "Raw Spread",
+						"min_deposit": "$200",
+						"spread": "From 0.0 pips",
+						"commission": "$7 per lot round turn",
+						"execution": "Market",
+						"best_for": "Scalpers and EAs"
+					},
+					{
+						"name": "cTrader Raw",
+						"min_deposit": "$200",
+						"spread": "From 0.0 pips",
+						"commission": "$6 per lot round turn",
+						"execution": "Market",
+						"best_for": "cTrader users"
+					}
+				],
+				"fxt_entities": [
+					{
+						"key": "global",
+						"name": "Offshore entity (name TBD)",
+						"regulator": "FSA Seychelles",
+						"licence": "TBD",
+						"jurisdiction": "Seychelles",
+						"protection": "Negative balance protection (to verify)",
+						"verified": false
+					}
+				],
+				"fxt_markets": {
+					"VN": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Local bank transfer",
+						"deposit": "complete",
+						"withdrawal": "complete",
+						"platform": "complete",
+						"support": "complete",
+						"last_tested": "2026-08-25"
+					},
+					"TH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Thai QR (PromptPay)",
+						"deposit": "complete",
+						"withdrawal": "planned",
+						"platform": "complete",
+						"support": "planned",
+						"last_tested": "2026-08-12"
+					},
+					"ID": {
+						"availability": "restricted",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"PH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Local bank transfer",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"KH": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"LA": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"BN": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "International wire",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"TL": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					}
+				}
+			},
+			"content": "<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"quick-facts\">Quick facts</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"quick-facts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"verdict\">Trader verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:quote {\"className\":\"is-style-verdict\"} -->\n<blockquote class=\"wp-block-quote is-style-verdict\"><!-- wp:paragraph -->\n<p>IC Markets recorded the lowest all-in EUR/USD cost among the brokers we sampled on its Raw account. Local payment options are narrower than some competitors, and the $200 minimum is less suited to small test balances.</p>\n<!-- /wp:paragraph --><cite><strong>Most relevant for</strong> Discretionary traders, Scalpers and EAs, cTrader users</cite></blockquote>\n<!-- /wp:quote -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"regulation\">Regulation and client protection</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">The brand is not the company that holds your money. For clients in each country, this is the chain we trace and verify on official registers.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"regulation\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"costs\">Trading costs and execution</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Spreads are averages we observed on EUR/USD across five sessions, including the London open, not the advertised minimum.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"costs\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"platforms\">Platforms</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"platforms\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"payments\">Deposit and withdrawal</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Payment options depend on the entity and the country. We move real money through local methods and time each step.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"payments\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"accounts\">Account types</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"accounts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"pros-cons\">Pros and cons</h2>\n<!-- /wp:heading -->\n\n<!-- wp:columns {\"className\":\"is-style-pros-cons\"} -->\n<div class=\"wp-block-columns is-style-pros-cons\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What worked in our research</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-pros\"} -->\n<ul class=\"wp-block-list is-style-pros\"><!-- wp:list-item -->\n<li>Lowest observed all-in cost on Raw accounts in our sample</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>MT4, MT5, cTrader and TradingView</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Deposits and withdrawals from Vietnam completed in sample tests</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What to weigh carefully</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-cons\"} -->\n<ul class=\"wp-block-list is-style-cons\"><!-- wp:list-item -->\n<li>$200 minimum deposit</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>No cent or micro account</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Test evidence for Vietnam not yet published</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"evidence\">Research evidence</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Test status by country. Evidence pages show timestamps, amounts and redacted screenshots for each test.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"evidence\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"method\">How we evaluated this broker</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-check\"} -->\n<ul class=\"wp-block-list is-style-check\"><!-- wp:list-item -->\n<li>Mapped which legal entity onboards clients in each market we cover, then looked it up on the regulator&#8217;s register.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Opened a live account, completed verification and recorded every step with timestamps.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Deposited and withdrew real money using local methods, and measured spreads across five sessions.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Scored six weighted categories. Commercial relationships were not part of the scoring.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"final-verdict\">Final verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"final-score\"} /-->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">A cost-efficient choice for active traders who are comfortable with a $200 minimum. Evidence from our Vietnam tests will be published once redaction is complete.</p>\n<!-- /wp:paragraph -->"
+		},
+		{
+			"slug": "ibkr",
+			"title": "Interactive Brokers",
+			"excerpt": "Deep multi-asset platform, but no local payment rails in our sample markets.",
+			"summary": "Interactive Brokers suits investors who trade more than currencies. In Vietnam we could only fund by international wire, which is slower and costlier than local rails. The entity serving Southeast Asia is still being mapped, so this review is being updated.",
+			"pros": [
+				"Very low observed EUR/USD cost on a commission basis",
+				"Broad range of markets and order types",
+				"No minimum deposit"
+			],
+			"cons": [
+				"Funding by international wire only in our sample markets",
+				"No MT4 or MT5",
+				"Entity serving Southeast Asia still being verified"
+			],
+			"final": "Best viewed as a multi-asset brokerage rather than a local Forex broker. Our update will confirm which entity serves traders in each market.",
+			"regulators": [
+				"SEC",
+				"FINRA",
+				"FCA",
+				"MAS",
+				"ASIC"
+			],
+			"platforms": [
+				"web",
+				"mobile",
+				"tradingview"
+			],
+			"account_types": [
+				"pro"
+			],
+			"meta": {
+				"fxt_monogram": "IB",
+				"fxt_status": "updating",
+				"fxt_score": 4.3,
+				"fxt_score_breakdown": {
+					"regulation": 4.8,
+					"availability": 3.6,
+					"costs": 4.5,
+					"platforms": 4.6,
+					"local": 3.2,
+					"support": 4
+				},
+				"fxt_reviewed": "2026-07-30",
+				"fxt_founded": "1978",
+				"fxt_min_deposit": 0,
+				"fxt_currencies": [
+					"USD",
+					"EUR",
+					"GBP",
+					"SGD",
+					"HKD",
+					"JPY"
+				],
+				"fxt_other_platforms": "Trader Workstation, API",
+				"fxt_trading": {
+					"leverage": "Lower retail limits (sample)",
+					"execution": "Direct market access",
+					"order_types": "60+ order types, including algos"
+				},
+				"fxt_costs": {
+					"spread": "0.1 pips + commission (observed avg)",
+					"commission": "Per trade, tiered",
+					"swap": "Benchmark rate based financing",
+					"other_fees": "Market data subscriptions may apply"
+				},
+				"fxt_payments": {
+					"bank": true,
+					"cards": false,
+					"ewallets": false,
+					"crypto": false,
+					"time_local": "1 to 3 days",
+					"time_cards": "Not offered",
+					"time_ewallets": "Not offered",
+					"time_crypto": "Not offered"
+				},
+				"fxt_accounts": [
+					{
+						"name": "IBKR Pro",
+						"min_deposit": "$0",
+						"spread": "Interbank + commission",
+						"commission": "Tiered, per trade",
+						"execution": "Direct market access",
+						"best_for": "Multi-asset investors"
+					}
+				],
+				"fxt_entities": [
+					{
+						"key": "global",
+						"name": "Regional entity (name TBD)",
+						"regulator": "Research pending",
+						"licence": "TBD",
+						"jurisdiction": "Research pending",
+						"protection": "Research pending",
+						"verified": false
+					}
+				],
+				"fxt_markets": {
+					"VN": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "International wire only",
+						"deposit": "complete",
+						"withdrawal": "planned",
+						"platform": "complete",
+						"support": "planned",
+						"last_tested": "2026-07-22"
+					},
+					"TH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "International wire only",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"ID": {
+						"availability": "restricted",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"PH": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"KH": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"LA": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"BN": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "International wire only",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"TL": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					}
+				}
+			},
+			"content": "<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"quick-facts\">Quick facts</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"quick-facts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"verdict\">Trader verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:quote {\"className\":\"is-style-verdict\"} -->\n<blockquote class=\"wp-block-quote is-style-verdict\"><!-- wp:paragraph -->\n<p>Interactive Brokers suits investors who trade more than currencies. In Vietnam we could only fund by international wire, which is slower and costlier than local rails. The entity serving Southeast Asia is still being mapped, so this review is being updated.</p>\n<!-- /wp:paragraph --><cite><strong>Most relevant for</strong> Multi-asset investors</cite></blockquote>\n<!-- /wp:quote -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"regulation\">Regulation and client protection</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">The brand is not the company that holds your money. For clients in each country, this is the chain we trace and verify on official registers.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"regulation\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"costs\">Trading costs and execution</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Spreads are averages we observed on EUR/USD across five sessions, including the London open, not the advertised minimum.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"costs\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"platforms\">Platforms</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"platforms\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"payments\">Deposit and withdrawal</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Payment options depend on the entity and the country. We move real money through local methods and time each step.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"payments\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"accounts\">Account types</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"accounts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"pros-cons\">Pros and cons</h2>\n<!-- /wp:heading -->\n\n<!-- wp:columns {\"className\":\"is-style-pros-cons\"} -->\n<div class=\"wp-block-columns is-style-pros-cons\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What worked in our research</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-pros\"} -->\n<ul class=\"wp-block-list is-style-pros\"><!-- wp:list-item -->\n<li>Very low observed EUR/USD cost on a commission basis</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Broad range of markets and order types</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>No minimum deposit</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What to weigh carefully</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-cons\"} -->\n<ul class=\"wp-block-list is-style-cons\"><!-- wp:list-item -->\n<li>Funding by international wire only in our sample markets</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>No MT4 or MT5</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Entity serving Southeast Asia still being verified</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"evidence\">Research evidence</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Test status by country. Evidence pages show timestamps, amounts and redacted screenshots for each test.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"evidence\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"method\">How we evaluated this broker</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-check\"} -->\n<ul class=\"wp-block-list is-style-check\"><!-- wp:list-item -->\n<li>Mapped which legal entity onboards clients in each market we cover, then looked it up on the regulator&#8217;s register.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Opened a live account, completed verification and recorded every step with timestamps.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Deposited and withdrew real money using local methods, and measured spreads across five sessions.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Scored six weighted categories. Commercial relationships were not part of the scoring.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"final-verdict\">Final verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"final-score\"} /-->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Best viewed as a multi-asset brokerage rather than a local Forex broker. Our update will confirm which entity serves traders in each market.</p>\n<!-- /wp:paragraph -->"
+		},
+		{
+			"slug": "pepperstone",
+			"title": "Pepperstone",
+			"excerpt": "Low costs and a complete platform set, with no minimum deposit.",
+			"summary": "Pepperstone combined low Razor account costs with MT4, MT5, cTrader and TradingView in our sample. From Vietnam, clients are onboarded by an offshore entity; protections differ from the Australian and UK entities.",
+			"pros": [
+				"No minimum deposit",
+				"Low observed cost on Razor accounts",
+				"Complete platform set including cTrader and TradingView"
+			],
+			"cons": [
+				"Offshore entity serves Southeast Asian clients",
+				"No cent account",
+				"Fewer local payment rails than some competitors"
+			],
+			"final": "A well-rounded option for cost-conscious traders who want platform choice. As with most brands here, check which entity will hold your account.",
+			"regulators": [
+				"ASIC",
+				"FCA",
+				"CySEC",
+				"DFSA",
+				"SCB",
+				"BaFin"
+			],
+			"platforms": [
+				"mt4",
+				"mt5",
+				"web",
+				"mobile",
+				"tradingview"
+			],
+			"account_types": [
+				"standard",
+				"raw",
+				"pro"
+			],
+			"meta": {
+				"fxt_monogram": "PS",
+				"fxt_status": "published",
+				"fxt_score": 4.4,
+				"fxt_score_breakdown": {
+					"regulation": 4.5,
+					"availability": 4.2,
+					"costs": 4.7,
+					"platforms": 4.8,
+					"local": 4,
+					"support": 4.4
+				},
+				"fxt_reviewed": "2026-09-15",
+				"fxt_founded": "2010",
+				"fxt_min_deposit": 0,
+				"fxt_currencies": [
+					"USD",
+					"EUR",
+					"GBP",
+					"SGD",
+					"AUD",
+					"HKD"
+				],
+				"fxt_other_platforms": "cTrader",
+				"fxt_trading": {
+					"leverage": "Varies by entity (up to 1:200 sample)",
+					"execution": "Market execution",
+					"order_types": "Market, limit, stop, trailing stop"
+				},
+				"fxt_costs": {
+					"spread": "0.1 pips + commission (Razor, observed avg)",
+					"commission": "$7 per lot round turn (Razor)",
+					"swap": "Standard swaps apply",
+					"other_fees": "No deposit fee observed"
+				},
+				"fxt_payments": {
+					"bank": true,
+					"cards": true,
+					"ewallets": true,
+					"crypto": false,
+					"time_local": "10 min",
+					"time_cards": "Instant",
+					"time_ewallets": "Instant",
+					"time_crypto": "Not offered"
+				},
+				"fxt_accounts": [
+					{
+						"name": "Standard",
+						"min_deposit": "$0",
+						"spread": "From 1.0 pips",
+						"commission": "None",
+						"execution": "Market",
+						"best_for": "New traders"
+					},
+					{
+						"name": "Razor",
+						"min_deposit": "$0",
+						"spread": "From 0.0 pips",
+						"commission": "$7 per lot round turn",
+						"execution": "Market",
+						"best_for": "Active traders"
+					},
+					{
+						"name": "Pro",
+						"min_deposit": "Eligibility based",
+						"spread": "From 0.0 pips",
+						"commission": "Reduced",
+						"execution": "Market",
+						"best_for": "Professional clients"
+					}
+				],
+				"fxt_entities": [
+					{
+						"key": "global",
+						"name": "Offshore entity (name TBD)",
+						"regulator": "SCB",
+						"licence": "TBD",
+						"jurisdiction": "The Bahamas",
+						"protection": "Negative balance protection (to verify)",
+						"verified": false
+					}
+				],
+				"fxt_markets": {
+					"VN": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Local bank transfer",
+						"deposit": "complete",
+						"withdrawal": "complete",
+						"platform": "complete",
+						"support": "complete",
+						"last_tested": "2026-09-13"
+					},
+					"TH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Thai QR (PromptPay)",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"ID": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"PH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Local bank transfer",
+						"deposit": "in-progress",
+						"withdrawal": "planned",
+						"platform": "planned",
+						"support": "planned",
+						"last_tested": "2026-09-20"
+					},
+					"KH": {
+						"availability": "restricted",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"LA": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"BN": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"TL": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					}
+				}
+			},
+			"content": "<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"quick-facts\">Quick facts</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"quick-facts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"verdict\">Trader verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:quote {\"className\":\"is-style-verdict\"} -->\n<blockquote class=\"wp-block-quote is-style-verdict\"><!-- wp:paragraph -->\n<p>Pepperstone combined low Razor account costs with MT4, MT5, cTrader and TradingView in our sample. From Vietnam, clients are onboarded by an offshore entity; protections differ from the Australian and UK entities.</p>\n<!-- /wp:paragraph --><cite><strong>Most relevant for</strong> New traders, Active traders, Professional clients</cite></blockquote>\n<!-- /wp:quote -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"regulation\">Regulation and client protection</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">The brand is not the company that holds your money. For clients in each country, this is the chain we trace and verify on official registers.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"regulation\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"costs\">Trading costs and execution</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Spreads are averages we observed on EUR/USD across five sessions, including the London open, not the advertised minimum.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"costs\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"platforms\">Platforms</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"platforms\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"payments\">Deposit and withdrawal</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Payment options depend on the entity and the country. We move real money through local methods and time each step.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"payments\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"accounts\">Account types</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"accounts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"pros-cons\">Pros and cons</h2>\n<!-- /wp:heading -->\n\n<!-- wp:columns {\"className\":\"is-style-pros-cons\"} -->\n<div class=\"wp-block-columns is-style-pros-cons\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What worked in our research</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-pros\"} -->\n<ul class=\"wp-block-list is-style-pros\"><!-- wp:list-item -->\n<li>No minimum deposit</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Low observed cost on Razor accounts</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Complete platform set including cTrader and TradingView</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What to weigh carefully</h3>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-cons\"} -->\n<ul class=\"wp-block-list is-style-cons\"><!-- wp:list-item -->\n<li>Offshore entity serves Southeast Asian clients</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>No cent account</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Fewer local payment rails than some competitors</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"evidence\">Research evidence</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Test status by country. Evidence pages show timestamps, amounts and redacted screenshots for each test.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"evidence\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"method\">How we evaluated this broker</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-check\"} -->\n<ul class=\"wp-block-list is-style-check\"><!-- wp:list-item -->\n<li>Mapped which legal entity onboards clients in each market we cover, then looked it up on the regulator&#8217;s register.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Opened a live account, completed verification and recorded every step with timestamps.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Deposited and withdrew real money using local methods, and measured spreads across five sessions.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Scored six weighted categories. Commercial relationships were not part of the scoring.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"final-verdict\">Final verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"final-score\"} /-->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">A well-rounded option for cost-conscious traders who want platform choice. As with most brands here, check which entity will hold your account.</p>\n<!-- /wp:paragraph -->"
+		},
+		{
+			"slug": "fpmarkets",
+			"title": "FP Markets",
+			"excerpt": "Research has not started. No rating is published until testing is complete.",
+			"summary": "FP Markets is in our research queue. We list it so readers can see what is coming, but we do not publish a score before entity mapping and payment tests are complete.",
+			"pros": [],
+			"cons": [],
+			"final": "No verdict yet. Research pending.",
+			"regulators": [
+				"ASIC",
+				"CySEC",
+				"FSCA",
+				"FSA Seychelles"
+			],
+			"platforms": [
+				"mt4",
+				"mt5",
+				"web",
+				"mobile",
+				"tradingview"
+			],
+			"account_types": [
+				"standard",
+				"raw"
+			],
+			"meta": {
+				"fxt_monogram": "FP",
+				"fxt_status": "pending",
+				"fxt_score": null,
+				"fxt_score_breakdown": null,
+				"fxt_reviewed": null,
+				"fxt_founded": "2005",
+				"fxt_min_deposit": 100,
+				"fxt_currencies": [
+					"USD",
+					"EUR",
+					"GBP",
+					"AUD"
+				],
+				"fxt_other_platforms": "cTrader",
+				"fxt_trading": {
+					"leverage": "Research pending",
+					"execution": "Market execution",
+					"order_types": "Research pending"
+				},
+				"fxt_costs": {
+					"spread": "Research pending",
+					"commission": "Research pending",
+					"swap": "Research pending",
+					"other_fees": "Research pending"
+				},
+				"fxt_payments": {
+					"bank": true,
+					"cards": true,
+					"ewallets": true,
+					"crypto": false,
+					"time_local": "TBD",
+					"time_cards": "TBD",
+					"time_ewallets": "TBD",
+					"time_crypto": "Not offered"
+				},
+				"fxt_accounts": [
+					{
+						"name": "Standard",
+						"min_deposit": "$100",
+						"spread": "TBD",
+						"commission": "None",
+						"execution": "Market",
+						"best_for": "TBD"
+					},
+					{
+						"name": "Raw",
+						"min_deposit": "$100",
+						"spread": "TBD",
+						"commission": "TBD",
+						"execution": "Market",
+						"best_for": "TBD"
+					}
+				],
+				"fxt_entities": [
+					{
+						"key": "global",
+						"name": "Offshore entity (name TBD)",
+						"regulator": "Research pending",
+						"licence": "TBD",
+						"jurisdiction": "Research pending",
+						"protection": "Research pending",
+						"verified": false
+					}
+				],
+				"fxt_markets": {
+					"VN": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"TH": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Research pending",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"ID": {
+						"availability": "yes",
+						"entity_key": "global",
+						"local_payments": "Local bank transfer (to verify)",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"PH": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"KH": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"LA": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"BN": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					},
+					"TL": {
+						"availability": "pending",
+						"entity_key": "global",
+						"local_payments": "",
+						"deposit": "",
+						"withdrawal": "",
+						"platform": "",
+						"support": "",
+						"last_tested": ""
+					}
+				}
+			},
+			"content": "<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"quick-facts\">Quick facts</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"quick-facts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"verdict\">Trader verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:quote {\"className\":\"is-style-verdict\"} -->\n<blockquote class=\"wp-block-quote is-style-verdict\"><!-- wp:paragraph -->\n<p>FP Markets is in our research queue. We list it so readers can see what is coming, but we do not publish a score before entity mapping and payment tests are complete.</p>\n<!-- /wp:paragraph --></blockquote>\n<!-- /wp:quote -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"regulation\">Regulation and client protection</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">The brand is not the company that holds your money. For clients in each country, this is the chain we trace and verify on official registers.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"regulation\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"costs\">Trading costs and execution</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Spreads are averages we observed on EUR/USD across five sessions, including the London open, not the advertised minimum.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"costs\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"platforms\">Platforms</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"platforms\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"payments\">Deposit and withdrawal</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Payment options depend on the entity and the country. We move real money through local methods and time each step.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"payments\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"accounts\">Account types</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"accounts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"pros-cons\">Pros and cons</h2>\n<!-- /wp:heading -->\n\n<!-- wp:columns {\"className\":\"is-style-pros-cons\"} -->\n<div class=\"wp-block-columns is-style-pros-cons\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What worked in our research</h3>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-note\"} -->\n<p class=\"is-style-note\">Research pending.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What to weigh carefully</h3>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-note\"} -->\n<p class=\"is-style-note\">Research pending.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"evidence\">Research evidence</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Test status by country. Evidence pages show timestamps, amounts and redacted screenshots for each test.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"evidence\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"method\">How we evaluated this broker</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-check\"} -->\n<ul class=\"wp-block-list is-style-check\"><!-- wp:list-item -->\n<li>Mapped which legal entity onboards clients in each market we cover, then looked it up on the regulator&#8217;s register.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Opened a live account, completed verification and recorded every step with timestamps.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Deposited and withdrew real money using local methods, and measured spreads across five sessions.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Scored six weighted categories. Commercial relationships were not part of the scoring.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"final-verdict\">Final verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"final-score\"} /-->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">No verdict yet. Research pending.</p>\n<!-- /wp:paragraph -->"
+		}
+	],
+	"evidence": [
+		{
+			"slug": "exness-vn",
+			"title": "Exness: Vietnam test evidence",
+			"broker": "exness",
+			"notes": [
+				"Deposit confirmation appeared approximately two minutes after the VietQR payment was completed.",
+				"The bank transfer deposit required the exact payment reference. A mistyped reference would likely have delayed crediting.",
+				"The first withdrawal was approved automatically; the second waited for manual approval of about an hour.",
+				"Support answered our live chat question about withdrawal limits in Vietnamese within four minutes."
+			],
+			"excerpt": "Every account, deposit, withdrawal and support step we recorded while testing Exness from Vietnam.",
+			"meta": {
+				"fxt_market": "VN",
+				"fxt_status": "completed",
+				"fxt_period": {
+					"from": "2026-09-01",
+					"to": "2026-09-10"
+				},
+				"fxt_account_label": "Standard (USD)",
+				"fxt_summary": [
+					{
+						"icon": "file",
+						"title": "Account registration",
+						"value": "Completed",
+						"detail": "Email and phone verified in 6 min"
+					},
+					{
+						"icon": "shield-check",
+						"title": "KYC verification",
+						"value": "Completed",
+						"detail": "Approved in 2 h 10 min"
+					},
+					{
+						"icon": "arrow-right",
+						"title": "Deposit tests",
+						"value": "3 completed",
+						"detail": "Fastest 2 min, slowest 14 min"
+					},
+					{
+						"icon": "arrow-right",
+						"title": "Withdrawal tests",
+						"value": "3 completed",
+						"detail": "Fastest 31 min, slowest 3 days 1 h"
+					},
+					{
+						"icon": "chart",
+						"title": "Platform tests",
+						"value": "2 completed",
+						"detail": "MT5 desktop, mobile app"
+					},
+					{
+						"icon": "book",
+						"title": "Customer support tests",
+						"value": "2 completed",
+						"detail": "Live chat and email"
+					}
+				],
+				"fxt_timeline": [
+					{
+						"at": "2026-09-01T10:05",
+						"title": "Account created",
+						"note": "Standard account, USD base currency",
+						"ref": ""
+					},
+					{
+						"at": "2026-09-01T12:15",
+						"title": "Identity verified",
+						"note": "National ID and proof of address accepted",
+						"ref": ""
+					},
+					{
+						"at": "2026-09-02T09:20",
+						"title": "Deposit #1",
+						"note": "VietQR, 2,500,000 VND",
+						"ref": "DEP-VN-001"
+					},
+					{
+						"at": "2026-09-03T14:02",
+						"title": "Deposit #2",
+						"note": "Local bank transfer, 5,000,000 VND",
+						"ref": "DEP-VN-002"
+					},
+					{
+						"at": "2026-09-05T08:47",
+						"title": "Deposit #3",
+						"note": "Bank card, 100 USD",
+						"ref": "DEP-VN-003"
+					},
+					{
+						"at": "2026-09-05T15:30",
+						"title": "Trade executed",
+						"note": "EUR/USD 0.10 lot, opened and closed",
+						"ref": ""
+					},
+					{
+						"at": "2026-09-06T09:14",
+						"title": "Withdrawal #1",
+						"note": "Local bank transfer, 2,000,000 VND",
+						"ref": "WDR-VN-001"
+					},
+					{
+						"at": "2026-09-08T15:02",
+						"title": "Withdrawal #2",
+						"note": "Local bank transfer, 1,500,000 VND",
+						"ref": "WDR-VN-002"
+					},
+					{
+						"at": "2026-09-10T10:00",
+						"title": "Withdrawal #3",
+						"note": "Refund to bank card, 100 USD",
+						"ref": "WDR-VN-003"
+					}
+				],
+				"fxt_deposits": [
+					{
+						"id": "DEP-VN-001",
+						"date": "2026-09-02",
+						"method": "VietQR",
+						"currency": "VND",
+						"amount": "2,500,000",
+						"time": "2 min",
+						"fee": "0",
+						"result": "Successful"
+					},
+					{
+						"id": "DEP-VN-002",
+						"date": "2026-09-03",
+						"method": "Local bank transfer",
+						"currency": "VND",
+						"amount": "5,000,000",
+						"time": "14 min",
+						"fee": "0",
+						"result": "Successful"
+					},
+					{
+						"id": "DEP-VN-003",
+						"date": "2026-09-05",
+						"method": "Bank card",
+						"currency": "USD",
+						"amount": "100",
+						"time": "Instant",
+						"fee": "0",
+						"result": "Successful"
+					}
+				],
+				"fxt_withdrawals": [
+					{
+						"id": "WDR-VN-001",
+						"date": "2026-09-06",
+						"method": "Local bank transfer",
+						"currency": "VND",
+						"amount": "2,000,000",
+						"requested": "2026-09-06T09:14",
+						"received": "2026-09-06T09:45",
+						"time": "31 min",
+						"fee": "0",
+						"result": "Successful"
+					},
+					{
+						"id": "WDR-VN-002",
+						"date": "2026-09-08",
+						"method": "Local bank transfer",
+						"currency": "VND",
+						"amount": "1,500,000",
+						"requested": "2026-09-08T15:02",
+						"received": "2026-09-09T08:40",
+						"time": "17 h 38 min",
+						"fee": "0",
+						"result": "Successful"
+					},
+					{
+						"id": "WDR-VN-003",
+						"date": "2026-09-10",
+						"method": "Bank card refund",
+						"currency": "USD",
+						"amount": "100",
+						"requested": "2026-09-10T10:00",
+						"received": "2026-09-13T11:20",
+						"time": "3 days 1 h",
+						"fee": "0",
+						"result": "Successful"
+					}
+				],
+				"fxt_records": [
+					{
+						"test_id": "DEP-VN-001",
+						"steps": "2026-09-02 09:18 | Payment initiated in banking app\n2026-09-02 09:19 | Bank confirmed payment\n2026-09-02 09:20 | Trading account credited",
+						"broker_status": "Credited",
+						"bank_status": "Completed",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "VCB ****0193",
+						"reference": "QR-****-77A1",
+						"note": "The deposit appeared in the trading account about two minutes after the payment was confirmed in the banking app. No fee was shown by the broker or the bank."
+					},
+					{
+						"test_id": "DEP-VN-002",
+						"steps": "2026-09-03 13:48 | Transfer sent from bank\n2026-09-03 13:49 | Bank confirmed transfer\n2026-09-03 14:02 | Trading account credited",
+						"broker_status": "Credited",
+						"bank_status": "Completed",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "TCB ****5520",
+						"reference": "TRF-****-19C0",
+						"note": "The transfer required the payment reference to be copied exactly. Crediting took 14 minutes, the slowest of the three deposits."
+					},
+					{
+						"test_id": "DEP-VN-003",
+						"steps": "2026-09-05 08:46 | Card payment authorised\n2026-09-05 08:47 | Trading account credited",
+						"broker_status": "Credited",
+						"bank_status": "Authorised",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "Visa ****7714",
+						"reference": "CRD-****-4F02",
+						"note": "Card deposit was credited instantly. The card issuer applied no foreign transaction fee on this test; this can vary by issuer."
+					},
+					{
+						"test_id": "WDR-VN-001",
+						"steps": "2026-09-06 09:14 | Withdrawal requested\n2026-09-06 09:32 | Approved by broker\n2026-09-06 09:45 | Funds received by bank",
+						"broker_status": "Processed",
+						"bank_status": "Received",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "VCB ****0193",
+						"reference": "WD-****-2B91",
+						"note": "Approved automatically in 18 minutes and received 13 minutes later. Amount received matched the amount requested."
+					},
+					{
+						"test_id": "WDR-VN-002",
+						"steps": "2026-09-08 15:02 | Withdrawal requested\n2026-09-08 16:10 | Approved by broker\n2026-09-09 08:40 | Funds received by bank",
+						"broker_status": "Processed",
+						"bank_status": "Received",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "TCB ****5520",
+						"reference": "WD-****-6E30",
+						"note": "Requested on a weekday afternoon. The broker approved within about an hour, but the bank credited the funds the next morning, which suggests the delay was on the banking side."
+					},
+					{
+						"test_id": "WDR-VN-003",
+						"steps": "2026-09-10 10:00 | Refund requested\n2026-09-10 11:05 | Approved by broker\n2026-09-13 11:20 | Refund posted to card",
+						"broker_status": "Processed",
+						"bank_status": "Posted",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "Visa ****7714",
+						"reference": "RF-****-0D18",
+						"note": "Card withdrawals are processed as refunds to the original card. The refund took three days to post, which is typical for card networks."
+					}
+				]
+			},
+			"content": "<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"summary\">Test summary</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/evidence-data {\"section\":\"summary\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"timeline\">Test timeline</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/evidence-data {\"section\":\"timeline\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"deposits\">Deposit tests</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/evidence-data {\"section\":\"deposits\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"withdrawals\">Withdrawal tests</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/evidence-data {\"section\":\"withdrawals\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"notes\">What happened during our test?</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-notes\"} -->\n<ul class=\"wp-block-list is-style-notes\"><!-- wp:list-item -->\n<li>Deposit confirmation appeared approximately two minutes after the VietQR payment was completed.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>The bank transfer deposit required the exact payment reference. A mistyped reference would likely have delayed crediting.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>The first withdrawal was approved automatically; the second waited for manual approval of about an hour.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Support answered our live chat question about withdrawal limits in Vietnamese within four minutes.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->"
+		}
+	],
+	"pages": [
+		{
+			"key": "home",
+			"slug": "home",
+			"title": "Home",
+			"excerpt": "",
+			"template": "default"
+		},
+		{
+			"key": "directory",
+			"slug": "broker-reviews",
+			"title": "Broker Reviews",
+			"excerpt": "Every review is built from our own research, and conditions can differ by country. We look at the same seven areas for every broker:",
+			"template": "templates/page-wide.php"
+		},
+		{
+			"key": "compare",
+			"slug": "compare-brokers",
+			"title": "Compare brokers",
+			"excerpt": "Choose up to four brokers, or compare all of them. Regulation, payment and test rows show the conditions for the country you select, because the same brand can offer different terms in different markets.",
+			"template": "templates/page-wide.php"
+		},
+		{
+			"key": "evidence",
+			"slug": "test-evidence",
+			"title": "Test Evidence",
+			"excerpt": "Dated, redacted records from our account, deposit and withdrawal tests.",
+			"template": "templates/page-wide.php"
+		},
+		{
+			"key": "methodology",
+			"slug": "methodology",
+			"title": "How We Research and Review Forex Brokers",
+			"excerpt": "A broker is not one product. The company that opens your account, the regulator that supervises it and the payment methods you can use all depend on where you live. Our process is built around that fact.",
+			"template": "templates/page-document.php"
+		},
+		{
+			"key": "posts",
+			"slug": "research",
+			"title": "Latest research",
+			"excerpt": "Guides, comparisons and regulation explainers from our research team.",
+			"template": "default"
+		},
+		{
+			"key": "about",
+			"slug": "about",
+			"title": "About FX Trading Today",
+			"excerpt": "Independent Forex broker research for traders in Southeast Asia.",
+			"template": "default"
+		},
+		{
+			"key": "contact",
+			"slug": "contact",
+			"title": "Contact",
+			"excerpt": "How to reach the research team.",
+			"template": "default"
+		},
+		{
+			"key": "terms",
+			"slug": "terms",
+			"title": "Terms of use",
+			"excerpt": "",
+			"template": "default"
+		},
+		{
+			"key": "privacy",
+			"slug": "privacy-policy",
+			"title": "Privacy policy",
+			"excerpt": "",
+			"template": "default"
+		},
+		{
+			"key": "risk",
+			"slug": "risk-disclosure",
+			"title": "Risk disclosure",
+			"excerpt": "",
+			"template": "default"
+		}
+	],
+	"posts": [
+		{
+			"slug": "why-the-same-broker-differs-by-country",
+			"title": "Why the same broker can be different across countries",
+			"category": "Country guide",
+			"date": "2026-09-21",
+			"excerpt": "How one brand’s leverage, client protection and payment options change once you look at the company that actually serves each market."
+		},
+		{
+			"slug": "understanding-broker-entities",
+			"title": "Understanding which broker entity holds your account",
+			"category": "Regulation guide",
+			"date": "2026-09-18",
+			"excerpt": "A step-by-step way to find the company behind your trading account, and why the brand’s strongest licence may not apply to you."
+		},
+		{
+			"slug": "vantage-vs-ic-markets-thailand",
+			"title": "Vantage vs IC Markets for traders in Thailand",
+			"category": "Broker comparison",
+			"date": "2026-08-27",
+			"excerpt": "Costs, platforms and local payment options compared for residents of Thailand, using our sample research data."
+		},
+		{
+			"slug": "how-we-time-a-withdrawal",
+			"title": "How we time a withdrawal test",
+			"category": "Test methods",
+			"date": "2026-09-08",
+			"excerpt": "What we record between pressing withdraw and seeing the money in a local bank account."
+		},
+		{
+			"slug": "spread-commission-swap-explained",
+			"title": "Spread, commission and swap: what you actually pay",
+			"category": "Beginner guide",
+			"date": "2026-08-20",
+			"excerpt": "The three costs of a Forex trade explained in plain language, with a worked example."
+		}
+	]
+}

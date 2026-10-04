@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/broker-data",
+	"title": "Broker data",
+	"category": "fxt",
+	"icon": "database",
+	"description": "Structured data section of a broker review (edited in the Broker data panels below the editor).",
+	"textdomain": "fxt-core",
+	"usesContext": [ "postId", "postType" ],
+	"attributes": {
+		"section": {
+			"type": "string",
+			"enum": [ "quick-facts", "regulation", "costs", "platforms", "payments", "accounts", "evidence", "final-score" ],
+			"default": "quick-facts"
+		},
+		"brokerId": { "type": "number", "default": 0 }
+	},
+	"supports": { "html": false, "reusable": false },
+	"editorScript": "fxt-core-blocks",
+	"render": "file:./render.php"
+}

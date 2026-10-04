@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/broker-cards",
+	"title": "Broker cards",
+	"category": "fxt",
+	"icon": "grid-view",
+	"description": "Highest-scoring broker reviews as cards.",
+	"textdomain": "fxt-core",
+	"attributes": {
+		"count": { "type": "number", "default": 4 }
+	},
+	"supports": { "html": false, "align": [ "wide", "full" ] },
+	"editorScript": "fxt-core-blocks",
+	"render": "file:./render.php"
+}

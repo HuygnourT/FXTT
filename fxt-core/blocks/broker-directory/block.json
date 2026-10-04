@@ -1,0 +1,14 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/broker-directory",
+	"title": "Broker directory",
+	"category": "fxt",
+	"icon": "filter",
+	"description": "All broker reviews with search, filters and sort.",
+	"textdomain": "fxt-core",
+	"supports": { "html": false, "align": [ "wide", "full" ], "multiple": false },
+	"editorScript": "fxt-core-blocks",
+	"viewScript": "fxt-core-directory",
+	"render": "file:./render.php"
+}

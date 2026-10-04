@@ -1,0 +1,109 @@
+/* ==========================================================================
+   Design tokens
+   Colour, type and spacing values are defined once in theme.json (so the
+   editor and the front end share them) and aliased here under the short names
+   the component CSS uses. Edit values in theme.json, not here.
+   ========================================================================== */
+
+:root {
+  /* Colour: neutrals */
+  --color-paper: var(--wp--preset--color--paper);          /* page ground */
+  --color-surface: var(--wp--preset--color--surface);        /* cards, alternate bands */
+  --color-surface-muted: var(--wp--preset--color--surface-muted);  /* chips, segmented track, placeholders */
+  --color-ink: var(--wp--preset--color--ink);            /* primary text, footer ground */
+  --color-ink-2: var(--wp--preset--color--ink-2);          /* body copy */
+  --color-ink-3: var(--wp--preset--color--ink-3);          /* captions, labels (AA on paper) */
+  --color-line: var(--wp--preset--color--line);           /* dividers */
+  --color-line-soft: var(--wp--preset--color--line-soft);      /* inner dividers */
+  --color-line-strong: var(--wp--preset--color--line-strong);    /* control borders */
+
+  /* Colour: accent (action + verified). One accent behaviour site-wide. */
+  --color-accent: var(--wp--preset--color--accent);
+  --color-accent-hover: var(--wp--preset--color--accent-hover);
+  --color-accent-tint: var(--wp--preset--color--accent-tint);
+  --color-accent-tint-2: var(--wp--preset--color--accent-tint-2);
+  --color-on-accent: var(--wp--preset--color--on-accent);
+
+  /* Colour: dark field (country band) */
+  --color-field: var(--wp--preset--color--field);
+  --color-on-field: var(--wp--preset--color--on-field);
+  --color-on-field-2: var(--wp--preset--color--on-field-2);
+  --color-on-field-3: var(--wp--preset--color--on-field-3);
+  --color-field-line: rgb(238, 241, 236, 0.12);
+  --color-field-mint: var(--wp--preset--color--field-mint);
+
+  /* Colour: sample-data marker. Reserved for placeholder content only. */
+  --color-sample-bg: var(--wp--preset--color--sample-bg);
+  --color-sample-fg: var(--wp--preset--color--sample-fg);
+  --color-sample-border: var(--wp--preset--color--sample-border);
+  --color-sample-on-dark: var(--wp--preset--color--sample-on-dark);
+
+  /* Colour: footer */
+  --color-footer-text: var(--wp--preset--color--footer-text);
+  --color-footer-muted: var(--wp--preset--color--footer-muted);
+  --color-footer-line: var(--wp--preset--color--footer-line);
+  --color-footer-panel: var(--wp--preset--color--footer-panel);
+
+  /* Typography */
+  --font-display: var(--wp--preset--font-family--display);
+  --font-sans: var(--wp--preset--font-family--sans);
+  --font-mono: var(--wp--preset--font-family--mono);
+
+  /* Fluid type scale (mobile -> desktop) */
+  --text-h1: var(--wp--preset--font-size--h-1);   /* 38 -> 58 */
+  --text-h2: var(--wp--preset--font-size--h-2);  /* 30 -> 42 */
+  --text-h3: var(--wp--preset--font-size--h-3);                                    /* 20 */
+  --text-lead: var(--wp--preset--font-size--lead); /* 17 -> 19 */
+  --text-body: var(--wp--preset--font-size--body);
+  --text-small: var(--wp--preset--font-size--small);
+  --text-xs: var(--wp--preset--font-size--xs);
+  --text-label: var(--wp--preset--font-size--label);
+
+  --leading-tight: 1.08;
+  --leading-heading: 1.15;
+  --leading-body: 1.65;
+
+  --tracking-display: -0.025em;
+  --tracking-heading: -0.02em;
+  --tracking-label: 0.06em;
+
+  /* Spacing (4px base) */
+  --space-1: var(--wp--preset--spacing--1);
+  --space-2: var(--wp--preset--spacing--2);
+  --space-3: var(--wp--preset--spacing--3);
+  --space-4: var(--wp--preset--spacing--4);
+  --space-5: var(--wp--preset--spacing--5);
+  --space-6: var(--wp--preset--spacing--6);
+  --space-7: var(--wp--preset--spacing--7);
+  --space-8: var(--wp--preset--spacing--8);
+  --space-9: var(--wp--preset--spacing--9);
+  --section-pad: var(--wp--preset--spacing--section);
+
+  /* Layout */
+  --container: 75rem;              /* 1200px */
+  --gutter: clamp(1rem, 0.5rem + 2vw, 1.5rem);
+  --page-margin: clamp(1rem, -1rem + 6vw, 7.5rem);
+  --header-height: 4.5rem;
+
+  /* Radius: one family */
+  --radius-xs: 4px;   /* tags, chips */
+  --radius-sm: 6px;   /* buttons, inputs */
+  --radius-md: 8px;   /* inner panels */
+  --radius-lg: 12px;  /* cards */
+
+  /* Elevation: one shadow language, used sparingly */
+  --shadow-raised: 0 1px 2px rgb(21, 23, 28, 0.05), 0 24px 48px -28px rgb(21, 23, 28, 0.28);
+  --shadow-menu: 0 24px 48px -24px rgb(21, 23, 28, 0.35);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --duration-fast: 140ms;
+  --duration-base: 200ms;
+
+  /* Layers (documented, small scale) */
+  --z-scrim: 20;   /* page dim behind open menus; below the header */
+  --z-header: 30;  /* sticky header; menus live inside its stacking context */
+  --z-menu: 50;    /* menus, relative to the header */
+
+  --tap-target: 44px;
+}

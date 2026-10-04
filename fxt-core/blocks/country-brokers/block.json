@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/country-brokers",
+	"title": "Brokers in your country",
+	"category": "fxt",
+	"icon": "location",
+	"description": "Country-aware list of brokers available to the visitor, with a country picker.",
+	"keywords": [ "country", "broker", "hero" ],
+	"textdomain": "fxt-core",
+	"attributes": {
+		"limit": { "type": "number", "default": 4 }
+	},
+	"supports": { "html": false, "align": false },
+	"editorScript": "fxt-core-blocks",
+	"viewScript": "fxt-core-country",
+	"render": "file:./render.php"
+}

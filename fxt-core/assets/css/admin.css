@@ -1,0 +1,125 @@
+/* FX Trading Today: admin fields (meta boxes, term, profile and settings screens). */
+
+.fxt-fields {
+	display: grid;
+	gap: 16px;
+	max-width: 960px;
+}
+
+.fxt-fields--profile,
+.fxt-fields--settings {
+	margin-block: 12px 24px;
+}
+
+.fxt-field__label {
+	display: block;
+	margin: 0 0 4px;
+	font-weight: 600;
+}
+
+.fxt-field .description {
+	margin-top: 4px;
+}
+
+.fxt-field textarea {
+	width: 100%;
+	min-height: 84px;
+}
+
+.fxt-group {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 12px 16px;
+	align-items: start;
+}
+
+.fxt-group > .fxt-field--textarea,
+.fxt-group > .fxt-field--list,
+.fxt-group > .fxt-field--repeater,
+.fxt-group > .fxt-field--group {
+	grid-column: 1 / -1;
+}
+
+.fxt-repeater__rows {
+	display: grid;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.fxt-repeater__row {
+	padding: 12px;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #f6f7f7;
+}
+
+.fxt-repeater__actions {
+	display: flex;
+	gap: 16px;
+	margin-top: 8px;
+	font-size: 12px;
+}
+
+.fxt-market-map {
+	display: grid;
+	gap: 6px;
+}
+
+.fxt-market {
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	background: #fff;
+}
+
+.fxt-market > summary {
+	padding: 8px 12px;
+	cursor: pointer;
+}
+
+.fxt-market[open] > summary {
+	border-bottom: 1px solid #dcdcde;
+}
+
+.fxt-market > .fxt-group {
+	padding: 12px;
+}
+
+.fxt-market__state {
+	float: right;
+	color: #646970;
+}
+
+.fxt-media {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+.fxt-media__preview {
+	width: 64px;
+	height: 64px;
+	object-fit: cover;
+	border-radius: 50%;
+	border: 1px solid #dcdcde;
+}
+
+.fxt-media__preview[hidden] {
+	display: none;
+}
+
+.fxt-sample-note {
+	padding: 8px 12px;
+	border-left: 4px solid #dba617;
+	background: #fcf9e8;
+}
+
+.column-fxt_score,
+.column-fxt_status {
+	width: 120px;
+}
+
+.fxt-demo-list {
+	list-style: disc;
+	padding-left: 20px;
+}

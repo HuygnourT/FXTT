@@ -1,0 +1,16 @@
+/*
+Theme Name: FX Trading Today
+Theme URI: https://example.com/fx-trading-today
+Author: FX Trading Today
+Description: Editorial theme for independent Forex broker research. Country-aware broker reviews, comparisons and test evidence, built on core blocks and theme.json. Pair with the FX Trading Today Core plugin for broker data, blocks and the demo importer.
+Version: 1.0.0
+Requires at least: 6.5
+Tested up to: 6.7
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: fx-trading-today
+Tags: blog, news, one-column, two-columns, custom-menu, editor-style, featured-images, block-patterns, wide-blocks, translation-ready
+*/
+
+/* Styles live in assets/css (see inc/assets.php). This file only carries the theme header. */

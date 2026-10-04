@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/score-weights",
+	"title": "Score weights",
+	"category": "fxt",
+	"icon": "chart-bar",
+	"description": "Rating framework weights from Settings > FX Trading Today.",
+	"textdomain": "fxt-core",
+	"attributes": {
+		"variant": { "type": "string", "enum": [ "list", "table" ], "default": "list" }
+	},
+	"supports": { "html": false },
+	"editorScript": "fxt-core-blocks",
+	"render": "file:./render.php"
+}

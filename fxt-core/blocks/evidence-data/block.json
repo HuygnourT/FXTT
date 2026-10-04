@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/evidence-data",
+	"title": "Evidence data",
+	"category": "fxt",
+	"icon": "media-spreadsheet",
+	"description": "Structured section of a test evidence page.",
+	"textdomain": "fxt-core",
+	"usesContext": [ "postId", "postType" ],
+	"attributes": {
+		"section": { "type": "string", "enum": [ "summary", "timeline", "deposits", "withdrawals" ], "default": "summary" }
+	},
+	"supports": { "html": false, "reusable": false },
+	"editorScript": "fxt-core-blocks",
+	"render": "file:./render.php"
+}
