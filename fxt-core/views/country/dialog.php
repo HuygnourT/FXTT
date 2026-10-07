@@ -34,15 +34,22 @@ $current = Repository::current_market();
 			$is_current = $market['code'] === $current;
 			$count      = count( Repository::available_in( $market['code'] ) );
 			?>
-			<li data-country-item data-name="<?php echo esc_attr( strtolower( $market['name'] . ' ' . $market['code'] ) ); ?>">
+			<li data-country-item data-name="<?php echo esc_attr( strtolower( remove_accents( $market['name'] ) . ' ' . $market['code'] ) ); ?>">
 				<button class="country-option" type="button" data-country-pick="<?php echo esc_attr( $market['code'] ); ?>" aria-pressed="<?php echo $is_current ? 'true' : 'false'; ?>">
 					<span class="country-code"><?php echo esc_html( $market['code'] ); ?></span>
 					<span class="country-option__text">
 						<span class="country-option__name"><?php echo esc_html( $market['name'] ); ?></span>
 						<span class="country-option__meta">
 							<?php
-							/* translators: 1: number of brokers, 2: research status */
-							echo esc_html( sprintf( _n( '%1$d broker available, %2$s', '%1$d brokers available, %2$s', $count, 'fxt-core' ), $count, isset( $status_labels[ $market['status'] ] ) ? $status_labels[ $market['status'] ] : '' ) );
+							if ( isset( $status_labels[ $market['status'] ] ) ) {
+								/* translators: 1: number of brokers, 2: research status */
+								echo esc_html( sprintf( _n( '%1$d broker available, %2$s', '%1$d brokers available, %2$s', $count, 'fxt-core' ), $count, $status_labels[ $market['status'] ] ) );
+							} elseif ( $count ) {
+								/* translators: %d: number of brokers */
+								echo esc_html( sprintf( _n( '%d broker available, not researched yet', '%d brokers available, not researched yet', $count, 'fxt-core' ), $count ) );
+							} else {
+								esc_html_e( 'Not researched yet', 'fxt-core' );
+							}
 							?>
 						</span>
 					</span>

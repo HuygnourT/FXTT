@@ -11,18 +11,31 @@ use FXT\Core\Repository;
 defined( 'ABSPATH' ) || exit;
 
 $code    = Repository::current_market();
-$brokers = array_slice(
-	array_values(
+if ( $args['brokers'] ) {
+	// Brokers chosen in the block settings, in that order (unpublished ones are skipped).
+	$brokers = array_values(
 		array_filter(
-			Repository::brokers(),
+			array_map( array( Repository::class, 'broker' ), $args['brokers'] ),
 			static function ( $b ) {
-				return null !== $b['score'];
+				return $b && 'publish' === get_post_status( $b['id'] );
 			}
 		)
-	),
-	0,
-	max( 1, (int) $args['count'] )
-);
+	);
+} else {
+	// Default: highest research scores.
+	$brokers = array_slice(
+		array_values(
+			array_filter(
+				Repository::brokers(),
+				static function ( $b ) {
+					return null !== $b['score'];
+				}
+			)
+		),
+		0,
+		$args['count']
+	);
+}
 if ( ! $brokers ) {
 	echo '<p class="empty-state">' . esc_html__( 'No published broker reviews yet.', 'fxt-core' ) . '</p>';
 	return;

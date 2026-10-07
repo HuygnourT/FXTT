@@ -20,6 +20,15 @@ if ( ! $market ) {
 }
 $country   = $market['name'];
 $available = Repository::available_in( $code );
+if ( isset( $args['orderBy'] ) && 'manual' === $args['orderBy'] ) {
+	// Manual order: the "Order" field of each Broker Review (lowest first).
+	usort(
+		$available,
+		static function ( $a, $b ) {
+			return $a['menu_order'] - $b['menu_order'];
+		}
+	);
+}
 $counts    = array( 'yes' => 0, 'restricted' => 0, 'pending' => 0 );
 foreach ( Repository::brokers() as $broker ) {
 	++$counts[ Repository::availability( $broker, $code ) ];

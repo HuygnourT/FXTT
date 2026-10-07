@@ -43,11 +43,7 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:post-excerpt {"className":"feature-article__excerpt","excerptLength":40} /-->
 
-<!-- wp:group {"className":"byline"} -->
-<div class="wp-block-group byline"><!-- wp:post-author-name {"isLink":true} /-->
-
-<!-- wp:post-date {"format":"d M Y"} /--></div>
-<!-- /wp:group --></article>
+<!-- wp:fxt/post-byline {"dateLabel":"Updated"} /--></article>
 <!-- /wp:group -->
 <!-- /wp:post-template --></div>
 <!-- /wp:query -->
@@ -59,11 +55,7 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:post-title {"level":3,"isLink":true,"className":"article-item__title"} /-->
 
-<!-- wp:group {"className":"byline"} -->
-<div class="wp-block-group byline"><!-- wp:post-author-name {"isLink":true} /-->
-
-<!-- wp:post-date {"format":"d M Y"} /--></div>
-<!-- /wp:group --></article>
+<!-- wp:fxt/post-byline {"showRole":false,"readTime":"short"} /--></article>
 <!-- /wp:group -->
 <!-- /wp:post-template --></div>
 <!-- /wp:query --></div>

@@ -92,6 +92,48 @@
 		}
 	} );
 
+	// Market map: add / remove a country row.
+	document.addEventListener( 'click', ( event ) => {
+		const add = event.target.closest( '[data-fxt-market-add]' );
+		const remove = event.target.closest( '[data-fxt-market-remove]' );
+		if ( add ) {
+			event.preventDefault();
+			const map = add.closest( '[data-fxt-market-map]' );
+			const select = map.querySelector( '[data-fxt-market-select]' );
+			const option = select.options[ select.selectedIndex ];
+			if ( ! option || ! option.value ) {
+				select.focus();
+				return;
+			}
+			const code = option.value;
+			const name = option.getAttribute( 'data-name' ) || code;
+			const escapeHtml = ( text ) => text.replace( /[&<>"]/g, ( c ) => ( { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ c ] ) );
+			const html = map.querySelector( '[data-fxt-market-template]' ).innerHTML
+				.split( '__CODE__' ).join( code )
+				.split( '__code__' ).join( code.toLowerCase() )
+				.split( '__NAME__' ).join( escapeHtml( name ) );
+			const wrapper = document.createElement( 'div' );
+			wrapper.innerHTML = html.trim();
+			const row = wrapper.firstElementChild;
+			map.querySelector( '[data-fxt-market-rows]' ).appendChild( row );
+			option.disabled = true;
+			select.value = '';
+			const first = row.querySelector( 'select, input' );
+			if ( first ) {
+				first.focus();
+			}
+		} else if ( remove ) {
+			event.preventDefault();
+			const row = remove.closest( '[data-fxt-market]' );
+			const map = remove.closest( '[data-fxt-market-map]' );
+			const option = map.querySelector( '[data-fxt-market-select] option[value="' + row.getAttribute( 'data-fxt-market' ) + '"]' );
+			if ( option ) {
+				option.disabled = false;
+			}
+			row.remove();
+		}
+	} );
+
 	// Market rows: reflect the availability choice in the collapsed summary.
 	document.addEventListener( 'change', ( event ) => {
 		const select = event.target;
@@ -103,4 +145,47 @@
 			state.textContent = select.options[ select.selectedIndex ].text;
 		}
 	} );
+}() );
+
+/**
+ * Settings: live total of score weights (must be 100).
+ */
+( function () {
+	'use strict';
+
+	const selector = 'input[name^="fxt_settings[score_categories]"][name$="[weight]"]';
+
+	function update() {
+		const inputs = Array.from( document.querySelectorAll( selector ) ).filter( ( i ) => ! i.closest( 'template' ) );
+		if ( ! inputs.length ) {
+			return;
+		}
+		const repeater = inputs[ 0 ].closest( '[data-fxt-repeater]' );
+		let total = repeater.parentNode.querySelector( '[data-fxt-weight-total]' );
+		if ( ! total ) {
+			total = document.createElement( 'p' );
+			total.setAttribute( 'data-fxt-weight-total', '' );
+			total.setAttribute( 'aria-live', 'polite' );
+			repeater.parentNode.insertBefore( total, repeater.nextSibling );
+		}
+		const sum = inputs.reduce( ( acc, i ) => acc + ( parseInt( i.value, 10 ) || 0 ), 0 );
+		total.textContent = 'Total: ' + sum + '%' + ( 100 === sum ? '' : ' (must be 100%)' );
+		total.className = 100 === sum ? 'description' : 'description fxt-weight-total--bad';
+	}
+
+	document.addEventListener( 'input', ( e ) => {
+		if ( e.target.matches( selector ) ) {
+			update();
+		}
+	} );
+	document.addEventListener( 'click', ( e ) => {
+		if ( e.target.closest( '[data-fxt-remove], [data-fxt-add]' ) ) {
+			window.setTimeout( update, 0 );
+		}
+	} );
+	if ( 'loading' === document.readyState ) {
+		document.addEventListener( 'DOMContentLoaded', update );
+	} else {
+		update();
+	}
 }() );

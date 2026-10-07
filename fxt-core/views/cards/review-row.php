@@ -54,7 +54,7 @@ $compare = fxt_core_compare_url( array( $broker['slug'] ) );
 			<div class="review-row__fact"><dt><?php esc_html_e( 'Countries researched', 'fxt-core' ); ?></dt><dd>
 				<?php
 				/* translators: 1: researched markets, 2: total markets */
-				printf( esc_html__( '%1$d of %2$d', 'fxt-core' ), count( Repository::tested_markets( $broker ) ), count( Repository::markets() ) );
+				printf( esc_html__( '%1$d of %2$d', 'fxt-core' ), count( Repository::tested_markets( $broker ) ), count( Repository::researched_markets() ) );
 				?>
 			</dd></div>
 			<div class="review-row__fact"><dt><?php esc_html_e( 'Last reviewed', 'fxt-core' ); ?></dt><dd><?php echo esc_html( fxt_core_date( $broker['reviewed'] ) ); ?></dd></div>

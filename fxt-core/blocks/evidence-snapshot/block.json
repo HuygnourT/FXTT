@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/evidence-snapshot",
+	"title": "Evidence snapshot",
+	"category": "fxt",
+	"icon": "yes-alt",
+	"description": "Key results of one broker's tests in one country (entity, first deposit, first withdrawal, support), read from the Test Evidence record.",
+	"textdomain": "fxt-core",
+	"attributes": {
+		"broker": { "type": "string", "default": "" },
+		"country": { "type": "string", "default": "" }
+	},
+	"supports": { "html": false },
+	"editorScript": "fxt-core-blocks",
+	"render": "file:./render.php"
+}

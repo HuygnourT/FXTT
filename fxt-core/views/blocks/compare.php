@@ -56,36 +56,46 @@ $text    = static function ( $value ) {
 	return fxt_core_text( $value );
 };
 
+// Platform and account rows follow the taxonomy terms (no fixed list).
+$platform_rows = array();
+foreach ( Repository::terms( \FXT\Core\Content_Types::PLATFORM ) as $term_row ) {
+	$platform_rows[] = array( $term_row['name'], $yes( 'platforms', $term_row['slug'] ) );
+}
+$account_rows = array();
+foreach ( Repository::terms( \FXT\Core\Content_Types::ACCOUNT_TYPE ) as $term_row ) {
+	$account_rows[] = array( $term_row['name'], $yes( 'accounts', $term_row['slug'] ) );
+}
+
 /* translators: %s: country */
 $in_country = sprintf( __( 'Available in %s', 'fxt-core' ), $country );
 
 $preview_rows = array(
-	array( __( 'Research score', 'fxt-core' ), 'fxt_core_score' ),
-	array( $in_country, static function ( $b ) use ( $code ) {
+	'score'        => array( __( 'Research score', 'fxt-core' ), 'fxt_core_score' ),
+	'availability' => array( $in_country, static function ( $b ) use ( $code ) {
 		return fxt_core_badge( 'availability', Repository::availability( $b, $code ) );
 	} ),
 	/* translators: %s: country */
-	array( sprintf( __( 'Regulator for %s', 'fxt-core' ), $country ), static function ( $b ) use ( $entity ) {
+	'regulator'    => array( sprintf( __( 'Regulator for %s', 'fxt-core' ), $country ), static function ( $b ) use ( $entity ) {
 		$e = $entity( $b );
 		return fxt_core_unverified( $e['regulator'], $e['verified'] );
 	} ),
-	array( __( 'Minimum deposit', 'fxt-core' ), static function ( $b ) {
+	'deposit'      => array( __( 'Minimum deposit', 'fxt-core' ), static function ( $b ) {
 		return esc_html( fxt_core_min_deposit( $b ) );
 	} ),
-	array( __( 'Typical EUR/USD cost', 'fxt-core' ), static function ( $b ) use ( $text ) {
+	'cost'         => array( __( 'Typical EUR/USD cost', 'fxt-core' ), static function ( $b ) use ( $text ) {
 		return $text( $b['costs']['spread'] );
 	} ),
-	array( __( 'Platforms', 'fxt-core' ), static function ( $b ) use ( $text ) {
+	'platforms'    => array( __( 'Platforms', 'fxt-core' ), static function ( $b ) use ( $text ) {
 		return $text( implode( ', ', fxt_core_platform_names( $b ) ) );
 	} ),
 	/* translators: %s: ISO country code */
-	array( sprintf( __( 'Local payments (%s)', 'fxt-core' ), $code ), static function ( $b ) use ( $row, $text ) {
+	'local'        => array( sprintf( __( 'Local payments (%s)', 'fxt-core' ), $code ), static function ( $b ) use ( $row, $text ) {
 		$r = $row( $b );
 		return $text( isset( $r['local_payments'] ) ? $r['local_payments'] : '' );
 	} ),
-	array( __( 'Countries researched', 'fxt-core' ), static function ( $b ) {
+	'researched'   => array( __( 'Countries researched', 'fxt-core' ), static function ( $b ) {
 		/* translators: 1: researched, 2: total */
-		return esc_html( sprintf( __( '%1$d of %2$d', 'fxt-core' ), count( Repository::tested_markets( $b ) ), count( Repository::markets() ) ) );
+		return esc_html( sprintf( __( '%1$d of %2$d', 'fxt-core' ), count( Repository::tested_markets( $b ) ), count( Repository::researched_markets() ) ) );
 	} ),
 );
 
@@ -104,7 +114,7 @@ $groups = array(
 			array( __( 'Minimum deposit', 'fxt-core' ), static function ( $b ) {
 				return esc_html( fxt_core_min_deposit( $b ) );
 			} ),
-			$preview_rows[1],
+			$preview_rows['availability'],
 		),
 	),
 	'regulation' => array(
@@ -169,11 +179,7 @@ $groups = array(
 		__( 'Platforms', 'fxt-core' ),
 		false,
 		array(
-			array( 'MT4', $yes( 'platforms', 'mt4' ) ),
-			array( 'MT5', $yes( 'platforms', 'mt5' ) ),
-			array( __( 'Web', 'fxt-core' ), $yes( 'platforms', 'web' ) ),
-			array( __( 'Mobile', 'fxt-core' ), $yes( 'platforms', 'mobile' ) ),
-			array( 'TradingView', $yes( 'platforms', 'tradingview' ) ),
+			...$platform_rows,
 			array( __( 'Other', 'fxt-core' ), static function ( $b ) use ( $text ) {
 				return $text( $b['other_platforms'] );
 			} ),
@@ -182,12 +188,7 @@ $groups = array(
 	'accounts'   => array(
 		__( 'Accounts', 'fxt-core' ),
 		false,
-		array(
-			array( __( 'Standard', 'fxt-core' ), $yes( 'accounts', 'standard' ) ),
-			array( __( 'Raw', 'fxt-core' ), $yes( 'accounts', 'raw' ) ),
-			array( __( 'Pro', 'fxt-core' ), $yes( 'accounts', 'pro' ) ),
-			array( __( 'Cent', 'fxt-core' ), $yes( 'accounts', 'cent' ) ),
-		),
+		$account_rows,
 	),
 	'payments'   => array(
 		__( 'Payments', 'fxt-core' ),
@@ -196,7 +197,7 @@ $groups = array(
 			array( __( 'Bank transfer', 'fxt-core' ), $pay( 'bank' ) ),
 			array( __( 'Cards', 'fxt-core' ), $pay( 'cards' ) ),
 			array( __( 'E-wallets', 'fxt-core' ), $pay( 'ewallets' ) ),
-			array( __( 'Local payments', 'fxt-core' ), $preview_rows[6][1] ),
+			array( __( 'Local payments', 'fxt-core' ), $preview_rows['local'][1] ),
 			array( __( 'Crypto', 'fxt-core' ), $pay( 'crypto' ) ),
 		),
 	),
@@ -233,12 +234,18 @@ $groups = array(
 	),
 );
 
+// Admin choice (block settings): which preview rows and full-table groups to show, in order.
+$row_keys     = isset( $args['rows'] ) ? (array) $args['rows'] : array_keys( $preview_rows );
+$group_keys   = isset( $args['groups'] ) ? (array) $args['groups'] : array_keys( $groups );
+$preview_rows = array_intersect_key( array_replace( array_flip( $row_keys ), $preview_rows ), array_flip( $row_keys ) );
+$groups       = array_intersect_key( array_replace( array_flip( $group_keys ), $groups ), array_flip( $group_keys ) );
+
 $cell = static function ( $render, $b ) {
 	// Every renderer returns escaped HTML.
 	return call_user_func( $render, $b );
 };
 ?>
-<div class="cmp-widget__inner" data-fxt-compare data-mode="<?php echo esc_attr( $mode ); ?>" data-slots="<?php echo (int) $slots; ?>" data-all="<?php echo $show_all ? '1' : '0'; ?>" data-sync="<?php echo empty( $args['sync'] ) ? '0' : '1'; ?>" data-selected="<?php echo esc_attr( implode( ',', $selected ) ); ?>" data-base="<?php echo esc_url( $here ); ?>">
+<div class="cmp-widget__inner" data-fxt-compare data-mode="<?php echo esc_attr( $mode ); ?>" data-slots="<?php echo (int) $slots; ?>" data-all="<?php echo $show_all ? '1' : '0'; ?>" data-sync="<?php echo empty( $args['sync'] ) ? '0' : '1'; ?>" data-selected="<?php echo esc_attr( implode( ',', $selected ) ); ?>" data-base="<?php echo esc_url( $here ); ?>" data-rows="<?php echo esc_attr( implode( ',', $row_keys ) ); ?>" data-groups="<?php echo esc_attr( implode( ',', $group_keys ) ); ?>">
 	<div class="cmp-toolbar">
 		<p class="cmp-context">
 			<?php echo fxt_core_icon( 'map-pin', 'icon--sm' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>

@@ -8,12 +8,48 @@
 	"description": "Interactive comparison: select, replace or remove brokers, or compare all.",
 	"textdomain": "fxt-core",
 	"attributes": {
-		"mode": { "type": "string", "enum": [ "preview", "full" ], "default": "preview" },
-		"slots": { "type": "number", "default": 3 },
-		"brokers": { "type": "string", "default": "" },
-		"syncUrl": { "type": "boolean", "default": false }
+		"mode": {
+			"type": "string",
+			"enum": [
+				"preview",
+				"full"
+			],
+			"default": "preview"
+		},
+		"slots": {
+			"type": "number",
+			"default": 3
+		},
+		"brokers": {
+			"type": "string",
+			"default": ""
+		},
+		"syncUrl": {
+			"type": "boolean",
+			"default": false
+		},
+		"groups": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		},
+		"rows": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"default": []
+		}
 	},
-	"supports": { "html": false, "align": [ "wide", "full" ] },
+	"supports": {
+		"html": false,
+		"align": [
+			"wide",
+			"full"
+		]
+	},
 	"editorScript": "fxt-core-blocks",
 	"viewScript": "fxt-core-compare",
 	"render": "file:./render.php"

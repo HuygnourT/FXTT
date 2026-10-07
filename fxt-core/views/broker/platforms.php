@@ -9,13 +9,11 @@
 defined( 'ABSPATH' ) || exit;
 
 $broker = $args['broker'];
-$tiles  = array(
-	'mt4'         => __( 'MetaTrader 4', 'fxt-core' ),
-	'mt5'         => __( 'MetaTrader 5', 'fxt-core' ),
-	'web'         => __( 'Web platform', 'fxt-core' ),
-	'mobile'      => __( 'Mobile app', 'fxt-core' ),
-	'tradingview' => __( 'TradingView', 'fxt-core' ),
-);
+$tiles  = array();
+// Every platform in Broker Reviews > Platforms; offered ones are ticked.
+foreach ( \FXT\Core\Repository::terms( \FXT\Core\Content_Types::PLATFORM ) as $platform_term ) {
+	$tiles[ $platform_term['slug'] ] = $platform_term['full_name'];
+}
 ?>
 <ul class="platform-grid">
 	<?php foreach ( $tiles as $slug => $name ) : ?>

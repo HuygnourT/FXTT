@@ -181,11 +181,11 @@ function fxt_tt_avatar( array $author, $size = 'sm' ) {
  * @return int
  */
 function fxt_tt_reading_time( $post = null ) {
-	$post  = get_post( $post );
-	$words = $post ? str_word_count( wp_strip_all_tags( strip_shortcodes( $post->post_content ) ) ) : 0;
-	// Data blocks add tables the reader also scans; count each as ~120 words.
-	$words += $post ? 120 * substr_count( $post->post_content, '<!-- wp:fxt/' ) : 0;
-	return max( 1, (int) round( $words / 220 ) );
+	if ( function_exists( 'fxt_core_reading_time' ) ) {
+		return fxt_core_reading_time( $post );
+	}
+	$post = get_post( $post );
+	return $post ? max( 1, (int) round( str_word_count( wp_strip_all_tags( $post->post_content ) ) / 220 ) ) : 1;
 }
 
 /**

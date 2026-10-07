@@ -5,12 +5,28 @@
 	"title": "Broker cards",
 	"category": "fxt",
 	"icon": "grid-view",
-	"description": "Highest-scoring broker reviews as cards.",
+	"description": "Broker review cards: the brokers you choose, in your order, or the highest research scores.",
 	"textdomain": "fxt-core",
 	"attributes": {
-		"count": { "type": "number", "default": 4 }
+		"count": {
+			"type": "number",
+			"default": 4
+		},
+		"brokers": {
+			"type": "array",
+			"items": {
+				"type": "number"
+			},
+			"default": []
+		}
 	},
-	"supports": { "html": false, "align": [ "wide", "full" ] },
+	"supports": {
+		"html": false,
+		"align": [
+			"wide",
+			"full"
+		]
+	},
 	"editorScript": "fxt-core-blocks",
 	"render": "file:./render.php"
 }

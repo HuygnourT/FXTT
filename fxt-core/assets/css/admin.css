@@ -123,3 +123,8 @@
 	list-style: disc;
 	padding-left: 20px;
 }
+
+.fxt-market-add { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.fxt-market-add select { max-width: 320px; }
+.fxt-market__actions { margin: 0; padding: 0 12px 12px; }
+.fxt-weight-total--bad { color: #b32d2e; font-weight: 600; }

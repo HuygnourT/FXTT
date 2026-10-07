@@ -1,0 +1,19 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/post-byline",
+	"title": "Post byline",
+	"category": "fxt",
+	"icon": "id",
+	"description": "Author (linked to the profile), role, date and reading time of the current post. Works inside Query Loop.",
+	"textdomain": "fxt-core",
+	"usesContext": [ "postId", "postType" ],
+	"attributes": {
+		"showRole": { "type": "boolean", "default": true },
+		"dateLabel": { "type": "string", "default": "" },
+		"readTime": { "type": "string", "enum": [ "none", "short", "long" ], "default": "long" }
+	},
+	"supports": { "html": false },
+	"editorScript": "fxt-core-blocks",
+	"render": "file:./render.php"
+}

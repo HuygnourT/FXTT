@@ -12,7 +12,11 @@ while ( have_posts() ) :
 	the_post();
 	$fxt_posts_page = (int) get_option( 'page_for_posts' );
 	$fxt_crumbs     = array();
-	if ( $fxt_posts_page ) {
+	if ( 'post' !== get_post_type() ) {
+		// Other content types (e.g. types from a plugin): link their archive when they have one.
+		$fxt_type     = get_post_type_object( get_post_type() );
+		$fxt_crumbs[] = array( $fxt_type->labels->name, (string) get_post_type_archive_link( $fxt_type->name ) );
+	} elseif ( $fxt_posts_page ) {
 		$fxt_crumbs[] = array( get_the_title( $fxt_posts_page ), get_permalink( $fxt_posts_page ) );
 	}
 	$fxt_crumbs[] = array( get_the_title(), '' );

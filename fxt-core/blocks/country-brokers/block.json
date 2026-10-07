@@ -6,12 +6,30 @@
 	"category": "fxt",
 	"icon": "location",
 	"description": "Country-aware list of brokers available to the visitor, with a country picker.",
-	"keywords": [ "country", "broker", "hero" ],
+	"keywords": [
+		"country",
+		"broker",
+		"hero"
+	],
 	"textdomain": "fxt-core",
 	"attributes": {
-		"limit": { "type": "number", "default": 4 }
+		"limit": {
+			"type": "number",
+			"default": 4
+		},
+		"orderBy": {
+			"type": "string",
+			"enum": [
+				"score",
+				"manual"
+			],
+			"default": "score"
+		}
 	},
-	"supports": { "html": false, "align": false },
+	"supports": {
+		"html": false,
+		"align": false
+	},
 	"editorScript": "fxt-core-blocks",
 	"viewScript": "fxt-core-country",
 	"render": "file:./render.php"

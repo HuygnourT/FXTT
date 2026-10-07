@@ -131,7 +131,7 @@
 	}
 
 	function filterList( query ) {
-		const term = query.trim().toLowerCase();
+		const term = query.trim().toLowerCase().normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' );
 		let visible = 0;
 		dialog.querySelectorAll( '[data-country-item]' ).forEach( ( item ) => {
 			const match = ! term || ( item.getAttribute( 'data-name' ) || '' ).indexOf( term ) !== -1;

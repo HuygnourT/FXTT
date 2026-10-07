@@ -18,6 +18,8 @@
 			all: '1' === inner.getAttribute( 'data-all' ),
 			sync: '1' === inner.getAttribute( 'data-sync' ),
 			base: inner.getAttribute( 'data-base' ) || '',
+			rows: inner.getAttribute( 'data-rows' ) || '',
+			groups: inner.getAttribute( 'data-groups' ) || '',
 		};
 	}
 
@@ -46,7 +48,7 @@
 		}
 		const widget = inner.parentElement;
 		widget.setAttribute( 'aria-busy', 'true' );
-		core.render( 'compare', { mode: s.mode, slots: s.slots, brokers: s.brokers.join( ',' ), all: s.all ? 1 : 0, sync: s.sync ? 1 : 0 }, s.base )
+		core.render( 'compare', { mode: s.mode, slots: s.slots, brokers: s.brokers.join( ',' ), all: s.all ? 1 : 0, sync: s.sync ? 1 : 0, rows: s.rows, groups: s.groups }, s.base )
 			.then( ( html ) => {
 				inner.outerHTML = html;
 				const fresh = widget.querySelector( '[data-fxt-compare]' );

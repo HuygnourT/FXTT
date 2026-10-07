@@ -35,7 +35,7 @@ $country = $market ? $market['name'] : $code;
 		<div class="kv__row"><dt><?php esc_html_e( 'Countries researched', 'fxt-core' ); ?></dt><dd>
 			<?php
 			/* translators: 1: researched markets, 2: total markets */
-			printf( esc_html__( '%1$d of %2$d', 'fxt-core' ), count( Repository::tested_markets( $broker ) ), count( Repository::markets() ) );
+			printf( esc_html__( '%1$d of %2$d', 'fxt-core' ), count( Repository::tested_markets( $broker ) ), count( Repository::researched_markets() ) );
 			?>
 		</dd></div>
 	</dl>

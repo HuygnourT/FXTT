@@ -22,6 +22,8 @@ $fxt_state = Blocks::compare_state( $attributes );
 			'selected' => $fxt_state['selected'],
 			'all'      => $fxt_state['all'],
 			'sync'     => ! empty( $attributes['syncUrl'] ),
+			'rows'     => Blocks::compare_keys( $attributes['rows'], 'rows' ),
+			'groups'   => Blocks::compare_keys( $attributes['groups'], 'groups' ),
 			'base_url' => Blocks::base_url(),
 		)
 	);

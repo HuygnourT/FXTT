@@ -3,9 +3,18 @@
  * Header and footer navigation from WordPress menus.
  *
  * Primary menu (Appearance > Menus, location "Primary"):
- *   - A top-level item with the CSS class `mega-top-brokers` opens the mega
- *     menu: highest-scoring brokers, its child items, countries and a
- *     featured link (child item with the class `mega-feature`).
+ *   - A top-level item with the CSS class `mega` opens a mega menu built
+ *     entirely from its child items (no text lives in this file):
+ *       - child with class `mega-auto-brokers`: column of the highest-scoring
+ *         brokers. Navigation Label = heading, URL + Description = the link
+ *         under the list.
+ *       - child with class `mega-auto-countries`: column of researched
+ *         countries linking to the directory. Same fields; "%d" in the
+ *         Description is replaced with the number of countries.
+ *       - child with class `mega-feature`: featured card. Description = small
+ *         label, Navigation Label = title, Title Attribute = call to action.
+ *       - any other child: a link column. Its Navigation Label is the heading
+ *         and its own child items are the links.
  *   - Other top-level items render as plain links.
  * Footer menus 1 to 5 render as columns; the menu name is the column heading.
  *
@@ -33,24 +42,36 @@ function fxt_tt_menu_tree( $location ) {
 	$items = $items ? $items : array();
 	_wp_menu_item_classes_by_context( $items );
 
-	$tree = array();
+	// Build a nested tree (any depth) keyed by parent ID.
+	$by_parent = array();
 	foreach ( $items as $item ) {
-		if ( ! $item->menu_item_parent ) {
-			$tree[ $item->ID ] = array(
+		$by_parent[ (int) $item->menu_item_parent ][] = $item;
+	}
+	$build = static function ( $parent ) use ( &$build, $by_parent ) {
+		$nodes = array();
+		foreach ( isset( $by_parent[ $parent ] ) ? $by_parent[ $parent ] : array() as $item ) {
+			$nodes[] = array(
 				'item'     => $item,
-				'children' => array(),
+				'children' => $build( (int) $item->ID ),
 			);
 		}
-	}
-	foreach ( $items as $item ) {
-		if ( $item->menu_item_parent && isset( $tree[ $item->menu_item_parent ] ) ) {
-			$tree[ $item->menu_item_parent ]['children'][] = $item;
-		}
-	}
+		return $nodes;
+	};
 	return array(
 		'menu'  => $menu,
-		'items' => array_values( $tree ),
+		'items' => $build( 0 ),
 	);
+}
+
+/**
+ * Does a top-level item open a mega menu?
+ *
+ * @param WP_Post $item Menu item.
+ * @return bool
+ */
+function fxt_tt_is_mega( $item ) {
+	// "mega-top-brokers" is the class used by version 1.0 menus.
+	return fxt_tt_item_has_class( $item, 'mega' ) || fxt_tt_item_has_class( $item, 'mega-top-brokers' );
 }
 
 /**
@@ -118,7 +139,7 @@ function fxt_tt_the_primary_nav() {
 	echo '<nav class="primary-nav" aria-label="' . esc_attr__( 'Primary', 'fx-trading-today' ) . '">';
 	foreach ( $tree['items'] as $node ) {
 		$item = $node['item'];
-		if ( fxt_tt_item_has_class( $item, 'mega-top-brokers' ) ) {
+		if ( fxt_tt_is_mega( $item ) && $node['children'] ) {
 			$active = is_singular( 'fxt_broker' ) || fxt_tt_is_current( $item );
 			printf(
 				'<button class="nav-link" type="button" aria-expanded="false" aria-controls="menu-%1$d" data-menu-trigger%2$s>%3$s%4$s</button>',
@@ -145,84 +166,128 @@ function fxt_tt_the_primary_nav() {
 function fxt_tt_the_mega_menus() {
 	$tree = fxt_tt_menu_tree( 'primary' );
 	foreach ( $tree['items'] as $node ) {
-		$item = $node['item'];
-		if ( ! fxt_tt_item_has_class( $item, 'mega-top-brokers' ) ) {
+		if ( ! fxt_tt_is_mega( $node['item'] ) || ! $node['children'] ) {
 			continue;
 		}
-		$feature = null;
-		$links   = array();
-		foreach ( $node['children'] as $child ) {
-			if ( fxt_tt_item_has_class( $child, 'mega-feature' ) ) {
-				$feature = $child;
-			} else {
-				$links[] = $child;
-			}
-		}
-		$brokers = array();
-		$markets = array();
-		if ( fxt_tt_core() ) {
-			$brokers = array_slice(
-				array_values(
-					array_filter(
-						\FXT\Core\Repository::brokers(),
-						static function ( $b ) {
-							return null !== $b['score'];
-						}
-					)
-				),
-				0,
-				4
-			);
-			$markets = \FXT\Core\Repository::markets();
-		}
 		?>
-		<div class="mega-menu" id="menu-<?php echo (int) $item->ID; ?>" hidden data-menu-panel>
+		<div class="mega-menu" id="menu-<?php echo (int) $node['item']->ID; ?>" hidden data-menu-panel>
 			<div class="container mega-menu__grid">
-				<div>
-					<p class="u-label mega-menu__heading"><?php esc_html_e( 'Highest research scores', 'fx-trading-today' ); ?></p>
-					<?php foreach ( $brokers as $broker ) : ?>
-						<a class="mega-menu__link" href="<?php echo esc_url( $broker['url'] ); ?>"><span><?php echo esc_html( $broker['name'] ); ?></span><span class="u-mono"><?php echo esc_html( fxt_core_score_label( $broker ) ); ?></span></a>
-					<?php endforeach; ?>
-					<a class="link-strong" href="<?php echo esc_url( $item->url ); ?>"><?php esc_html_e( 'All broker reviews', 'fx-trading-today' ); ?></a>
-				</div>
-				<?php if ( $links ) : ?>
-					<div>
-						<p class="u-label mega-menu__heading"><?php echo esc_html( $item->description ? $item->description : __( 'By account type', 'fx-trading-today' ) ); ?></p>
-						<?php foreach ( $links as $link ) : ?>
-							<a class="mega-menu__link"<?php echo fxt_tt_item_attrs( $link ); // phpcs:ignore WordPress.Security.EscapeOutput ?>><?php echo esc_html( $link->title ); ?></a>
-						<?php endforeach; ?>
-					</div>
-				<?php endif; ?>
-				<?php if ( $markets ) : ?>
-					<div>
-						<p class="u-label mega-menu__heading"><?php esc_html_e( 'By country', 'fx-trading-today' ); ?></p>
-						<?php foreach ( array_slice( $markets, 0, 4 ) as $market ) : ?>
-							<a class="mega-menu__link" href="<?php echo esc_url( add_query_arg( 'country', $market['code'], $item->url ) ); ?>">
-								<?php
-								/* translators: %s: country */
-								echo esc_html( sprintf( __( 'Brokers for %s', 'fx-trading-today' ), $market['name'] ) );
-								?>
-							</a>
-						<?php endforeach; ?>
-						<a class="mega-menu__link" href="<?php echo esc_url( $item->url ); ?>">
-							<?php
-							/* translators: %d: number of countries */
-							echo esc_html( sprintf( _n( 'All %d market', 'All %d markets', count( $markets ), 'fx-trading-today' ), count( $markets ) ) );
-							?>
-						</a>
-					</div>
-				<?php endif; ?>
-				<?php if ( $feature ) : ?>
-					<a class="mega-menu__feature placeholder"<?php echo fxt_tt_item_attrs( $feature ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
-						<span class="u-label"><?php echo esc_html( $feature->description ? $feature->description : __( 'Before you read a review', 'fx-trading-today' ) ); ?></span>
-						<span class="mega-menu__feature-title"><?php echo esc_html( $feature->title ); ?></span>
-						<span class="link-strong"><?php echo esc_html( $feature->attr_title ? $feature->attr_title : __( 'Read the methodology', 'fx-trading-today' ) ); ?></span>
-					</a>
-				<?php endif; ?>
+				<?php
+				$loose = array();
+				foreach ( $node['children'] as $child ) {
+					$item = $child['item'];
+					if ( fxt_tt_item_has_class( $item, 'mega-feature' ) ) {
+						fxt_tt_the_mega_feature( $item );
+					} elseif ( fxt_tt_item_has_class( $item, 'mega-auto-brokers' ) ) {
+						fxt_tt_the_mega_auto_column( $item, 'brokers' );
+					} elseif ( fxt_tt_item_has_class( $item, 'mega-auto-countries' ) ) {
+						fxt_tt_the_mega_auto_column( $item, 'countries' );
+					} elseif ( $child['children'] ) {
+						fxt_tt_the_mega_column( $item->title, wp_list_pluck( $child['children'], 'item' ) );
+					} else {
+						$loose[] = $item;
+					}
+				}
+				if ( $loose ) {
+					// Version 1.0 menus: plain child links form one column headed by the parent's Description.
+					fxt_tt_the_mega_column( (string) $node['item']->description, $loose );
+				}
+				?>
 			</div>
 		</div>
 		<?php
 	}
+}
+
+/**
+ * Link column.
+ *
+ * @param string    $heading Column heading.
+ * @param WP_Post[] $links   Menu items.
+ */
+function fxt_tt_the_mega_column( $heading, array $links ) {
+	echo '<div>';
+	if ( '' !== trim( $heading ) ) {
+		echo '<p class="u-label mega-menu__heading">' . esc_html( $heading ) . '</p>';
+	}
+	foreach ( $links as $link ) {
+		echo '<a class="mega-menu__link"' . fxt_tt_item_attrs( $link ) . '>' . esc_html( $link->title ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper.
+	}
+	echo '</div>';
+}
+
+/**
+ * Automatic column: top brokers or researched countries (data from the plugin).
+ *
+ * @param WP_Post $item Menu item (title = heading, URL + description = footer link).
+ * @param string  $type brokers|countries.
+ */
+function fxt_tt_the_mega_auto_column( $item, $type ) {
+	if ( ! fxt_tt_core() ) {
+		return;
+	}
+	$footer = trim( (string) $item->description );
+	echo '<div>';
+	echo '<p class="u-label mega-menu__heading">' . esc_html( $item->title ) . '</p>';
+	if ( 'brokers' === $type ) {
+		$brokers = array_slice(
+			array_values(
+				array_filter(
+					\FXT\Core\Repository::brokers(),
+					static function ( $b ) {
+						return null !== $b['score'];
+					}
+				)
+			),
+			0,
+			4
+		);
+		foreach ( $brokers as $broker ) {
+			echo '<a class="mega-menu__link" href="' . esc_url( $broker['url'] ) . '"><span>' . esc_html( $broker['name'] ) . '</span><span class="u-mono">' . esc_html( fxt_core_score_label( $broker ) ) . '</span></a>';
+		}
+		$count = count( \FXT\Core\Repository::brokers() );
+	} else {
+		$markets = \FXT\Core\Repository::researched_markets();
+		// Most complete research first (published, in progress, planned), then A to Z.
+		$rank = array_flip( array( 'published', 'in-progress', 'planned' ) );
+		usort(
+			$markets,
+			static function ( $a, $b ) use ( $rank ) {
+				$ra = isset( $rank[ $a['status'] ] ) ? $rank[ $a['status'] ] : 9;
+				$rb = isset( $rank[ $b['status'] ] ) ? $rank[ $b['status'] ] : 9;
+				return $ra === $rb ? strcasecmp( remove_accents( $a['name'] ), remove_accents( $b['name'] ) ) : $ra - $rb;
+			}
+		);
+		$target  = $item->url && '#' !== $item->url ? $item->url : fxt_tt_url( 'directory' );
+		foreach ( array_slice( $markets, 0, 4 ) as $market ) {
+			echo '<a class="mega-menu__link" href="' . esc_url( add_query_arg( 'country', $market['code'], $target ) ) . '">' . esc_html( $market['name'] ) . '</a>';
+		}
+		$count = count( $markets );
+	}
+	if ( $footer && $item->url && '#' !== $item->url ) {
+		$class = 'brokers' === $type ? 'link-strong' : 'mega-menu__link';
+		echo '<a class="' . esc_attr( $class ) . '"' . fxt_tt_item_attrs( $item ) . '>' . esc_html( str_replace( '%d', (string) $count, $footer ) ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper.
+	}
+	echo '</div>';
+}
+
+/**
+ * Featured card.
+ *
+ * @param WP_Post $item Menu item (description = label, title = heading, attr_title = call to action).
+ */
+function fxt_tt_the_mega_feature( $item ) {
+	?>
+	<a class="mega-menu__feature placeholder"<?php echo fxt_tt_item_attrs( $item ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
+		<?php if ( $item->description ) : ?>
+			<span class="u-label"><?php echo esc_html( $item->description ); ?></span>
+		<?php endif; ?>
+		<span class="mega-menu__feature-title"><?php echo esc_html( $item->title ); ?></span>
+		<?php if ( $item->attr_title ) : ?>
+			<span class="link-strong"><?php echo esc_html( $item->attr_title ); ?></span>
+		<?php endif; ?>
+	</a>
+	<?php
 }
 
 /**

@@ -60,23 +60,43 @@
 	"platforms": [
 		{
 			"slug": "mt4",
-			"name": "MT4"
+			"name": "MT4",
+			"meta": {
+				"fxt_full_name": "MetaTrader 4",
+				"fxt_compact": true
+			}
 		},
 		{
 			"slug": "mt5",
-			"name": "MT5"
+			"name": "MT5",
+			"meta": {
+				"fxt_full_name": "MetaTrader 5",
+				"fxt_compact": true
+			}
 		},
 		{
 			"slug": "web",
-			"name": "Web"
+			"name": "Web",
+			"meta": {
+				"fxt_full_name": "Web platform",
+				"fxt_compact": true
+			}
 		},
 		{
 			"slug": "mobile",
-			"name": "Mobile"
+			"name": "Mobile",
+			"meta": {
+				"fxt_full_name": "Mobile app",
+				"fxt_compact": false
+			}
 		},
 		{
 			"slug": "tradingview",
-			"name": "TradingView"
+			"name": "TradingView",
+			"meta": {
+				"fxt_full_name": "TradingView",
+				"fxt_compact": true
+			}
 		}
 	],
 	"account_types": [
@@ -229,7 +249,6 @@
 			"meta": {
 				"fxt_monogram": "EX",
 				"fxt_status": "published",
-				"fxt_score": 4.5,
 				"fxt_score_breakdown": {
 					"regulation": 4.3,
 					"availability": 4.8,
@@ -447,7 +466,6 @@
 			"meta": {
 				"fxt_monogram": "VT",
 				"fxt_status": "published",
-				"fxt_score": 4.2,
 				"fxt_score_breakdown": {
 					"regulation": 4,
 					"availability": 4.3,
@@ -645,7 +663,6 @@
 			"meta": {
 				"fxt_monogram": "IC",
 				"fxt_status": "published",
-				"fxt_score": 4.4,
 				"fxt_score_breakdown": {
 					"regulation": 4.3,
 					"availability": 4.1,
@@ -842,7 +859,6 @@
 			"meta": {
 				"fxt_monogram": "IB",
 				"fxt_status": "updating",
-				"fxt_score": 4.3,
 				"fxt_score_breakdown": {
 					"regulation": 4.8,
 					"availability": 3.6,
@@ -1029,12 +1045,11 @@
 			"meta": {
 				"fxt_monogram": "PS",
 				"fxt_status": "published",
-				"fxt_score": 4.4,
 				"fxt_score_breakdown": {
 					"regulation": 4.5,
 					"availability": 4.2,
-					"costs": 4.7,
-					"platforms": 4.8,
+					"costs": 4.4,
+					"platforms": 4.5,
 					"local": 4,
 					"support": 4.4
 				},
@@ -1221,7 +1236,6 @@
 			"meta": {
 				"fxt_monogram": "FP",
 				"fxt_status": "pending",
-				"fxt_score": null,
 				"fxt_score_breakdown": null,
 				"fxt_reviewed": null,
 				"fxt_founded": "2005",
@@ -1492,7 +1506,18 @@
 						"amount": "2,500,000",
 						"time": "2 min",
 						"fee": "0",
-						"result": "Successful"
+						"result": "Successful",
+						"steps": "2026-09-02 09:18 | Payment initiated in banking app\n2026-09-02 09:19 | Bank confirmed payment\n2026-09-02 09:20 | Trading account credited",
+						"broker_status": "Credited",
+						"bank_status": "Completed",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "VCB ****0193",
+						"reference": "QR-****-77A1",
+						"note": "The deposit appeared in the trading account about two minutes after the payment was confirmed in the banking app. No fee was shown by the broker or the bank.",
+						"status": "completed",
+						"verified_by": "Timo",
+						"verified_on": "2026-09-10"
 					},
 					{
 						"id": "DEP-VN-002",
@@ -1502,7 +1527,18 @@
 						"amount": "5,000,000",
 						"time": "14 min",
 						"fee": "0",
-						"result": "Successful"
+						"result": "Successful",
+						"steps": "2026-09-03 13:48 | Transfer sent from bank\n2026-09-03 13:49 | Bank confirmed transfer\n2026-09-03 14:02 | Trading account credited",
+						"broker_status": "Credited",
+						"bank_status": "Completed",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "TCB ****5520",
+						"reference": "TRF-****-19C0",
+						"note": "The transfer required the payment reference to be copied exactly. Crediting took 14 minutes, the slowest of the three deposits.",
+						"status": "completed",
+						"verified_by": "Timo",
+						"verified_on": "2026-09-10"
 					},
 					{
 						"id": "DEP-VN-003",
@@ -1512,7 +1548,18 @@
 						"amount": "100",
 						"time": "Instant",
 						"fee": "0",
-						"result": "Successful"
+						"result": "Successful",
+						"steps": "2026-09-05 08:46 | Card payment authorised\n2026-09-05 08:47 | Trading account credited",
+						"broker_status": "Credited",
+						"bank_status": "Authorised",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "Visa ****7714",
+						"reference": "CRD-****-4F02",
+						"note": "Card deposit was credited instantly. The card issuer applied no foreign transaction fee on this test; this can vary by issuer.",
+						"status": "completed",
+						"verified_by": "Timo",
+						"verified_on": "2026-09-10"
 					}
 				],
 				"fxt_withdrawals": [
@@ -1526,7 +1573,18 @@
 						"received": "2026-09-06T09:45",
 						"time": "31 min",
 						"fee": "0",
-						"result": "Successful"
+						"result": "Successful",
+						"steps": "2026-09-06 09:14 | Withdrawal requested\n2026-09-06 09:32 | Approved by broker\n2026-09-06 09:45 | Funds received by bank",
+						"broker_status": "Processed",
+						"bank_status": "Received",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "VCB ****0193",
+						"reference": "WD-****-2B91",
+						"note": "Approved automatically in 18 minutes and received 13 minutes later. Amount received matched the amount requested.",
+						"status": "completed",
+						"verified_by": "Timo",
+						"verified_on": "2026-09-10"
 					},
 					{
 						"id": "WDR-VN-002",
@@ -1538,7 +1596,18 @@
 						"received": "2026-09-09T08:40",
 						"time": "17 h 38 min",
 						"fee": "0",
-						"result": "Successful"
+						"result": "Successful",
+						"steps": "2026-09-08 15:02 | Withdrawal requested\n2026-09-08 16:10 | Approved by broker\n2026-09-09 08:40 | Funds received by bank",
+						"broker_status": "Processed",
+						"bank_status": "Received",
+						"account": "MT5 ****4821",
+						"holder": "T*** N***",
+						"bank": "TCB ****5520",
+						"reference": "WD-****-6E30",
+						"note": "Requested on a weekday afternoon. The broker approved within about an hour, but the bank credited the funds the next morning, which suggests the delay was on the banking side.",
+						"status": "completed",
+						"verified_by": "Timo",
+						"verified_on": "2026-09-10"
 					},
 					{
 						"id": "WDR-VN-003",
@@ -1550,67 +1619,7 @@
 						"received": "2026-09-13T11:20",
 						"time": "3 days 1 h",
 						"fee": "0",
-						"result": "Successful"
-					}
-				],
-				"fxt_records": [
-					{
-						"test_id": "DEP-VN-001",
-						"steps": "2026-09-02 09:18 | Payment initiated in banking app\n2026-09-02 09:19 | Bank confirmed payment\n2026-09-02 09:20 | Trading account credited",
-						"broker_status": "Credited",
-						"bank_status": "Completed",
-						"account": "MT5 ****4821",
-						"holder": "T*** N***",
-						"bank": "VCB ****0193",
-						"reference": "QR-****-77A1",
-						"note": "The deposit appeared in the trading account about two minutes after the payment was confirmed in the banking app. No fee was shown by the broker or the bank."
-					},
-					{
-						"test_id": "DEP-VN-002",
-						"steps": "2026-09-03 13:48 | Transfer sent from bank\n2026-09-03 13:49 | Bank confirmed transfer\n2026-09-03 14:02 | Trading account credited",
-						"broker_status": "Credited",
-						"bank_status": "Completed",
-						"account": "MT5 ****4821",
-						"holder": "T*** N***",
-						"bank": "TCB ****5520",
-						"reference": "TRF-****-19C0",
-						"note": "The transfer required the payment reference to be copied exactly. Crediting took 14 minutes, the slowest of the three deposits."
-					},
-					{
-						"test_id": "DEP-VN-003",
-						"steps": "2026-09-05 08:46 | Card payment authorised\n2026-09-05 08:47 | Trading account credited",
-						"broker_status": "Credited",
-						"bank_status": "Authorised",
-						"account": "MT5 ****4821",
-						"holder": "T*** N***",
-						"bank": "Visa ****7714",
-						"reference": "CRD-****-4F02",
-						"note": "Card deposit was credited instantly. The card issuer applied no foreign transaction fee on this test; this can vary by issuer."
-					},
-					{
-						"test_id": "WDR-VN-001",
-						"steps": "2026-09-06 09:14 | Withdrawal requested\n2026-09-06 09:32 | Approved by broker\n2026-09-06 09:45 | Funds received by bank",
-						"broker_status": "Processed",
-						"bank_status": "Received",
-						"account": "MT5 ****4821",
-						"holder": "T*** N***",
-						"bank": "VCB ****0193",
-						"reference": "WD-****-2B91",
-						"note": "Approved automatically in 18 minutes and received 13 minutes later. Amount received matched the amount requested."
-					},
-					{
-						"test_id": "WDR-VN-002",
-						"steps": "2026-09-08 15:02 | Withdrawal requested\n2026-09-08 16:10 | Approved by broker\n2026-09-09 08:40 | Funds received by bank",
-						"broker_status": "Processed",
-						"bank_status": "Received",
-						"account": "MT5 ****4821",
-						"holder": "T*** N***",
-						"bank": "TCB ****5520",
-						"reference": "WD-****-6E30",
-						"note": "Requested on a weekday afternoon. The broker approved within about an hour, but the bank credited the funds the next morning, which suggests the delay was on the banking side."
-					},
-					{
-						"test_id": "WDR-VN-003",
+						"result": "Successful",
 						"steps": "2026-09-10 10:00 | Refund requested\n2026-09-10 11:05 | Approved by broker\n2026-09-13 11:20 | Refund posted to card",
 						"broker_status": "Processed",
 						"bank_status": "Posted",
@@ -1618,7 +1627,10 @@
 						"holder": "T*** N***",
 						"bank": "Visa ****7714",
 						"reference": "RF-****-0D18",
-						"note": "Card withdrawals are processed as refunds to the original card. The refund took three days to post, which is typical for card networks."
+						"note": "Card withdrawals are processed as refunds to the original card. The refund took three days to post, which is typical for card networks.",
+						"status": "completed",
+						"verified_by": "Timo",
+						"verified_on": "2026-09-10"
 					}
 				]
 			},

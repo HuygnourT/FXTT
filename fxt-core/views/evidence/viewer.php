@@ -14,9 +14,13 @@ if ( ! $evidence['records'] ) {
 	return;
 }
 $tests = array();
-foreach ( array_merge( $evidence['deposits'], $evidence['withdrawals'] ) as $test ) {
-	if ( ! empty( $test['id'] ) ) {
-		$tests[ $test['id'] ] = $test;
+$kinds = array();
+foreach ( array( 'deposits' => 'deposit', 'withdrawals' => 'withdrawal' ) as $list => $kind ) {
+	foreach ( $evidence[ $list ] as $test ) {
+		if ( ! empty( $test['id'] ) ) {
+			$tests[ $test['id'] ] = $test;
+			$kinds[ $test['id'] ] = $kind;
+		}
 	}
 }
 ?>
@@ -24,7 +28,7 @@ foreach ( array_merge( $evidence['deposits'], $evidence['withdrawals'] ) as $tes
 <?php
 foreach ( $evidence['records'] as $id => $record ) :
 	$test       = isset( $tests[ $id ] ) ? $tests[ $id ] : array();
-	$is_deposit = 0 === strpos( strtoupper( $id ), 'DEP' );
+	$is_deposit = ! isset( $kinds[ $id ] ) || 'deposit' === $kinds[ $id ];
 	$get        = static function ( $arr, $key ) {
 		return isset( $arr[ $key ] ) ? (string) $arr[ $key ] : '';
 	};
@@ -53,12 +57,19 @@ foreach ( $evidence['records'] as $id => $record ) :
 			</button>
 		</div>
 		<div class="evidence-dialog__body">
-			<figure class="placeholder evidence-shot">
-				<?php echo fxt_core_icon( 'image', 'icon--lg' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-				<figcaption><?php esc_html_e( 'Screenshot placeholder. Names, account numbers and IDs are redacted before publication.', 'fxt-core' ); ?></figcaption>
-				<span class="evidence-shot__redact" aria-hidden="true"></span>
-				<span class="evidence-shot__redact evidence-shot__redact--short" aria-hidden="true"></span>
-			</figure>
+			<?php if ( ! empty( $record['screenshot'] ) && wp_attachment_is_image( (int) $record['screenshot'] ) ) : ?>
+				<figure class="evidence-shot evidence-shot--image">
+					<?php echo wp_get_attachment_image( (int) $record['screenshot'], 'large', false, array( 'loading' => 'lazy' ) ); ?>
+					<figcaption><?php esc_html_e( 'Redacted screenshot. Names, account numbers and IDs are hidden.', 'fxt-core' ); ?></figcaption>
+				</figure>
+			<?php else : ?>
+				<figure class="placeholder evidence-shot">
+					<?php echo fxt_core_icon( 'image', 'icon--lg' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+					<figcaption><?php esc_html_e( 'Screenshot placeholder. Names, account numbers and IDs are redacted before publication.', 'fxt-core' ); ?></figcaption>
+					<span class="evidence-shot__redact" aria-hidden="true"></span>
+					<span class="evidence-shot__redact evidence-shot__redact--short" aria-hidden="true"></span>
+				</figure>
+			<?php endif; ?>
 			<dl class="evidence-facts">
 				<div><dt><?php esc_html_e( 'Amount', 'fxt-core' ); ?></dt><dd class="u-mono"><?php echo esc_html( trim( $get( $test, 'amount' ) . ' ' . $get( $test, 'currency' ) ) ); ?></dd></div>
 				<div><dt><?php esc_html_e( 'Timestamp', 'fxt-core' ); ?></dt><dd class="u-mono"><?php echo esc_html( fxt_core_datetime( $first ) ); ?></dd></div>
@@ -66,6 +77,9 @@ foreach ( $evidence['records'] as $id => $record ) :
 				<div><dt><?php esc_html_e( 'Processing time', 'fxt-core' ); ?></dt><dd class="u-mono"><?php echo esc_html( $get( $test, 'time' ) ); ?></dd></div>
 				<div><dt><?php esc_html_e( 'Broker status', 'fxt-core' ); ?></dt><dd><?php echo esc_html( $get( $record, 'broker_status' ) ); ?></dd></div>
 				<div><dt><?php esc_html_e( 'Bank / payment status', 'fxt-core' ); ?></dt><dd><?php echo esc_html( $get( $record, 'bank_status' ) ); ?></dd></div>
+				<?php if ( $get( $record, 'verified_by' ) ) : ?>
+					<div><dt><?php esc_html_e( 'Verified by', 'fxt-core' ); ?></dt><dd><?php echo esc_html( $get( $record, 'verified_by' ) . ( $get( $record, 'verified_on' ) ? ', ' . fxt_core_date( $get( $record, 'verified_on' ) ) : '' ) ); ?></dd></div>
+				<?php endif; ?>
 				<?php foreach ( $masked as $label => $value ) : ?>
 					<div><dt><?php echo esc_html( $label ); ?></dt><dd class="u-mono masked"><?php echo fxt_core_icon( 'lock', 'icon--sm' ); // phpcs:ignore WordPress.Security.EscapeOutput ?><?php echo esc_html( $value ); ?></dd></div>
 				<?php endforeach; ?>

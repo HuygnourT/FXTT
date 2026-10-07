@@ -588,7 +588,7 @@ p.is-style-sample {
 .feature-article__title a:hover,
 .article-item__title a:hover { color: var(--color-accent); }
 .byline .wp-block-post-date { font-family: var(--font-mono); }
-.byline a { color: inherit; }
+.byline a { color: var(--color-accent); }
 .byline a:hover { color: var(--color-accent); }
 .article-item__excerpt { color: var(--color-ink-2); font-size: 0.9375rem; }
 
@@ -700,3 +700,30 @@ p.is-style-sample {
   font-size: clamp(1.625rem, 1.3rem + 1vw, 2.125rem);
 }
 .editor-styles-wrapper .wp-block-post-title { margin-bottom: var(--space-6); }
+.editor-styles-wrapper .fxt-block-hint {
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-accent-tint-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  color: var(--color-ink-2);
+}
+
+/* Evidence snapshot block inside the feature audience card */
+.audience-card--feature .wp-block-fxt-evidence-snapshot { margin-top: auto; }
+.audience-card__sample .u-label a { color: inherit; }
+.audience-card__sample .u-label a:hover { color: var(--color-field-mint); }
+.audience-card__sample dt { color: var(--color-on-field-3); }
+.audience-card__sample dd { margin: 0; text-align: right; }
+.evidence-shot--image img { width: 100%; height: auto; border-radius: var(--radius-md); }
+.evidence-shot--image figcaption { margin-top: var(--space-2); font-size: var(--text-xs); color: var(--color-ink-3); }
+
+/* Evidence index country filter */
+.filter-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.filter-chip.is-active { border-color: var(--color-accent); background: var(--color-accent-tint-2); color: var(--color-accent); font-weight: 600; }
+.evidence-index > .doc-section__title { margin-bottom: 0; }
+.author-social { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+
+/* Wide pages: intro text aligns with the content edge, keeps a readable measure. */
+.page-body--wide > .is-style-lead { max-width: var(--wp--style--global--wide-size); padding-right: max(0px, calc(100% - 44rem)); }

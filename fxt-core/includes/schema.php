@@ -69,18 +69,32 @@ final class Schema {
 	}
 
 	/**
-	 * Score categories, in display order. Weights live in plugin settings.
+	 * Score categories in display order: key => label. Editable under
+	 * Settings > FX Trading Today (single source for every score view).
 	 *
-	 * @return array
+	 * @return array<string, string>
 	 */
 	public static function categories() {
+		$out = array();
+		foreach ( Repository::categories() as $category ) {
+			$out[ $category['key'] ] = $category['label'];
+		}
+		return $out;
+	}
+
+	/**
+	 * Default score categories (used until the settings are saved).
+	 *
+	 * @return array[]
+	 */
+	public static function default_categories() {
 		return array(
-			'regulation'   => __( 'Regulation and client protection', 'fxt-core' ),
-			'availability' => __( 'Country availability', 'fxt-core' ),
-			'costs'        => __( 'Trading costs and execution', 'fxt-core' ),
-			'platforms'    => __( 'Trading platforms', 'fxt-core' ),
-			'local'        => __( 'Local services and language', 'fxt-core' ),
-			'support'      => __( 'Customer support', 'fxt-core' ),
+			array( 'key' => 'regulation', 'label' => __( 'Regulation and client protection', 'fxt-core' ), 'weight' => 30, 'description' => __( 'Entity, licence and permissions checked on official registers.', 'fxt-core' ), 'evidence' => __( 'Register lookups, client agreement', 'fxt-core' ) ),
+			array( 'key' => 'availability', 'label' => __( 'Country availability', 'fxt-core' ), 'weight' => 20, 'description' => __( 'Which entity accepts residents, and whether local deposits and withdrawals work in our tests.', 'fxt-core' ), 'evidence' => __( 'Sign-up flow, deposit and withdrawal tests', 'fxt-core' ) ),
+			array( 'key' => 'costs', 'label' => __( 'Trading costs and execution', 'fxt-core' ), 'weight' => 20, 'description' => __( 'Spreads, commissions and swaps measured in live test sessions.', 'fxt-core' ), 'evidence' => __( 'Cost logs from five or more sessions', 'fxt-core' ) ),
+			array( 'key' => 'platforms', 'label' => __( 'Trading platforms', 'fxt-core' ), 'weight' => 15, 'description' => __( 'Platform versions, stability, order types and tools.', 'fxt-core' ), 'evidence' => __( 'Platform test notes', 'fxt-core' ) ),
+			array( 'key' => 'local', 'label' => __( 'Local services and language', 'fxt-core' ), 'weight' => 10, 'description' => __( 'Local-language site, support hours and local payment options.', 'fxt-core' ), 'evidence' => __( 'Support transcripts, payment tests', 'fxt-core' ) ),
+			array( 'key' => 'support', 'label' => __( 'Customer support', 'fxt-core' ), 'weight' => 5, 'description' => __( 'Scripted questions by chat and email, scored for accuracy.', 'fxt-core' ), 'evidence' => __( 'Chat and email transcripts', 'fxt-core' ) ),
 		);
 	}
 
@@ -98,7 +112,7 @@ final class Schema {
 		return array(
 			'fxt_monogram'        => array( 'type' => 'text', 'label' => __( 'Monogram', 'fxt-core' ), 'help' => __( 'Two or three letters shown when no logo is set.', 'fxt-core' ) ),
 			'fxt_status'          => array( 'type' => 'select', 'label' => __( 'Review status', 'fxt-core' ), 'options' => self::review_status(), 'default' => 'published' ),
-			'fxt_score'           => array( 'type' => 'number', 'label' => __( 'Research score (0 to 5)', 'fxt-core' ), 'min' => 0, 'max' => 5, 'step' => 0.1, 'help' => __( 'Leave empty to show "Pending".', 'fxt-core' ) ),
+			'fxt_score'           => array( 'type' => 'number', 'label' => __( 'Overall score override (0 to 5)', 'fxt-core' ), 'min' => 0, 'max' => 5, 'step' => 0.1, 'help' => __( 'Leave empty: the score is calculated from the category scores and the weights in Settings. Shown as "Pending" until every category has a score.', 'fxt-core' ) ),
 			'fxt_score_breakdown' => array( 'type' => 'group', 'label' => __( 'Category scores', 'fxt-core' ), 'fields' => $score_fields ),
 			'fxt_reviewed'        => array( 'type' => 'date', 'label' => __( 'Last reviewed', 'fxt-core' ), 'help' => __( 'Shown in bylines. Update only when the research is re-checked, not for typo fixes.', 'fxt-core' ) ),
 			'fxt_founded'         => array( 'type' => 'text', 'label' => __( 'Founded', 'fxt-core' ) ),
@@ -179,7 +193,8 @@ final class Schema {
 					'last_tested'    => array( 'type' => 'date', 'label' => __( 'Last tested', 'fxt-core' ) ),
 				),
 			),
-			'fxt_affiliate_url'   => array( 'type' => 'url', 'label' => __( 'Affiliate URL', 'fxt-core' ), 'help' => __( 'Rendered with rel="sponsored nofollow" and an "affiliate link" label.', 'fxt-core' ) ),
+			'fxt_affiliate_url'   => array( 'type' => 'url', 'label' => __( 'Affiliate URL', 'fxt-core' ), 'help' => __( 'Rendered with rel="sponsored nofollow" and an "affiliate link" label. The button is hidden while this is empty.', 'fxt-core' ) ),
+			'fxt_cta_label'       => array( 'type' => 'text', 'label' => __( 'Affiliate button label', 'fxt-core' ), 'help' => __( 'Default: "Visit {broker}". "(affiliate link)" is always added.', 'fxt-core' ) ),
 		);
 	}
 
@@ -225,49 +240,53 @@ final class Schema {
 			'fxt_deposits'      => array(
 				'type'   => 'repeater',
 				'label'  => __( 'Deposit tests', 'fxt-core' ),
-				'fields' => array(
-					'id'       => array( 'type' => 'text', 'label' => __( 'Test ID', 'fxt-core' ) ),
-					'date'     => array( 'type' => 'date', 'label' => __( 'Date', 'fxt-core' ) ),
-					'method'   => array( 'type' => 'text', 'label' => __( 'Method', 'fxt-core' ) ),
-					'currency' => array( 'type' => 'text', 'label' => __( 'Currency', 'fxt-core' ) ),
-					'amount'   => array( 'type' => 'text', 'label' => __( 'Amount', 'fxt-core' ) ),
-					'time'     => array( 'type' => 'text', 'label' => __( 'Processing time', 'fxt-core' ) ),
-					'fee'      => array( 'type' => 'text', 'label' => __( 'Fee', 'fxt-core' ) ),
-					'result'   => array( 'type' => 'text', 'label' => __( 'Result', 'fxt-core' ) ),
-				),
+				'help'   => __( 'One row per test. Account numbers, names, bank details and references are masked automatically when saved. Steps: one per line as "YYYY-MM-DD HH:MM | description".', 'fxt-core' ),
+				'fields' => self::test_fields( false ),
 			),
 			'fxt_withdrawals'   => array(
 				'type'   => 'repeater',
 				'label'  => __( 'Withdrawal tests', 'fxt-core' ),
-				'fields' => array(
-					'id'        => array( 'type' => 'text', 'label' => __( 'Test ID', 'fxt-core' ) ),
-					'date'      => array( 'type' => 'date', 'label' => __( 'Date', 'fxt-core' ) ),
-					'method'    => array( 'type' => 'text', 'label' => __( 'Method', 'fxt-core' ) ),
-					'currency'  => array( 'type' => 'text', 'label' => __( 'Currency', 'fxt-core' ) ),
-					'amount'    => array( 'type' => 'text', 'label' => __( 'Amount', 'fxt-core' ) ),
-					'requested' => array( 'type' => 'datetime', 'label' => __( 'Requested', 'fxt-core' ) ),
-					'received'  => array( 'type' => 'datetime', 'label' => __( 'Received', 'fxt-core' ) ),
-					'time'      => array( 'type' => 'text', 'label' => __( 'Processing time', 'fxt-core' ) ),
-					'fee'       => array( 'type' => 'text', 'label' => __( 'Fee', 'fxt-core' ) ),
-					'result'    => array( 'type' => 'text', 'label' => __( 'Result', 'fxt-core' ) ),
-				),
+				'help'   => __( 'One row per test. Sensitive values are masked automatically when saved.', 'fxt-core' ),
+				'fields' => self::test_fields( true ),
 			),
-			'fxt_records'       => array(
-				'type'   => 'repeater',
-				'label'  => __( 'Evidence records (viewer)', 'fxt-core' ),
-				'help'   => __( 'Account numbers, names, bank details and references are masked automatically when saved. Steps: one per line as "YYYY-MM-DD HH:MM | description".', 'fxt-core' ),
-				'fields' => array(
-					'test_id'       => array( 'type' => 'text', 'label' => __( 'Test ID', 'fxt-core' ) ),
-					'steps'         => array( 'type' => 'textarea', 'label' => __( 'Transaction steps', 'fxt-core' ) ),
-					'broker_status' => array( 'type' => 'text', 'label' => __( 'Broker status', 'fxt-core' ) ),
-					'bank_status'   => array( 'type' => 'text', 'label' => __( 'Bank / payment status', 'fxt-core' ) ),
-					'account'       => array( 'type' => 'text', 'label' => __( 'Trading account', 'fxt-core' ), 'mask' => 'digits' ),
-					'holder'        => array( 'type' => 'text', 'label' => __( 'Account holder', 'fxt-core' ), 'mask' => 'name' ),
-					'bank'          => array( 'type' => 'text', 'label' => __( 'Bank account / card', 'fxt-core' ), 'mask' => 'digits' ),
-					'reference'     => array( 'type' => 'text', 'label' => __( 'Transaction reference', 'fxt-core' ), 'mask' => 'digits' ),
-					'note'          => array( 'type' => 'textarea', 'label' => __( 'Researcher note', 'fxt-core' ) ),
-				),
-			),
+		);
+	}
+
+	/**
+	 * One deposit or withdrawal test: everything the table, the evidence
+	 * viewer and the timeline need, in a single record.
+	 *
+	 * @param bool $withdrawal Add request/receipt timestamps.
+	 * @return array
+	 */
+	public static function test_fields( $withdrawal ) {
+		$fields = array(
+			'id'       => array( 'type' => 'text', 'label' => __( 'Test ID', 'fxt-core' ), 'help' => __( 'e.g. DEP-VN-001. Timeline steps can link to it.', 'fxt-core' ) ),
+			'date'     => array( 'type' => 'date', 'label' => __( 'Test date', 'fxt-core' ) ),
+			'method'   => array( 'type' => 'text', 'label' => __( 'Payment method', 'fxt-core' ) ),
+			'currency' => array( 'type' => 'text', 'label' => __( 'Currency', 'fxt-core' ) ),
+			'amount'   => array( 'type' => 'text', 'label' => __( 'Amount', 'fxt-core' ) ),
+		);
+		if ( $withdrawal ) {
+			$fields['requested'] = array( 'type' => 'datetime', 'label' => __( 'Requested', 'fxt-core' ) );
+			$fields['received']  = array( 'type' => 'datetime', 'label' => __( 'Received', 'fxt-core' ) );
+		}
+		return $fields + array(
+			'time'          => array( 'type' => 'text', 'label' => __( 'Processing time', 'fxt-core' ) ),
+			'fee'           => array( 'type' => 'text', 'label' => __( 'Fee', 'fxt-core' ) ),
+			'result'        => array( 'type' => 'text', 'label' => __( 'Result', 'fxt-core' ), 'help' => __( 'e.g. Successful, Rejected, Partial', 'fxt-core' ) ),
+			'status'        => array( 'type' => 'select', 'label' => __( 'Test status', 'fxt-core' ), 'options' => array( 'completed' => __( 'Completed', 'fxt-core' ), 'in-progress' => __( 'In progress', 'fxt-core' ), 'failed' => __( 'Failed', 'fxt-core' ) ), 'default' => 'completed' ),
+			'steps'         => array( 'type' => 'textarea', 'label' => __( 'Transaction steps', 'fxt-core' ) ),
+			'broker_status' => array( 'type' => 'text', 'label' => __( 'Broker status', 'fxt-core' ) ),
+			'bank_status'   => array( 'type' => 'text', 'label' => __( 'Bank / payment status', 'fxt-core' ) ),
+			'account'       => array( 'type' => 'text', 'label' => __( 'Trading account', 'fxt-core' ), 'mask' => 'digits' ),
+			'holder'        => array( 'type' => 'text', 'label' => __( 'Account holder', 'fxt-core' ), 'mask' => 'name' ),
+			'bank'          => array( 'type' => 'text', 'label' => __( 'Bank account / card', 'fxt-core' ), 'mask' => 'digits' ),
+			'reference'     => array( 'type' => 'text', 'label' => __( 'Transaction reference', 'fxt-core' ), 'mask' => 'digits' ),
+			'screenshot'    => array( 'type' => 'media', 'label' => __( 'Screenshot (redacted)', 'fxt-core' ), 'help' => __( 'Upload only images with personal data already blurred.', 'fxt-core' ) ),
+			'verified_by'   => array( 'type' => 'text', 'label' => __( 'Verified by', 'fxt-core' ) ),
+			'verified_on'   => array( 'type' => 'date', 'label' => __( 'Verified on', 'fxt-core' ) ),
+			'note'          => array( 'type' => 'textarea', 'label' => __( 'Researcher note', 'fxt-core' ) ),
 		);
 	}
 
@@ -280,8 +299,19 @@ final class Schema {
 		return array(
 			'fxt_iso'      => array( 'type' => 'text', 'label' => __( 'ISO code', 'fxt-core' ), 'help' => __( 'Two letters, e.g. VN', 'fxt-core' ) ),
 			'fxt_currency' => array( 'type' => 'text', 'label' => __( 'Local currency', 'fxt-core' ) ),
-			'fxt_status'   => array( 'type' => 'select', 'label' => __( 'Research status', 'fxt-core' ), 'options' => array( 'published' => __( 'Published', 'fxt-core' ), 'in-progress' => __( 'In progress', 'fxt-core' ), 'planned' => __( 'Planned', 'fxt-core' ) ) ),
-			'fxt_order'    => array( 'type' => 'number', 'label' => __( 'Display order', 'fxt-core' ), 'step' => 1 ),
+			'fxt_status'   => array( 'type' => 'select', 'label' => __( 'Research status', 'fxt-core' ), 'options' => array( '' => __( 'Not researched', 'fxt-core' ), 'published' => __( 'Published', 'fxt-core' ), 'in-progress' => __( 'In progress', 'fxt-core' ), 'planned' => __( 'Planned', 'fxt-core' ) ), 'help' => __( 'Researched countries appear in country shortcuts and in "N of M countries researched".', 'fxt-core' ) ),
+		);
+	}
+
+	/**
+	 * Platform term fields.
+	 *
+	 * @return array
+	 */
+	public static function platform() {
+		return array(
+			'fxt_full_name' => array( 'type' => 'text', 'label' => __( 'Full name', 'fxt-core' ), 'help' => __( 'Shown on review platform tiles, e.g. "MetaTrader 4". The term name is the short label used in tables.', 'fxt-core' ) ),
+			'fxt_compact'   => array( 'type' => 'checkbox', 'label' => __( 'Show in compact lists (broker cards)', 'fxt-core' ) ),
 		);
 	}
 
@@ -310,6 +340,15 @@ final class Schema {
 			),
 			'fxt_principles' => array( 'type' => 'list', 'label' => __( 'Review principles (one per line)', 'fxt-core' ), 'lines' => true ),
 			'fxt_disclosure' => array( 'type' => 'textarea', 'label' => __( 'Disclosure', 'fxt-core' ) ),
+			'fxt_social'     => array(
+				'type'   => 'repeater',
+				'label'  => __( 'Profile links', 'fxt-core' ),
+				'help'   => __( 'Public profiles (LinkedIn, X, YouTube…). Shown on the author page and in structured data.', 'fxt-core' ),
+				'fields' => array(
+					'label' => array( 'type' => 'text', 'label' => __( 'Label', 'fxt-core' ) ),
+					'url'   => array( 'type' => 'url', 'label' => __( 'URL', 'fxt-core' ) ),
+				),
+			),
 			'fxt_simulated'  => array( 'type' => 'checkbox', 'label' => __( 'Show "Simulated profile" label', 'fxt-core' ) ),
 		);
 	}
@@ -320,11 +359,6 @@ final class Schema {
 	 * @return array
 	 */
 	public static function settings() {
-		$weights = array();
-		foreach ( self::categories() as $key => $label ) {
-			$weights[ $key ] = array( 'type' => 'number', 'label' => $label, 'min' => 0, 'max' => 100, 'step' => 1 );
-		}
-
 		return array(
 			'banner_enabled'       => array( 'type' => 'checkbox', 'label' => __( 'Show prototype banner', 'fxt-core' ) ),
 			'banner_text'          => array( 'type' => 'textarea', 'label' => __( 'Banner text', 'fxt-core' ) ),
@@ -343,7 +377,19 @@ final class Schema {
 					'url'   => array( 'type' => 'url', 'label' => __( 'URL', 'fxt-core' ) ),
 				),
 			),
-			'weights'              => array( 'type' => 'group', 'label' => __( 'Score weights (%)', 'fxt-core' ), 'help' => __( 'Must add up to 100.', 'fxt-core' ), 'fields' => $weights ),
+			'score_categories'     => array(
+				'type'   => 'repeater',
+				'label'  => __( 'Score categories', 'fxt-core' ),
+				'help'   => __( 'Order here is the display order everywhere. Weights must add up to 100. The key links broker category scores to a row: change a label freely, but keep the key.', 'fxt-core' ),
+				'fields' => array(
+					'key'         => array( 'type' => 'text', 'label' => __( 'Key (letters, numbers, dashes)', 'fxt-core' ) ),
+					'label'       => array( 'type' => 'text', 'label' => __( 'Category', 'fxt-core' ) ),
+					'weight'      => array( 'type' => 'number', 'label' => __( 'Weight (%)', 'fxt-core' ), 'min' => 0, 'max' => 100, 'step' => 1 ),
+					'description' => array( 'type' => 'textarea', 'label' => __( 'What we measure', 'fxt-core' ) ),
+					'evidence'    => array( 'type' => 'text', 'label' => __( 'Evidence used', 'fxt-core' ) ),
+				),
+			),
+			'deposit_bands'        => array( 'type' => 'list', 'label' => __( 'Minimum deposit filter (USD)', 'fxt-core' ), 'help' => __( 'Amounts offered in the directory filter, comma separated, e.g. 0, 50, 100, 200', 'fxt-core' ) ),
 			'pages'                => array(
 				'type'   => 'group',
 				'label'  => __( 'Key pages', 'fxt-core' ),
@@ -375,7 +421,8 @@ final class Schema {
 			'risk_warning'         => __( 'Forex and CFDs are complex financial products and involve a high risk of losing money. Make sure you understand the risks before trading. Nothing on this site is financial advice.', 'fxt-core' ),
 			'affiliate_disclosure' => __( 'We may receive a commission when you open an account through some links on this site. This never affects ratings, rankings or research findings.', 'fxt-core' ),
 			'social'               => array(),
-			'weights'              => array( 'regulation' => 30, 'availability' => 20, 'costs' => 20, 'platforms' => 15, 'local' => 10, 'support' => 5 ),
+			'score_categories'     => self::default_categories(),
+			'deposit_bands'        => array( '0', '50', '100', '200' ),
 			'pages'                => array( 'directory' => null, 'compare' => null, 'evidence' => null, 'methodology' => null ),
 		);
 	}

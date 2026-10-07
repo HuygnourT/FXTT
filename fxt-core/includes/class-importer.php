@@ -285,18 +285,20 @@ final class Importer {
 	 * @param array $markets Market rows.
 	 */
 	private function markets( array $markets ) {
+		// The full country list is reference data (seeded by the plugin, never removed).
+		Countries::sync();
+		Repository::flush();
 		foreach ( $markets as $market ) {
-			$term_id = $this->upsert_term( Content_Types::MARKET, $market['name'], strtolower( $market['code'] ) );
-			if ( ! $term_id ) {
+			$country = Repository::market( $market['code'] );
+			if ( ! $country ) {
 				continue;
 			}
-			update_term_meta( $term_id, 'fxt_iso', strtoupper( $market['code'] ) );
-			update_term_meta( $term_id, 'fxt_currency', $market['currency'] );
-			update_term_meta( $term_id, 'fxt_status', $market['status'] );
-			update_term_meta( $term_id, 'fxt_order', (int) $market['order'] );
+			// The demo only marks which countries are under research.
+			update_term_meta( $country['term_id'], 'fxt_status', $market['status'] );
+			update_term_meta( $country['term_id'], '_fxt_demo_status', 1 );
 		}
-		/* translators: %d: number of countries */
-		$this->log[] = sprintf( __( '%d countries', 'fxt-core' ), count( $markets ) );
+		/* translators: 1: total countries, 2: researched countries */
+		$this->log[] = sprintf( __( '%1$d countries available (%2$d marked as researched)', 'fxt-core' ), count( Repository::markets() ), count( $markets ) );
 	}
 
 	/**
@@ -307,7 +309,10 @@ final class Importer {
 	 */
 	private function terms( $taxonomy, array $terms ) {
 		foreach ( $terms as $term ) {
-			$this->upsert_term( $taxonomy, $term['name'], isset( $term['slug'] ) ? $term['slug'] : sanitize_title( $term['name'] ) );
+			$term_id = $this->upsert_term( $taxonomy, $term['name'], isset( $term['slug'] ) ? $term['slug'] : sanitize_title( $term['name'] ) );
+			foreach ( $term_id && isset( $term['meta'] ) ? (array) $term['meta'] : array() as $key => $value ) {
+				update_term_meta( $term_id, sanitize_key( $key ), $value );
+			}
 		}
 	}
 
@@ -487,7 +492,7 @@ final class Importer {
 				wp_slash(
 					array(
 						'ID'           => $this->pages[ $page['key'] ],
-						'post_content' => $this->prepare( $html ),
+						'post_content' => $this->configure_blocks( $this->prepare( $html ) ),
 					)
 				)
 			);
@@ -571,6 +576,37 @@ final class Importer {
 	}
 
 	/**
+	 * Demo configuration of dynamic blocks that needs this site's IDs:
+	 * homepage broker cards get an explicit, editable broker selection.
+	 *
+	 * @param string $html Block markup.
+	 * @return string
+	 */
+	private function configure_blocks( $html ) {
+		if ( false === strpos( $html, 'wp:fxt/broker-cards' ) ) {
+			return $html;
+		}
+		$ids = array();
+		foreach ( Repository::brokers() as $broker ) {
+			if ( null !== $broker['score'] && count( $ids ) < 4 ) {
+				$ids[] = $broker['id'];
+			}
+		}
+		$walk = static function ( array $blocks ) use ( &$walk, $ids ) {
+			foreach ( $blocks as $i => $block ) {
+				if ( 'fxt/broker-cards' === $block['blockName'] && empty( $block['attrs']['brokers'] ) ) {
+					$blocks[ $i ]['attrs']['brokers'] = $ids;
+				}
+				if ( ! empty( $block['innerBlocks'] ) ) {
+					$blocks[ $i ]['innerBlocks'] = $walk( $block['innerBlocks'] );
+				}
+			}
+			return $blocks;
+		};
+		return serialize_blocks( $walk( parse_blocks( $html ) ) );
+	}
+
+	/**
 	 * URL of a demo page by key.
 	 *
 	 * @param string $key Page key.
@@ -639,13 +675,18 @@ final class Importer {
 			'primary'  => array(
 				__( 'Primary', 'fxt-core' ),
 				array(
-					array( __( 'Broker Reviews', 'fxt-core' ), $dir, 'mega-top-brokers', array(
-						array( __( 'Raw spread accounts', 'fxt-core' ), add_query_arg( 'account', 'raw', $dir ) ),
-						array( __( 'Low minimum deposit', 'fxt-core' ), add_query_arg( 'deposit', '50', $dir ) ),
-						array( __( 'MetaTrader 5 brokers', 'fxt-core' ), add_query_arg( 'platform', 'mt5', $dir ) ),
-						array( __( 'TradingView brokers', 'fxt-core' ), add_query_arg( 'platform', 'tradingview', $dir ) ),
-						array( __( 'Cent accounts', 'fxt-core' ), add_query_arg( 'account', 'cent', $dir ) ),
-						array( __( 'How we research and score a broker', 'fxt-core' ), $method, 'mega-feature' ),
+					// Mega menu: every heading, link and label is a menu item (see theme inc/navigation.php).
+					array( __( 'Broker Reviews', 'fxt-core' ), $dir, 'mega', array(
+						array( __( 'Highest research scores', 'fxt-core' ), $dir, 'mega-auto-brokers', array(), __( 'All broker reviews', 'fxt-core' ) ),
+						array( __( 'By account type', 'fxt-core' ), '#', '', array(
+							array( __( 'Raw spread accounts', 'fxt-core' ), add_query_arg( 'account', 'raw', $dir ) ),
+							array( __( 'Low minimum deposit', 'fxt-core' ), add_query_arg( 'deposit', '50', $dir ) ),
+							array( __( 'MetaTrader 5 brokers', 'fxt-core' ), add_query_arg( 'platform', 'mt5', $dir ) ),
+							array( __( 'TradingView brokers', 'fxt-core' ), add_query_arg( 'platform', 'tradingview', $dir ) ),
+							array( __( 'Cent accounts', 'fxt-core' ), add_query_arg( 'account', 'cent', $dir ) ),
+						) ),
+						array( __( 'By country', 'fxt-core' ), $dir, 'mega-auto-countries', array(), __( 'All %d markets', 'fxt-core' ) ),
+						array( __( 'How we research and score a broker', 'fxt-core' ), $method, 'mega-feature', array(), __( 'Before you read a review', 'fxt-core' ), __( 'Read the methodology', 'fxt-core' ) ),
 					) ),
 					array( __( 'Compare Brokers', 'fxt-core' ), $this->url( 'compare' ) ),
 					array( __( 'Best Brokers', 'fxt-core' ), add_query_arg( 'sort', 'score', $dir ) ),
@@ -711,7 +752,7 @@ final class Importer {
 	 * Create (or rebuild) one demo menu.
 	 *
 	 * @param string $name  Menu name.
-	 * @param array  $items [ label, url, class?, children? ].
+	 * @param array  $items [ label, url, class?, children?, description?, title attribute? ].
 	 * @return int
 	 */
 	private function menu( $name, array $items ) {
@@ -736,6 +777,8 @@ final class Importer {
 					'menu-item-title'     => $item[0],
 					'menu-item-url'       => $item[1],
 					'menu-item-classes'   => isset( $item[2] ) ? $item[2] : '',
+					'menu-item-description' => isset( $item[4] ) ? $item[4] : '',
+					'menu-item-attr-title'  => isset( $item[5] ) ? $item[5] : '',
 					'menu-item-parent-id' => $parent,
 					'menu-item-status'    => 'publish',
 					'menu-item-type'      => 'custom',
@@ -808,7 +851,7 @@ final class Importer {
 			$count += wp_delete_post( $id, true ) ? 1 : 0;
 		}
 
-		$taxonomies = array( Content_Types::MARKET, Content_Types::REGULATOR, Content_Types::PLATFORM, Content_Types::ACCOUNT_TYPE, 'category', 'nav_menu' );
+		$taxonomies = array( Content_Types::REGULATOR, Content_Types::PLATFORM, Content_Types::ACCOUNT_TYPE, 'category', 'nav_menu' );
 		$terms      = get_terms(
 			array(
 				'taxonomy'   => $taxonomies,
@@ -849,6 +892,20 @@ final class Importer {
 				$settings['header_cta_url'] = '';
 			}
 			update_option( Repository::SETTINGS, $settings );
+		}
+
+		// Research status set by the demo is cleared; the countries themselves stay.
+		$flagged = get_terms(
+			array(
+				'taxonomy'   => Content_Types::MARKET,
+				'hide_empty' => false,
+				'meta_key'   => '_fxt_demo_status', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- admin-only.
+				'fields'     => 'ids',
+			)
+		);
+		foreach ( is_wp_error( $flagged ) ? array() : $flagged as $term_id ) {
+			delete_term_meta( $term_id, 'fxt_status' );
+			delete_term_meta( $term_id, '_fxt_demo_status' );
 		}
 
 		delete_option( 'fxt_demo_imported' );

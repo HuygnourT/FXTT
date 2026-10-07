@@ -7,7 +7,35 @@
 	"icon": "list-view",
 	"description": "Published test evidence and tests still in progress.",
 	"textdomain": "fxt-core",
-	"supports": { "html": false, "align": [ "wide" ] },
+	"supports": {
+		"html": false,
+		"align": [
+			"wide"
+		]
+	},
 	"editorScript": "fxt-core-blocks",
-	"render": "file:./render.php"
+	"render": "file:./render.php",
+	"attributes": {
+		"scope": {
+			"type": "string",
+			"enum": [
+				"all",
+				"country"
+			],
+			"default": "all"
+		},
+		"showPending": {
+			"type": "boolean",
+			"default": true
+		},
+		"publishedTitle": {
+			"type": "string",
+			"default": ""
+		},
+		"pendingTitle": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"viewScript": "fxt-core-country"
 }

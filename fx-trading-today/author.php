@@ -104,6 +104,13 @@ get_header();
 						<?php endforeach; ?>
 					</dl>
 				<?php endif; ?>
+				<?php if ( ! empty( $fxt_author['social'] ) ) : ?>
+					<ul class="author-social" aria-label="<?php esc_attr_e( 'Profiles', 'fx-trading-today' ); ?>">
+						<?php foreach ( $fxt_author['social'] as $fxt_link ) : ?>
+							<li><a class="filter-chip" href="<?php echo esc_url( $fxt_link['url'] ); ?>" rel="me noopener" target="_blank"><?php echo esc_html( ! empty( $fxt_link['label'] ) ? $fxt_link['label'] : wp_parse_url( $fxt_link['url'], PHP_URL_HOST ) ); ?></a></li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>
@@ -275,6 +282,7 @@ fxt_tt_the_json_ld(
 				'description'   => $fxt_author['short_bio'],
 				'knowsAbout'    => isset( $fxt_author['expertise'] ) ? $fxt_author['expertise'] : null,
 				'knowsLanguage' => isset( $fxt_author['languages'] ) ? $fxt_author['languages'] : null,
+				'sameAs'        => ! empty( $fxt_author['social'] ) ? array_values( wp_list_pluck( $fxt_author['social'], 'url' ) ) : null,
 				'worksFor'      => array(
 					'@type' => 'Organization',
 					'name'  => get_bloginfo( 'name' ),

@@ -7,12 +7,10 @@
  */
 
 use FXT\Core\Repository;
-use FXT\Core\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
 $broker  = $args['broker'];
-$weights = Repository::setting( 'weights' );
 $method  = fxt_core_page_url( 'methodology' );
 $has     = null !== $broker['score'] && ! empty( $broker['breakdown'] );
 ?>
@@ -30,12 +28,14 @@ $has     = null !== $broker['score'] && ! empty( $broker['breakdown'] );
 	<?php if ( $has ) : ?>
 		<ul class="score-card__list">
 			<?php
-			foreach ( Schema::categories() as $key => $label ) :
+			foreach ( Repository::categories() as $category ) :
+				$key   = $category['key'];
+				$label = $category['label'];
 				$value = isset( $broker['breakdown'][ $key ] ) ? (float) $broker['breakdown'][ $key ] : 0;
 				$pct   = (int) round( $value / 5 * 100 );
 				?>
 				<li class="score-card__row">
-					<span class="score-card__label"><?php echo esc_html( $label ); ?> <span class="u-mono muted"><?php echo esc_html( (int) $weights[ $key ] . '%' ); ?></span></span>
+					<span class="score-card__label"><?php echo esc_html( $label ); ?> <span class="u-mono muted"><?php echo esc_html( (int) $category['weight'] . '%' ); ?></span></span>
 					<span class="meter meter--thin" role="img" aria-label="<?php /* translators: 1: category, 2: score */ echo esc_attr( sprintf( __( '%1$s: %2$s out of 5', 'fxt-core' ), $label, number_format_i18n( $value, 1 ) ) ); ?>"><span class="meter__fill" style="<?php echo esc_attr( '--value: ' . $pct . '%' ); ?>"></span></span>
 					<span class="score-card__num"><?php echo esc_html( number_format_i18n( $value, 1 ) ); ?></span>
 				</li>

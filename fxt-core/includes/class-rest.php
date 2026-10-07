@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Rest {
 
-	const VIEWS = array( 'country-brokers', 'broker-cards', 'compare', 'directory-results' );
+	const VIEWS = array( 'country-brokers', 'broker-cards', 'compare', 'directory-results', 'evidence-list' );
 
 	/**
 	 * Hooks.
@@ -77,11 +77,15 @@ final class Rest {
 
 		switch ( $request['view'] ) {
 			case 'country-brokers':
-				$html = fxt_core_get_view( 'blocks/country-brokers', array( 'limit' => max( 1, min( 8, isset( $args['limit'] ) ? (int) $args['limit'] : 4 ) ) ) );
+				$html = fxt_core_get_view( 'blocks/country-brokers', Blocks::hero_args( $args ) );
+				break;
+
+			case 'evidence-list':
+				$html = fxt_core_get_view( 'blocks/evidence-list', array_merge( Blocks::evidence_list_args( $args ), array( 'filter' => '', 'base' => $base ) ) );
 				break;
 
 			case 'broker-cards':
-				$html = fxt_core_get_view( 'blocks/broker-cards', array( 'count' => max( 1, min( 12, isset( $args['count'] ) ? (int) $args['count'] : 4 ) ) ) );
+				$html = fxt_core_get_view( 'blocks/broker-cards', Blocks::card_args( $args ) );
 				break;
 
 			case 'compare':
@@ -94,6 +98,8 @@ final class Rest {
 						'selected' => array_slice( Blocks::parse_slugs( isset( $args['brokers'] ) ? $args['brokers'] : '' ), 0, $slots ),
 						'all'      => ! empty( $args['all'] ),
 						'sync'     => ! empty( $args['sync'] ),
+						'rows'     => Blocks::compare_keys( isset( $args['rows'] ) ? $args['rows'] : '', 'rows' ),
+						'groups'   => Blocks::compare_keys( isset( $args['groups'] ) ? $args['groups'] : '', 'groups' ),
 						'base_url' => $base,
 					)
 				);

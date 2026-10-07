@@ -30,51 +30,56 @@ The importer:
 - Never overwrites content the user created themselves. If permalinks are set to "Plain", it switches them to `/%postname%/`.
 - Moves the default "Hello world!" post to the Trash only if nobody has edited it.
 
-## 2. Where to edit what
+## 2. Where to edit what (single source for each kind of data)
 
-| Item to change | Location |
-|---|---|
-| Body copy for each section (home page, methodology…) | Gutenberg: Pages > *the page* (all core blocks) |
-| Reuse a section | Block inserter > Patterns > "FX Trading Today: home / sections" |
-| Broker review copy (verdict, pros/cons, notes) | Broker Reviews > *broker*: blocks in the editor |
-| Structured broker data (score, costs, entities, by-country conditions…) | Broker Reviews > *broker*: the **Broker data** panels below the editor |
-| Regulators, Platforms, Account types | Broker Reviews > Regulators / Platforms / Account Types (sidebar checkboxes) |
-| Countries (ISO code, currency, research status, order) | Broker Reviews > Markets |
-| Test evidence (summary, timeline, deposits, withdrawals, viewer records) | Broker Reviews > Test Evidence |
-| Author (role, short bio, expertise, figures, principles…) | Users > *user* > section "FX Trading Today author profile" |
-| Prototype banner, Sample data label, default country, header button, risk warning, affiliate disclosure, score weights, key pages | **Settings > FX Trading Today** |
-| Header menu, mega menu, 5 footer columns | Appearance > Menus (locations Primary, Footer column 1–5) |
-| Logo, site name | Appearance > Customize > Site Identity |
-| Colours, fonts, sizes | `theme.json` (single source; CSS only aliases the variables) |
+| Item to change | Location | Automatically updates |
+|---|---|---|
+| Broker: name, logo (featured image), description (excerpt), status, **category scores**, last reviewed, min deposit, currencies, costs, trading conditions, payments, accounts, legal entities, **conditions by country**, affiliate URL + button label | Broker Reviews > *broker*: panels **below the editor** (sidebar: "Broker data > Edit broker data") | Homepage (country hero, cards, compare), directory, compare page, review, mega menu, evidence |
+| Overall score | **Calculated** from category scores × weights; the "Overall score override" field is for exceptions only | Everywhere scores appear |
+| Broker review copy (verdict, pros/cons, notes, method) | Gutenberg in the broker post | Review page |
+| Display order when scores tie / "manual" order | The "Order" field (Page Attributes) of each broker | Lists and the hero block when set to manual order |
+| **Countries** (all 250, A–Z) | Broker Reviews > Countries: rename, set "Research status". The "Add missing countries" button restores deleted countries | Country selector, availability, directory, evidence, mega menu |
+| Regulators, Platforms, Account types | Broker Reviews > Regulators / Platforms / Account Types. Platforms have "Full name" (review tile) and "Show in compact lists" (card) | Comparison rows, review tiles, directory filters |
+| **Score categories** (add / edit / delete / reorder, weight, description, evidence used) | **Settings > FX Trading Today > Score categories**. Weights must total 100; an invalid set is rejected | Homepage methodology, Methodology page, review score card, every broker score |
+| Directory "Minimum deposit" filter | Settings > Minimum deposit filter | Directory |
+| Test evidence (broker × country): period, account, summary, timeline, **each deposit/withdrawal test** (method, amount, date, time, fee, result, status, steps, broker/bank status, masked details, **screenshot**, **verified by/on**, note) | Broker Reviews > Test Evidence (sidebar: "Edit evidence data") | Evidence page, evidence viewer, index, review "Research evidence", homepage snapshot |
+| Author: name, photo, role, short/long bio, expertise, figures, principles, disclosure, **profile links** | Users > *user* > section "FX Trading Today author profile" | Bylines, author boxes, author page, Query Loop bylines, structured data |
+| Header menu, mega menu, footer columns | Appearance > Menus | Header, mobile drawer, footer |
+| Header button, banner, risk warning, affiliate disclosure, key pages | Settings > FX Trading Today | Header, footer, links in blocks |
+| Section copy (hero, how it works, independence…) | Gutenberg: Pages > *page* | — |
 
-### Mega menu
-In the **Primary** menu, the top-level item with the CSS class `mega-top-brokers` opens the mega menu:
-- Column 1: brokers with the highest scores (automatic).
-- Column 2: the item's child items. The column heading is the parent item's *Description*.
-- Column 3: countries (automatic, from Markets).
-- Featured card: a child item with the class `mega-feature`.
+### Mega menu (built entirely from menu items)
 
-Enable the CSS class field in Appearance > Menus > Screen Options.
+The top-level item with the CSS class **`mega`** opens the mega menu. Each of its children is a column or card:
+
+| Child item | Role | Fields used |
+|---|---|---|
+| Class `mega-auto-brokers` | Column of the highest-scoring brokers (automatic) | Navigation Label = heading; URL + **Description** = link below the list |
+| Class `mega-auto-countries` | Column of researched countries (automatic) | Same as above; `%d` in the Description = number of countries |
+| Class `mega-feature` | Featured card | Description = small label; Navigation Label = title; **Title Attribute** = call to action |
+| Any other item | Link column | Navigation Label = heading; its child items = the links |
+
+Turn on the **CSS Classes**, **Description** and **Title Attribute** fields in Appearance > Menus > Screen Options.
 
 ### Content inside the page header
 On pages that use the theme's templates, consecutive blocks at the **top** of the content that carry the class `page-hero__extra` render inside the page header. Examples: the research-areas chips on the Broker Reviews page, and the principles on the Methodology page.
 
 ## 3. Blocks (category "FX Trading Today")
 
-| Block | Purpose |
-|---|---|
-| Brokers in your country | Hero list that changes with the selected country |
-| Broker cards | Cards for the highest-scoring brokers |
-| Broker comparison | Comparison widget (preview / full, 2–4 slots, sync to URL) |
-| Broker data | One data section of a review (quick facts, regulation, costs, platforms, payments, accounts, evidence, final score) |
-| Evidence data | Summary / timeline / deposits / withdrawals of a test |
-| Score weights | Weights from Settings (list or table) |
-| Broker directory | Search + filters + sort |
-| Test evidence index | List of published evidence pages |
+| Block | Purpose | Admin options (block sidebar) |
+|---|---|---|
+| Brokers in your country | Brokers available in the selected country | Number shown; order by score or manual |
+| Broker cards | Broker review cards | **Choose brokers + reorder** (empty = automatic by score) |
+| Broker comparison | Comparison widget | Layout, slots, **default brokers + order**, **rows/groups to show**, sync to URL |
+| Broker data | One data section of a review | Section |
+| Evidence data | One section of a test | Section |
+| Evidence snapshot | Key results for one broker in one country (homepage audience card) | Broker, country |
+| Score weights | Score categories (bars or table) | Display style |
+| Broker directory | Search + filters + sort | — |
+| Test evidence index | Published evidence + tests in progress | All countries (with country filter) or only the selected country; headings; show/hide in progress |
+| Post byline | Author + role + date + read time (inside Query Loop) | Show role, text before the date, read-time format |
 
-Every block is server-rendered (`block.json` + `render.php`) and previewed live in the editor. Data is never written into the post content, so changing a number in the meta box updates every page that shows it.
-
-Block style variations (Block sidebar > Styles): Lead, Eyebrow, Small note, Sample data tag, Strong link, Link card (paragraph); Check / Lock / Pros / Cons / Researcher notes / Chips (list); Data table; Card, Callout (group); Verdict (quote); Pros and cons (columns); Secondary, Light (button); Search field.
+Every block is server-rendered; data is never copied into the post content.
 
 ## 4. Country, cache, privacy
 
@@ -101,8 +106,14 @@ Block style variations (Block sidebar > Styles): Lead, Eyebrow, Small note, Samp
 - Save round trip: meta box → front end → reload editor.
 - Screenshots compared with Prototype V3 at 1440px and 390px.
 
+## 6b. Acceptance checks (version 1.1)
+
+22/22 automated checks through the admin screens pass: editing a broker updates the review, homepage and compare page; category scores recalculate the overall score; editing a weight updates the homepage, the Methodology page and the score card; an invalid total is rejected; adding test evidence updates the index, the country filter and the review, and sensitive values are masked on save; editing the author updates bylines and author boxes; editing the menu updates the header and mega menu; the country selector lists all 250 countries A–Z. Every demo page still opens valid in Gutenberg and all 47 interaction checks pass.
+
 ## 7. Known differences from the prototype
 
 - The prototype pointed the "Visit broker (affiliate link)" button at its own page. The demo leaves `Affiliate URL` empty, so the button is hidden until a real link is entered.
 - Reading time is estimated from word count. The prototype used fixed numbers.
+- Overall scores are calculated from the weights. Pepperstone's demo category scores were adjusted slightly so the calculated score (4.4) and the order match V3.
+- The audience card ("Vietnam, Exness") is now read from the real Test Evidence, so its row labels follow the data ("Local bank transfer withdrawal", "Customer support").
 - "Latest research" uses the **Query Loop** block over Posts, so it lists articles. The prototype mixed in reviews and evidence pages, which have their own blocks.

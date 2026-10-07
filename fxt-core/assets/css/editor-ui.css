@@ -1,0 +1,9 @@
+/* Block sidebar controls (fxt-core blocks). */
+.fxt-picker { margin-bottom: 16px; }
+.fxt-picker__list { margin: 8px 0 12px; padding: 0; list-style: none; counter-reset: fxt-pick; }
+.fxt-picker__item { display: flex; align-items: center; gap: 2px; padding: 4px 0; border-bottom: 1px solid #e0e0e0; counter-increment: fxt-pick; }
+.fxt-picker__item::before { content: counter(fxt-pick) "."; width: 22px; color: #757575; font-size: 12px; }
+.fxt-picker__name { flex: 1; font-size: 13px; }
+.fxt-picker__empty { margin: 8px 0 12px; color: #757575; font-style: italic; }
+.fxt-checklist { margin-bottom: 16px; }
+.fxt-checklist .components-base-control { margin-bottom: 4px; }

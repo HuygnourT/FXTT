@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       FX Trading Today Core
  * Description:       Broker reviews, test evidence, country data, blocks and demo import for the FX Trading Today theme. Content and data live here so they survive a theme change.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.5
  * Requires PHP:      7.4
  * Author:            FX Trading Today
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FXT_CORE_VERSION', '1.0.0' );
+define( 'FXT_CORE_VERSION', '1.1.0' );
 define( 'FXT_CORE_FILE', __FILE__ );
 define( 'FXT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FXT_CORE_URL', plugin_dir_url( __FILE__ ) );
@@ -26,6 +26,7 @@ require_once FXT_CORE_DIR . 'includes/class-fields.php';
 require_once FXT_CORE_DIR . 'includes/class-block-templates.php';
 require_once FXT_CORE_DIR . 'includes/class-content-types.php';
 require_once FXT_CORE_DIR . 'includes/class-repository.php';
+require_once FXT_CORE_DIR . 'includes/class-countries.php';
 require_once FXT_CORE_DIR . 'includes/functions.php';
 require_once FXT_CORE_DIR . 'includes/class-blocks.php';
 require_once FXT_CORE_DIR . 'includes/class-assets.php';
@@ -40,6 +41,7 @@ add_action(
 
 		FXT\Core\Content_Types::init();
 		FXT\Core\Repository::init();
+		FXT\Core\Countries::init();
 		FXT\Core\Blocks::init();
 		FXT\Core\Assets::init();
 		FXT\Core\Rest::init();
@@ -59,6 +61,7 @@ register_activation_hook(
 	static function () {
 		FXT\Core\Content_Types::register_post_types();
 		FXT\Core\Content_Types::register_taxonomies();
+		FXT\Core\Countries::sync();
 		flush_rewrite_rules();
 	}
 );

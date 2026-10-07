@@ -388,30 +388,7 @@ final class Fields {
 				break;
 
 			case 'market_map':
-				$value = is_array( $value ) ? $value : array();
-				$markets = Repository::markets();
-				if ( ! $markets ) {
-					echo '<p class="description">' . esc_html__( 'Add countries under Broker Reviews > Markets first.', 'fxt-core' ) . '</p>';
-					break;
-				}
-				echo '<div class="fxt-market-map">';
-				foreach ( $markets as $market ) {
-					$code  = $market['code'];
-					$row   = isset( $value[ $code ] ) ? $value[ $code ] : array();
-					$avail = isset( $row['availability'] ) ? $row['availability'] : 'pending';
-					$label = Schema::availability();
-					printf(
-						'<details class="fxt-market"><summary><strong>%s</strong> %s <span class="fxt-market__state">%s</span></summary><div class="fxt-group">',
-						esc_html( $code ),
-						esc_html( $market['name'] ),
-						esc_html( isset( $label[ $avail ] ) ? $label[ $avail ] : '' )
-					);
-					foreach ( $field['fields'] as $key => $sub ) {
-						self::render( $sub, $name . '[' . $code . '][' . $key . ']', isset( $row[ $key ] ) ? $row[ $key ] : null, $id . '-' . strtolower( $code ) . '-' . $key );
-					}
-					echo '</div></details>';
-				}
-				echo '</div>';
+				self::render_market_map( $field, $name, is_array( $value ) ? $value : array(), $id );
 				break;
 
 			case 'url':
@@ -432,6 +409,73 @@ final class Fields {
 					esc_attr( (string) $value )
 				);
 		}
+	}
+
+	/**
+	 * Per-country conditions: only countries with data are listed (the full
+	 * country list has ~250 entries); "Add country" appends a row.
+	 *
+	 * @param array  $field Field definition.
+	 * @param string $name  Input name.
+	 * @param array  $value Saved map code => row.
+	 * @param string $id    DOM id.
+	 */
+	private static function render_market_map( array $field, $name, array $value, $id ) {
+		$markets = Repository::markets();
+		if ( ! $markets ) {
+			echo '<p class="description">' . esc_html__( 'Add countries under Broker Reviews > Countries first.', 'fxt-core' ) . '</p>';
+			return;
+		}
+		echo '<div class="fxt-market-map" data-fxt-market-map>';
+		echo '<div data-fxt-market-rows>';
+		foreach ( $markets as $market ) {
+			if ( isset( $value[ $market['code'] ] ) ) {
+				self::render_market_row( $field, $name, $market['code'], $market['name'], $value[ $market['code'] ], $id );
+			}
+		}
+		echo '</div><template data-fxt-market-template>';
+		self::render_market_row( $field, $name, '__CODE__', '__NAME__', array(), $id, true );
+		echo '</template>';
+		echo '<p class="fxt-market-add"><label class="screen-reader-text" for="' . esc_attr( $id ) . '-add">' . esc_html__( 'Country to add', 'fxt-core' ) . '</label>';
+		echo '<select id="' . esc_attr( $id ) . '-add" data-fxt-market-select><option value="">' . esc_html__( 'Choose a country…', 'fxt-core' ) . '</option>';
+		foreach ( $markets as $market ) {
+			printf(
+				'<option value="%1$s" data-name="%2$s"%3$s>%2$s (%1$s)</option>',
+				esc_attr( $market['code'] ),
+				esc_attr( $market['name'] ),
+				isset( $value[ $market['code'] ] ) ? ' disabled' : ''
+			);
+		}
+		echo '</select> <button type="button" class="button" data-fxt-market-add>' . esc_html__( 'Add country', 'fxt-core' ) . '</button></p>';
+		echo '</div>';
+	}
+
+	/**
+	 * One country row of the market map.
+	 *
+	 * @param array  $field    Field definition.
+	 * @param string $name     Input name.
+	 * @param string $code     ISO code (or placeholder).
+	 * @param string $country  Country name (or placeholder).
+	 * @param array  $row      Saved values.
+	 * @param string $id       DOM id.
+	 * @param bool   $open     Render expanded.
+	 */
+	private static function render_market_row( array $field, $name, $code, $country, array $row, $id, $open = false ) {
+		$avail = isset( $row['availability'] ) ? $row['availability'] : 'pending';
+		$label = Schema::availability();
+		printf(
+			'<details class="fxt-market" data-fxt-market="%1$s"%5$s><summary><strong>%1$s</strong> %2$s <span class="fxt-market__state">%3$s</span></summary><div class="fxt-group">',
+			esc_attr( $code ),
+			esc_html( $country ),
+			esc_html( isset( $label[ $avail ] ) ? $label[ $avail ] : '' ),
+			'',
+			$open ? ' open' : ''
+		);
+		foreach ( $field['fields'] as $key => $sub ) {
+			self::render( $sub, $name . '[' . $code . '][' . $key . ']', isset( $row[ $key ] ) ? $row[ $key ] : null, $id . '-' . strtolower( $code ) . '-' . $key );
+		}
+		printf( '</div><p class="fxt-market__actions"><button type="button" class="button-link button-link-delete" data-fxt-market-remove>%s</button></p></details>', esc_html__( 'Remove this country', 'fxt-core' ) );
 	}
 
 	/**

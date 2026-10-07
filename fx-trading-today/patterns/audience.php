@@ -29,57 +29,7 @@ defined( 'ABSPATH' ) || exit;
 <p class="audience-card__text">See which entity serves your country and which local payment options actually work, tested from inside that market.</p>
 <!-- /wp:paragraph -->
 
-<!-- wp:group {"className":"audience-card__sample"} -->
-<div class="wp-block-group audience-card__sample"><!-- wp:group {"className":"audience-card__sample-row"} -->
-<div class="wp-block-group audience-card__sample-row"><!-- wp:paragraph {"className":"audience-card__sample-title"} -->
-<p class="audience-card__sample-title">Vietnam, Exness</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"className":"is-style-sample"} -->
-<p class="is-style-sample">Sample</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"audience-card__sample-row"} -->
-<div class="wp-block-group audience-card__sample-row"><!-- wp:paragraph -->
-<p>Entity</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p>Offshore, Seychelles</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"audience-card__sample-row"} -->
-<div class="wp-block-group audience-card__sample-row"><!-- wp:paragraph -->
-<p>VietQR deposit</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"className":"is-ok"} -->
-<p class="is-ok">Tested, 2 min</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"audience-card__sample-row"} -->
-<div class="wp-block-group audience-card__sample-row"><!-- wp:paragraph -->
-<p>Bank withdrawal</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"className":"is-ok"} -->
-<p class="is-ok">Tested, 31 min</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group -->
-
-<!-- wp:group {"className":"audience-card__sample-row"} -->
-<div class="wp-block-group audience-card__sample-row"><!-- wp:paragraph -->
-<p>Vietnamese support</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph {"className":"is-ok"} -->
-<p class="is-ok">Tested</p>
-<!-- /wp:paragraph --></div>
-<!-- /wp:group --></div>
-<!-- /wp:group -->
+<!-- wp:fxt/evidence-snapshot {"broker":"exness","country":"VN"} /-->
 
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button {"className":"is-style-light"} -->

@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Blocks {
 
-	const BLOCKS = array( 'country-brokers', 'broker-cards', 'broker-compare', 'broker-data', 'evidence-data', 'score-weights', 'broker-directory', 'evidence-list' );
+	const BLOCKS = array( 'country-brokers', 'broker-cards', 'broker-compare', 'broker-data', 'evidence-data', 'score-weights', 'broker-directory', 'evidence-list', 'evidence-snapshot', 'post-byline' );
 
 	/** @var bool Whether the evidence viewer markup still has to be printed. */
 	private static $viewer_pending = false;
@@ -28,6 +28,7 @@ final class Blocks {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register' ) );
 		add_filter( 'block_categories_all', array( __CLASS__, 'category' ) );
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'editor_ui_style' ) );
 	}
 
 	/**
@@ -42,12 +43,20 @@ final class Blocks {
 			true
 		);
 		wp_set_script_translations( 'fxt-core-blocks', 'fxt-core', FXT_CORE_DIR . 'languages' );
+		wp_add_inline_script( 'fxt-core-blocks', 'window.fxtCoreBlocks = ' . wp_json_encode( array( 'compare' => self::compare_options() ) ) . ';', 'before' );
 
 		Assets::register_frontend_scripts();
 
 		foreach ( self::BLOCKS as $block ) {
 			register_block_type( FXT_CORE_DIR . 'blocks/' . $block );
 		}
+	}
+
+	/**
+	 * Styles for the block sidebar controls (broker picker, checklists).
+	 */
+	public static function editor_ui_style() {
+		wp_enqueue_style( 'fxt-core-editor-ui', FXT_CORE_URL . 'assets/css/editor-ui.css', array( 'wp-components' ), FXT_CORE_VERSION );
 	}
 
 	/**
@@ -129,6 +138,91 @@ final class Blocks {
 	}
 
 	/**
+	 * Broker cards arguments (block attributes or REST args), sanitized.
+	 *
+	 * @param array $raw Raw values.
+	 * @return array { count: int, brokers: int[] }
+	 */
+	public static function card_args( array $raw ) {
+		return array(
+			'count'   => max( 1, min( 12, isset( $raw['count'] ) ? (int) $raw['count'] : 4 ) ),
+			'brokers' => array_values( array_filter( array_map( 'absint', isset( $raw['brokers'] ) ? (array) $raw['brokers'] : array() ) ) ),
+		);
+	}
+
+	/**
+	 * Country hero arguments, sanitized.
+	 *
+	 * @param array $raw Raw values.
+	 * @return array { limit: int, orderBy: string }
+	 */
+	public static function hero_args( array $raw ) {
+		return array(
+			'limit'   => max( 1, min( 8, isset( $raw['limit'] ) ? (int) $raw['limit'] : 4 ) ),
+			'orderBy' => isset( $raw['orderBy'] ) && 'manual' === $raw['orderBy'] ? 'manual' : 'score',
+		);
+	}
+
+	/**
+	 * Evidence index arguments, sanitized.
+	 *
+	 * @param array $raw Raw values.
+	 * @return array { scope: string, showPending: bool, publishedTitle: string, pendingTitle: string }
+	 */
+	public static function evidence_list_args( array $raw ) {
+		return array(
+			'scope'          => isset( $raw['scope'] ) && 'country' === $raw['scope'] ? 'country' : 'all',
+			'showPending'    => ! isset( $raw['showPending'] ) || ! empty( $raw['showPending'] ),
+			'publishedTitle' => isset( $raw['publishedTitle'] ) ? sanitize_text_field( (string) $raw['publishedTitle'] ) : '',
+			'pendingTitle'   => isset( $raw['pendingTitle'] ) ? sanitize_text_field( (string) $raw['pendingTitle'] ) : '',
+		);
+	}
+
+	/**
+	 * Comparison row options: preview row keys and full-table group keys.
+	 *
+	 * @return array{rows: array<string,string>, groups: array<string,string>}
+	 */
+	public static function compare_options() {
+		return array(
+			'rows'   => array(
+				'score'        => __( 'Research score', 'fxt-core' ),
+				'availability' => __( 'Availability in the selected country', 'fxt-core' ),
+				'regulator'    => __( 'Regulator for the selected country', 'fxt-core' ),
+				'deposit'      => __( 'Minimum deposit', 'fxt-core' ),
+				'cost'         => __( 'Typical EUR/USD cost', 'fxt-core' ),
+				'platforms'    => __( 'Platforms', 'fxt-core' ),
+				'local'        => __( 'Local payments', 'fxt-core' ),
+				'researched'   => __( 'Countries researched', 'fxt-core' ),
+			),
+			'groups' => array(
+				'overview'   => __( 'Overview', 'fxt-core' ),
+				'regulation' => __( 'Regulation', 'fxt-core' ),
+				'costs'      => __( 'Trading costs', 'fxt-core' ),
+				'trading'    => __( 'Trading', 'fxt-core' ),
+				'platforms'  => __( 'Platforms', 'fxt-core' ),
+				'accounts'   => __( 'Accounts', 'fxt-core' ),
+				'payments'   => __( 'Payments', 'fxt-core' ),
+				'research'   => __( 'Research', 'fxt-core' ),
+			),
+		);
+	}
+
+	/**
+	 * Keep only known keys, in the given order; empty means "all".
+	 *
+	 * @param mixed  $raw  Raw list (array or comma string).
+	 * @param string $type rows|groups.
+	 * @return string[]
+	 */
+	public static function compare_keys( $raw, $type ) {
+		$known = self::compare_options()[ $type ];
+		$keys  = is_array( $raw ) ? $raw : explode( ',', (string) $raw );
+		$keys  = array_values( array_intersect( array_map( 'sanitize_key', $keys ), array_keys( $known ) ) );
+		return $keys ? $keys : array_keys( $known );
+	}
+
+	/**
 	 * Directory filters from an array (usually $_GET), sanitized.
 	 *
 	 * @param array $source Raw input.
@@ -162,11 +256,17 @@ final class Blocks {
 			}
 			return $out;
 		};
+		$deposit_options = array();
+		foreach ( (array) Repository::setting( 'deposit_bands' ) as $amount ) {
+			$amount = absint( $amount );
+			/* translators: %s: amount in USD */
+			$deposit_options[ (string) $amount ] = 0 === $amount ? '$0' : sprintf( __( 'Up to %s', 'fxt-core' ), '$' . number_format_i18n( $amount ) );
+		}
 		return array(
 			'availability' => array( __( 'Availability', 'fxt-core' ), __( 'Any availability', 'fxt-core' ), Schema::availability() ),
 			'regulator'    => array( __( 'Regulation', 'fxt-core' ), __( 'Any regulator', 'fxt-core' ), $term_options( Content_Types::REGULATOR ) ),
 			'platform'     => array( __( 'Trading platform', 'fxt-core' ), __( 'Any platform', 'fxt-core' ), $term_options( Content_Types::PLATFORM ) ),
-			'deposit'      => array( __( 'Minimum deposit', 'fxt-core' ), __( 'Any amount', 'fxt-core' ), array( '0' => '$0', '50' => __( 'Up to $50', 'fxt-core' ), '100' => __( 'Up to $100', 'fxt-core' ), '200' => __( 'Up to $200', 'fxt-core' ) ) ),
+			'deposit'      => array( __( 'Minimum deposit', 'fxt-core' ), __( 'Any amount', 'fxt-core' ), $deposit_options ),
 			'account'      => array( __( 'Account type', 'fxt-core' ), __( 'Any account type', 'fxt-core' ), $term_options( Content_Types::ACCOUNT_TYPE ) ),
 			'status'       => array( __( 'Research status', 'fxt-core' ), __( 'Any status', 'fxt-core' ), Schema::review_status() ),
 		);

@@ -14,7 +14,7 @@ $broker    = $args['broker'];
 $code      = $args['code'];
 $entity    = Repository::entity( $broker, $code );
 $available = 0;
-foreach ( Repository::markets() as $fxt_market ) {
+foreach ( Repository::researched_markets() as $fxt_market ) {
 	$available += 'yes' === Repository::availability( $broker, $fxt_market['code'] ) ? 1 : 0;
 }
 $account_names = wp_list_pluck( $broker['accounts'], 'name' );
@@ -54,8 +54,8 @@ $account_names = wp_list_pluck( $broker['accounts'], 'name' );
 			<?php echo fxt_core_badge( 'availability', Repository::availability( $broker, $code ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<span class="muted">
 				<?php
-				/* translators: 1: number of markets, 2: total markets */
-				printf( esc_html__( 'Available in %1$d of %2$d markets', 'fxt-core' ), (int) $available, count( Repository::markets() ) );
+				/* translators: 1: number of countries, 2: researched countries */
+				printf( esc_html__( 'Available in %1$d of %2$d researched countries', 'fxt-core' ), (int) $available, count( Repository::researched_markets() ) );
 				?>
 			</span>
 		</dd>

@@ -36,6 +36,8 @@ final class Repository {
 		add_action( 'deleted_post', $flush );
 		add_action( 'trashed_post', $flush );
 		add_action( 'set_object_terms', $flush );
+		add_action( 'saved_term', $flush );
+		add_action( 'delete_term', $flush );
 		add_action( 'created_' . Content_Types::MARKET, $flush );
 		add_action( 'edited_' . Content_Types::MARKET, $flush );
 		add_action( 'delete_' . Content_Types::MARKET, $flush );
@@ -51,8 +53,10 @@ final class Repository {
 	 */
 	public static function flush() {
 		delete_transient( self::CACHE_KEY );
-		self::$brokers = null;
-		self::$markets = null;
+		self::$brokers      = null;
+		self::$markets      = null;
+		self::$market_index = null;
+		self::$term_lists   = array();
 	}
 
 	/**
@@ -95,10 +99,64 @@ final class Repository {
 		$settings = array_merge( $defaults, array_filter( $saved, static function ( $value ) {
 			return null !== $value;
 		} ) );
-		foreach ( array( 'weights', 'pages' ) as $group ) {
-			$settings[ $group ] = array_merge( $defaults[ $group ], is_array( $settings[ $group ] ) ? array_filter( $settings[ $group ], 'is_numeric' ) : array() );
+		$settings['pages'] = array_merge( $defaults['pages'], is_array( $settings['pages'] ) ? array_filter( $settings['pages'], 'is_numeric' ) : array() );
+		if ( empty( $settings['score_categories'] ) || ! is_array( $settings['score_categories'] ) ) {
+			$settings['score_categories'] = $defaults['score_categories'];
+			// Sites saved before categories became editable kept weights only.
+			if ( ! empty( $saved['weights'] ) && is_array( $saved['weights'] ) ) {
+				foreach ( $settings['score_categories'] as $i => $category ) {
+					if ( isset( $saved['weights'][ $category['key'] ] ) ) {
+						$settings['score_categories'][ $i ]['weight'] = (int) $saved['weights'][ $category['key'] ];
+					}
+				}
+			}
 		}
 		return $settings;
+	}
+
+	/**
+	 * Score categories in display order (single source for every score view).
+	 *
+	 * @return array[] Each: key, label, weight, description, evidence.
+	 */
+	public static function categories() {
+		$out = array();
+		foreach ( (array) self::setting( 'score_categories' ) as $row ) {
+			if ( empty( $row['key'] ) ) {
+				continue;
+			}
+			$out[] = array(
+				'key'         => (string) $row['key'],
+				'label'       => isset( $row['label'] ) ? (string) $row['label'] : (string) $row['key'],
+				'weight'      => isset( $row['weight'] ) ? (int) $row['weight'] : 0,
+				'description' => isset( $row['description'] ) ? (string) $row['description'] : '',
+				'evidence'    => isset( $row['evidence'] ) ? (string) $row['evidence'] : '',
+			);
+		}
+		return $out;
+	}
+
+	/**
+	 * Overall score from category scores x weights, or null while any
+	 * weighted category is unscored.
+	 *
+	 * @param array $breakdown Category key => score.
+	 * @return float|null
+	 */
+	public static function weighted_score( array $breakdown ) {
+		$total  = 0.0;
+		$weight = 0;
+		foreach ( self::categories() as $category ) {
+			if ( $category['weight'] <= 0 ) {
+				continue;
+			}
+			if ( ! isset( $breakdown[ $category['key'] ] ) || ! is_numeric( $breakdown[ $category['key'] ] ) ) {
+				return null;
+			}
+			$total  += (float) $breakdown[ $category['key'] ] * $category['weight'];
+			$weight += $category['weight'];
+		}
+		return $weight ? $total / $weight : null;
 	}
 
 	/**
@@ -128,16 +186,19 @@ final class Repository {
 	 * Markets
 	 * ------------------------------------------------------------------ */
 
+	/** @var array<string,int>|null Index of markets() by ISO code. */
+	private static $market_index = null;
+
 	/**
-	 * All markets, ordered.
+	 * All countries, A to Z by name.
 	 *
-	 * @return array[] Each: code, name, currency, status, order, term_id.
+	 * @return array[] Each: code, name, currency, status ('' = not researched), term_id.
 	 */
 	public static function markets() {
 		if ( null !== self::$markets ) {
 			return self::$markets;
 		}
-		$terms = get_terms(
+		$terms   = get_terms(
 			array(
 				'taxonomy'   => Content_Types::MARKET,
 				'hide_empty' => false,
@@ -146,26 +207,84 @@ final class Repository {
 		$markets = array();
 		if ( ! is_wp_error( $terms ) ) {
 			foreach ( $terms as $term ) {
-				$code = strtoupper( (string) get_term_meta( $term->term_id, 'fxt_iso', true ) );
-				$code = $code ? $code : strtoupper( $term->slug );
+				$code      = strtoupper( (string) get_term_meta( $term->term_id, 'fxt_iso', true ) );
+				$code      = $code ? $code : strtoupper( $term->slug );
 				$markets[] = array(
 					'code'     => $code,
 					'name'     => $term->name,
 					'currency' => (string) get_term_meta( $term->term_id, 'fxt_currency', true ),
 					'status'   => (string) get_term_meta( $term->term_id, 'fxt_status', true ),
-					'order'    => (int) get_term_meta( $term->term_id, 'fxt_order', true ),
 					'term_id'  => $term->term_id,
 				);
 			}
 		}
+		// Alphabetical by name; accents are ignored so "Åland Islands" sorts under A.
 		usort(
 			$markets,
 			static function ( $a, $b ) {
-				return $a['order'] === $b['order'] ? strcmp( $a['name'], $b['name'] ) : $a['order'] - $b['order'];
+				return strcasecmp( remove_accents( $a['name'] ), remove_accents( $b['name'] ) );
 			}
 		);
-		self::$markets = $markets;
+		self::$markets      = $markets;
+		self::$market_index = array();
+		foreach ( $markets as $i => $market ) {
+			self::$market_index[ $market['code'] ] = $i;
+		}
 		return $markets;
+	}
+
+	/** @var array<string, array[]> Per-request term lists. */
+	private static $term_lists = array();
+
+	/**
+	 * All terms of a classification taxonomy (platforms, account types,
+	 * regulators) in creation order: the single list every table, tile and
+	 * filter renders from.
+	 *
+	 * @param string $taxonomy Taxonomy.
+	 * @return array[] Each: slug, name, full_name, compact, term_id.
+	 */
+	public static function terms( $taxonomy ) {
+		if ( isset( self::$term_lists[ $taxonomy ] ) ) {
+			return self::$term_lists[ $taxonomy ];
+		}
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'orderby'    => 'term_id',
+			)
+		);
+		$out   = array();
+		foreach ( is_wp_error( $terms ) ? array() : $terms as $term ) {
+			$full  = (string) get_term_meta( $term->term_id, 'fxt_full_name', true );
+			$out[] = array(
+				'slug'      => $term->slug,
+				'name'      => $term->name,
+				'full_name' => $full ? $full : $term->name,
+				'compact'   => (bool) get_term_meta( $term->term_id, 'fxt_compact', true ),
+				'term_id'   => $term->term_id,
+			);
+		}
+		self::$term_lists[ $taxonomy ] = $out;
+		return $out;
+	}
+
+	/**
+	 * Countries with research published, in progress or planned (A to Z).
+	 * Used for "N of M countries researched" and for country shortcuts.
+	 *
+	 * @return array[]
+	 */
+	public static function researched_markets() {
+		return array_values(
+			array_filter(
+				self::markets(),
+				static function ( $market ) {
+					return '' !== $market['status'];
+				}
+			)
+		);
 	}
 
 	/**
@@ -175,12 +294,9 @@ final class Repository {
 	 * @return array|null
 	 */
 	public static function market( $code ) {
-		foreach ( self::markets() as $market ) {
-			if ( $market['code'] === strtoupper( (string) $code ) ) {
-				return $market;
-			}
-		}
-		return null;
+		$markets = self::markets();
+		$code    = strtoupper( (string) $code );
+		return isset( self::$market_index[ $code ] ) ? $markets[ self::$market_index[ $code ] ] : null;
 	}
 
 	/**
@@ -343,6 +459,7 @@ final class Repository {
 		return array(
 			'id'              => $post->ID,
 			'slug'            => $post->post_name,
+			'menu_order'      => (int) $post->menu_order,
 			'name'            => $name,
 			'url'             => get_permalink( $post ),
 			'excerpt'         => has_excerpt( $post ) ? get_the_excerpt( $post ) : '',
@@ -350,7 +467,9 @@ final class Repository {
 			'monogram'        => $meta( 'fxt_monogram', strtoupper( mb_substr( $name, 0, 2 ) ) ),
 			'author_id'       => (int) $post->post_author,
 			'status'          => $meta( 'fxt_status', 'published' ),
-			'score'           => null === $score ? null : (float) $score,
+			// Manual override wins; otherwise the score follows the category weights.
+			'score'           => null !== $score ? (float) $score : self::weighted_score( (array) $meta( 'fxt_score_breakdown', array() ) ),
+			'score_source'    => null !== $score ? 'manual' : 'calculated',
 			'breakdown'       => $meta( 'fxt_score_breakdown', array() ),
 			'reviewed'        => $meta( 'fxt_reviewed', '' ),
 			'founded'         => $meta( 'fxt_founded', '' ),
@@ -364,6 +483,7 @@ final class Repository {
 			'entities'        => $meta( 'fxt_entities', array() ),
 			'markets'         => $meta( 'fxt_markets', array() ),
 			'affiliate_url'   => $meta( 'fxt_affiliate_url', '' ),
+			'cta_label'       => $meta( 'fxt_cta_label', '' ),
 			'regulators'      => array_values( $terms( Content_Types::REGULATOR ) ),
 			'regulator_slugs' => array_keys( $terms( Content_Types::REGULATOR ) ),
 			'platforms'       => $terms( Content_Types::PLATFORM ),
@@ -494,6 +614,7 @@ final class Repository {
 				'broker_id' => (int) get_post_meta( $post->ID, 'fxt_broker_id', true ),
 				'market'    => (string) get_post_meta( $post->ID, 'fxt_market', true ),
 				'status'    => (string) get_post_meta( $post->ID, 'fxt_status', true ),
+				'date'      => $post->post_date,
 				'author_id' => (int) $post->post_author,
 			);
 		}
@@ -531,12 +652,29 @@ final class Repository {
 			$value = get_post_meta( $post->ID, $key, true );
 			return ( '' === $value || null === $value ) ? $default : $value;
 		};
-		$records = array();
+		$deposits    = array_values( (array) $get( 'fxt_deposits' ) );
+		$withdrawals = array_values( (array) $get( 'fxt_withdrawals' ) );
+
+		// Records shown in the evidence viewer come from the test rows themselves.
+		// Version 1.0 kept them in a separate "fxt_records" list; it is still read.
+		$legacy = array();
 		foreach ( (array) $get( 'fxt_records' ) as $record ) {
 			if ( ! empty( $record['test_id'] ) ) {
-				$record['steps']                = self::parse_steps( isset( $record['steps'] ) ? (string) $record['steps'] : '' );
-				$records[ $record['test_id'] ] = $record;
+				$legacy[ $record['test_id'] ] = $record;
 			}
+		}
+		$records = array();
+		$detail  = array( 'steps', 'broker_status', 'bank_status', 'account', 'holder', 'bank', 'reference', 'note', 'screenshot' );
+		foreach ( array_merge( $deposits, $withdrawals ) as $row ) {
+			if ( empty( $row['id'] ) ) {
+				continue;
+			}
+			$record = isset( $legacy[ $row['id'] ] ) ? array_merge( $legacy[ $row['id'] ], array_filter( (array) $row ) ) : (array) $row;
+			if ( ! array_intersect_key( array_filter( $record ), array_flip( $detail ) ) ) {
+				continue; // Nothing to show beyond the table row.
+			}
+			$record['steps']         = self::parse_steps( isset( $record['steps'] ) ? (string) $record['steps'] : '' );
+			$records[ $row['id'] ] = $record;
 		}
 		return array(
 			'id'          => $post->ID,
@@ -548,8 +686,8 @@ final class Repository {
 			'account'     => (string) $get( 'fxt_account_label', '' ),
 			'summary'     => (array) $get( 'fxt_summary' ),
 			'timeline'    => (array) $get( 'fxt_timeline' ),
-			'deposits'    => (array) $get( 'fxt_deposits' ),
-			'withdrawals' => (array) $get( 'fxt_withdrawals' ),
+			'deposits'    => $deposits,
+			'withdrawals' => $withdrawals,
 			'records'     => $records,
 			'author_id'   => (int) $post->post_author,
 		);
@@ -612,6 +750,14 @@ final class Repository {
 			'stats'      => (array) $get( 'fxt_stats', array() ),
 			'principles' => (array) $get( 'fxt_principles', array() ),
 			'disclosure' => (string) $get( 'fxt_disclosure' ),
+			'social'     => array_values(
+				array_filter(
+					(array) $get( 'fxt_social', array() ),
+					static function ( $link ) {
+						return ! empty( $link['url'] );
+					}
+				)
+			),
 			'simulated'  => (bool) $get( 'fxt_simulated', false ),
 		);
 	}

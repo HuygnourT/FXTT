@@ -99,11 +99,12 @@ final class Content_Types {
 			array( self::BROKER ),
 			array(
 				'labels'            => array(
-					'name'          => __( 'Markets', 'fxt-core' ),
-					'singular_name' => __( 'Market', 'fxt-core' ),
-					'add_new_item'  => __( 'Add New Market', 'fxt-core' ),
-					'edit_item'     => __( 'Edit Market', 'fxt-core' ),
-					'menu_name'     => __( 'Markets', 'fxt-core' ),
+					'name'          => __( 'Countries', 'fxt-core' ),
+					'singular_name' => __( 'Country', 'fxt-core' ),
+					'add_new_item'  => __( 'Add New Country', 'fxt-core' ),
+					'edit_item'     => __( 'Edit Country', 'fxt-core' ),
+					'search_items'  => __( 'Search Countries', 'fxt-core' ),
+					'menu_name'     => __( 'Countries', 'fxt-core' ),
 				),
 				'public'            => false,
 				'show_ui'           => true,
@@ -149,6 +150,7 @@ final class Content_Types {
 		self::register_set( 'post', Schema::broker(), self::BROKER );
 		self::register_set( 'post', Schema::evidence(), self::EVIDENCE );
 		self::register_set( 'term', Schema::market(), self::MARKET );
+		self::register_set( 'term', Schema::platform(), self::PLATFORM );
 		self::register_set( 'user', Schema::author(), '' );
 	}
 

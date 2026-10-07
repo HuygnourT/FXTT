@@ -58,7 +58,15 @@ $cell = static function ( $row, $key ) {
 				<?php endif; ?>
 				<td class="u-mono"><?php echo esc_html( $cell( $row, 'time' ) ); ?></td>
 				<td class="u-mono"><?php echo esc_html( $cell( $row, 'fee' ) ); ?></td>
-				<td><span class="badge <?php echo $success ? 'badge--test-complete' : 'badge--progress'; ?>"><?php echo esc_html( $cell( $row, 'result' ) ); ?></span></td>
+				<td>
+					<?php if ( 'in-progress' === $cell( $row, 'status' ) ) : ?>
+						<span class="badge badge--progress"><?php esc_html_e( 'In progress', 'fxt-core' ); ?></span>
+					<?php elseif ( 'failed' === $cell( $row, 'status' ) ) : ?>
+						<span class="badge badge--avail-restricted"><?php echo esc_html( $cell( $row, 'result' ) ? $cell( $row, 'result' ) : __( 'Failed', 'fxt-core' ) ); ?></span>
+					<?php else : ?>
+						<span class="badge <?php echo $success ? 'badge--test-complete' : 'badge--progress'; ?>"><?php echo esc_html( $cell( $row, 'result' ) ); ?></span>
+					<?php endif; ?>
+				</td>
 				<td>
 					<?php if ( $id && isset( $evidence['records'][ $id ] ) ) : ?>
 						<button class="btn btn--secondary btn--sm" type="button" data-view-evidence="<?php echo esc_attr( $id ); ?>">

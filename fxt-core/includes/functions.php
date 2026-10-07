@@ -182,18 +182,33 @@ function fxt_core_score_label( array $broker ) {
 }
 
 /**
- * Platform names in a stable order.
+ * Platform names of a broker, in the order of Broker Reviews > Platforms.
  *
- * @param array $broker Normalized broker.
- * @param bool  $short  Skip "Mobile" for compact lists.
+ * @param array $broker  Normalized broker.
+ * @param bool  $compact Only platforms marked "Show in compact lists".
  * @return string[]
  */
-function fxt_core_platform_names( array $broker, $short = false ) {
-	$names = $broker['platforms'];
-	if ( $short ) {
-		unset( $names['mobile'] );
+function fxt_core_platform_names( array $broker, $compact = false ) {
+	$names = array();
+	foreach ( Repository::terms( FXT\Core\Content_Types::PLATFORM ) as $term ) {
+		if ( isset( $broker['platforms'][ $term['slug'] ] ) && ( ! $compact || $term['compact'] ) ) {
+			$names[] = $term['name'];
+		}
 	}
-	return array_values( $names );
+	return $names;
+}
+
+/**
+ * Estimated reading time in minutes (data blocks count as ~120 words each).
+ *
+ * @param WP_Post|int|null $post Post.
+ * @return int
+ */
+function fxt_core_reading_time( $post = null ) {
+	$post  = get_post( $post );
+	$words = $post ? str_word_count( wp_strip_all_tags( strip_shortcodes( $post->post_content ) ) ) : 0;
+	$words += $post ? 120 * substr_count( $post->post_content, '<!-- wp:fxt/' ) : 0;
+	return max( 1, (int) round( $words / 220 ) );
 }
 
 /* -------------------------------------------------------------------------

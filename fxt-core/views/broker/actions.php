@@ -32,7 +32,9 @@ $compare = fxt_core_compare_url( array_merge( array( $broker['slug'] ), $others 
 		<a class="btn btn--secondary" href="<?php echo esc_url( $broker['affiliate_url'] ); ?>" rel="sponsored nofollow noopener" target="_blank">
 			<?php
 			/* translators: %s: broker name */
-			printf( esc_html__( 'Visit %s (affiliate link)', 'fxt-core' ), esc_html( $broker['name'] ) );
+			$cta_label = $broker['cta_label'] ? $broker['cta_label'] : sprintf( __( 'Visit %s', 'fxt-core' ), $broker['name'] );
+			/* translators: %s: button label */
+			echo esc_html( sprintf( __( '%s (affiliate link)', 'fxt-core' ), $cta_label ) );
 			?>
 			<?php echo fxt_core_icon( 'external', 'icon--sm' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<span class="u-visually-hidden"><?php esc_html_e( '(opens in a new tab)', 'fxt-core' ); ?></span>
