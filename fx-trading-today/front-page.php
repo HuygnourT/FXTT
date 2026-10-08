@@ -17,7 +17,15 @@ get_header();
 while ( have_posts() ) :
 	the_post();
 	?>
-	<h1 class="u-visually-hidden"><?php bloginfo( 'name' ); ?></h1>
+	<?php
+	// Fallback heading only when the page content has no H1 of its own
+	// (the home hero pattern provides one). Avoids two H1s on the page.
+	if ( ! preg_match( '/<h1[\s>]/i', get_the_content() ) ) :
+		?>
+		<h1 class="u-visually-hidden"><?php bloginfo( 'name' ); ?></h1>
+		<?php
+	endif;
+	?>
 	<div class="entry-content entry-content--landing has-global-padding is-layout-constrained">
 		<?php the_content(); ?>
 	</div>
