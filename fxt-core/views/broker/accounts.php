@@ -20,6 +20,7 @@ $cols = array(
 	'execution'   => __( 'Execution', 'fxt-core' ),
 	'best_for'    => __( 'Most relevant for', 'fxt-core' ),
 );
+echo fxt_core_source_line( \FXT\Core\Repository::source( $args['broker'], 'accounts' ) ); // phpcs:ignore WordPress.Security.EscapeOutput
 ?>
 <div class="table-scroll">
 	<table class="data-table">

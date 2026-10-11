@@ -5,7 +5,7 @@ Production build of Prototype V3, packaged as two parts:
 | Gói | Vai trò |
 |---|---|
 | `fx-trading-today` (theme) | Presentation only: `theme.json`, CSS, PHP templates, header/footer, patterns, block styles |
-| `fxt-core` (plugin) | Data and logic: CPTs, taxonomies, meta, settings, 8 dynamic blocks, REST render, country picker, demo importer |
+| `fxt-core` (plugin) | Data and logic: CPTs, taxonomies, meta, settings, 10 dynamic blocks, REST render, country picker, demo importer |
 
 Data stays in the plugin, so content survives a theme change. The theme never reads meta keys directly; it calls the plugin's template API (`fxt_core_*`).
 
@@ -41,7 +41,9 @@ The importer:
 | **Countries** (all 250, A–Z) | Broker Reviews > Countries: rename, set "Research status". The "Add missing countries" button restores deleted countries | Country selector, availability, directory, evidence, mega menu |
 | Regulators, Platforms, Account types | Broker Reviews > Regulators / Platforms / Account Types. Platforms have "Full name" (review tile) and "Show in compact lists" (card) | Comparison rows, review tiles, directory filters |
 | **Score categories** (add / edit / delete / reorder, weight, description, evidence used) | **Settings > FX Trading Today > Score categories**. Weights must total 100; an invalid set is rejected | Homepage methodology, Methodology page, review score card, every broker score |
-| Directory "Minimum deposit" filter | Settings > Minimum deposit filter | Directory |
+| Directory "Minimum deposit" filter amounts | Settings > FX Trading Today > General > Minimum deposit filter | Directory |
+| **Broker Reviews filter text**: filter labels, placeholders, descriptions, order, show/hide, option names, panel title, sort labels, result heading, result note, empty-result text, clear buttons | **Settings > FX Trading Today > Broker Reviews filters**. Placeholders `{count}` and `{country}`; empty fields use the default wording | Broker Reviews page only. Broker data, filter keys and filtering logic never change with these labels |
+| **Data sources** of each fact (Tested / Verified at source / Broker-stated), reference link, check date | Broker Reviews > *broker* > **Broker data: sources**; per legal entity: "Source of entity and licence data"; per country: "Availability source" | Source labels on the review page, directory rows, comparison table; eligible countries of the directory filter |
 | Test evidence (broker × country): period, account, summary, timeline, **each deposit/withdrawal test** (method, amount, date, time, fee, result, status, steps, broker/bank status, masked details, **screenshot**, **verified by/on**, note) | Broker Reviews > Test Evidence (sidebar: "Edit evidence data") | Evidence page, evidence viewer, index, review "Research evidence", homepage snapshot |
 | Author: name, photo, role, short/long bio, expertise, figures, principles, disclosure, **profile links** | Users > *user* > section "FX Trading Today author profile" | Bylines, author boxes, author page, Query Loop bylines, structured data |
 | Header menu, mega menu, footer columns | Appearance > Menus | Header, mobile drawer, footer |
@@ -81,6 +83,14 @@ On pages that use the theme's templates, consecutive blocks at the **top** of th
 
 Every block is server-rendered; data is never copied into the post content.
 
+## 3b. Version 1.2 rules
+
+- **Result heading** of the Broker Reviews page is the only H2 there: "{n} forex brokers reviewed" (singular for one), counted from the same filtered list as the cards and refreshed with every filter change. "Filter brokers" and "Select your country" are plain text (same look, not headings).
+- **Directory country filter** starts at "Select a country" (the visitor's saved country is not applied there and choosing one does not change it). It offers only countries with published research, A to Z: published test evidence with completed tests for a published broker, or a published broker's availability classified as Tested or Verified at source. The list has no counts or markers, so test-account countries cannot be told apart. Availability is disabled until a country is chosen.
+- **"Deposit & withdrawal tests: n methods tested"** replaces "Countries researched N of M" on directory rows and broker cards. Methodology: a payment method counts once per broker when at least one deposit or withdrawal test row with status "Completed" uses it in a published evidence set; methods are matched by name (case and spacing ignored), so the same method used for deposit and withdrawal, or in several countries, counts once. Tests in progress, failed tests and broker-stated methods are not counted.
+- **Source labels**: Tested (our documented test), Verified at source (checked against an official or primary source), Broker-stated (published by the broker, not checked). Unclassified facts show "Source not classified". A fact marked Tested without published completed tests for that broker (and country, where it applies) shows "Needs review" and the broker screen lists it in a warning. A Verified or Tested label with an http(s) reference links to it; the check date is in the tooltip and screen-reader text.
+- **Score pending**: shown wherever a score is not complete yet (directory, cards, review, comparison, mega menu). No number and no "Research score" caption is shown with it.
+
 ## 4. Country, cache, privacy
 
 - The country is a **preference**: `?country=XX` > cookie `fxt_country` > the default setting. The site **never reads location**.
@@ -109,6 +119,12 @@ Every block is server-rendered; data is never copied into the post content.
 ## 6b. Acceptance checks (version 1.1)
 
 22/22 automated checks through the admin screens pass: editing a broker updates the review, homepage and compare page; category scores recalculate the overall score; editing a weight updates the homepage, the Methodology page and the score card; an invalid total is rejected; adding test evidence updates the index, the country filter and the review, and sensitive values are masked on save; editing the author updates bylines and author boxes; editing the menu updates the header and mega menu; the country selector lists all 250 countries A–Z. Every demo page still opens valid in Gutenberg and all 47 interaction checks pass.
+
+## 6c. Acceptance checks (version 1.2)
+
+63/63 automated checks through the admin screens and the frontend pass (headings and outline, country filter default/eligibility/order/privacy/no-JS/REST, count and grammar, methods tested and its reaction to publishing or unpublishing evidence, source labels including "Needs review", label/heading/note/option edits, hidden filters, filter order, placeholder safety, tab saving, importer rerun). The 47 interaction journeys, the 22 version 1.1 checks and the block-validity check of all 23 demo items still pass; the PHP log stays empty. Computed styles of the former headings are identical to version 1.1.
+
+Upgrading from 1.1: no re-import needed. Legal entities saved with the old "Verified on official register" checkbox read as "Verified at source" until saved again. Facts without a classification show "Source not classified" until an editor sets one. Filter text uses the defaults until the new settings tab is saved. The directory now uses its own country filter, so links such as "All brokers for Vietnam" only pre-select a country that qualifies.
 
 ## 7. Known differences from the prototype
 

@@ -635,6 +635,14 @@ final class Importer {
 			'header_cta_url'   => $this->url( 'directory' ),
 			'footer_tagline'   => __( 'Independent Forex broker research for traders in Southeast Asia.', 'fxt-core' ),
 			'social'           => array(),
+			// Example result note with placeholders; only used when the site has
+			// no Broker Reviews text saved yet (saved text always wins below).
+			'directory_ui'     => array_merge(
+				Schema::default_directory_ui(),
+				array(
+					'result_note' => __( 'Showing {count} reviewed brokers for {country}. Each fact on a review is labelled by source: Tested, Verified at source or Broker-stated. Sample data: nothing here is verified research.', 'fxt-core' ),
+				)
+			),
 		);
 		$pages    = array();
 		foreach ( array( 'directory', 'compare', 'evidence', 'methodology' ) as $key ) {

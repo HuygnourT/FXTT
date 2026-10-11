@@ -223,29 +223,49 @@ final class Blocks {
 	}
 
 	/**
-	 * Directory filters from an array (usually $_GET), sanitized.
+	 * Read directory filters from a request. The country is the directory's
+	 * own filter: it defaults to no country (the visitor's saved country is
+	 * not applied here) and only countries offered by the filter are accepted.
 	 *
-	 * @param array $source Raw input.
+	 * @param array $source $_GET or REST args.
 	 * @return array
 	 */
 	public static function directory_filters( array $source ) {
-		$keys    = array( 'q', 'availability', 'regulator', 'platform', 'deposit', 'account', 'status' );
+		$keys    = array( 'q', 'country', 'availability', 'regulator', 'platform', 'deposit', 'account', 'status' );
 		$filters = array();
 		foreach ( $keys as $key ) {
-			$filters[ $key ] = isset( $source[ $key ] ) ? sanitize_text_field( wp_unslash( (string) $source[ $key ] ) ) : '';
+			$filters[ $key ] = isset( $source[ $key ] ) && is_scalar( $source[ $key ] ) ? sanitize_text_field( wp_unslash( (string) $source[ $key ] ) ) : '';
 		}
 		$filters['deposit'] = '' === $filters['deposit'] ? '' : (string) absint( $filters['deposit'] );
-		$sort               = isset( $source['sort'] ) ? sanitize_key( $source['sort'] ) : 'score';
-		$filters['sort']    = in_array( $sort, array( 'score', 'recent', 'deposit' ), true ) ? $sort : 'score';
+
+		$country            = strtoupper( $filters['country'] );
+		$filters['country'] = in_array( $country, wp_list_pluck( Repository::directory_markets(), 'code' ), true ) ? $country : '';
+		if ( '' === $filters['country'] ) {
+			$filters['availability'] = ''; // Availability is per country.
+		}
+
+		// A hidden filter is never applied, even from a shared URL.
+		foreach ( Repository::setting( 'directory_filters' ) as $row ) {
+			if ( ! empty( $row['hidden'] ) ) {
+				$filters[ $row['key'] ] = '';
+			}
+		}
+
+		$sort            = isset( $source['sort'] ) ? sanitize_key( $source['sort'] ) : 'score';
+		$filters['sort'] = in_array( $sort, array( 'score', 'recent', 'deposit' ), true ) ? $sort : 'score';
 		return $filters;
 	}
 
 	/**
-	 * Directory filter definitions: name => [label, "any" label, options].
+	 * Directory filters as configured in Settings > FX Trading Today >
+	 * Broker Reviews filters, in display order. Labels are display text; the
+	 * key is the query parameter and the filtering logic never depends on
+	 * the label.
 	 *
-	 * @return array
+	 * @param bool $include_hidden Also return hidden filters.
+	 * @return array key => { label, placeholder, description, hidden, options }
 	 */
-	public static function directory_fields() {
+	public static function directory_fields( $include_hidden = false ) {
 		$term_options = static function ( $taxonomy ) {
 			$terms = get_terms( array( 'taxonomy' => $taxonomy, 'hide_empty' => false ) );
 			$out   = array();
@@ -256,20 +276,45 @@ final class Blocks {
 			}
 			return $out;
 		};
-		$deposit_options = array();
+		$names = Repository::setting( 'directory_options' );
+
+		$deposit = array();
 		foreach ( (array) Repository::setting( 'deposit_bands' ) as $amount ) {
-			$amount = absint( $amount );
-			/* translators: %s: amount in USD */
-			$deposit_options[ (string) $amount ] = 0 === $amount ? '$0' : sprintf( __( 'Up to %s', 'fxt-core' ), '$' . number_format_i18n( $amount ) );
+			$amount                       = absint( $amount );
+			$deposit[ (string) $amount ] = 0 === $amount ? $names['deposit_zero'] : strtr( $names['deposit_band'], array( '{amount}' => '$' . number_format_i18n( $amount ) ) );
 		}
-		return array(
-			'availability' => array( __( 'Availability', 'fxt-core' ), __( 'Any availability', 'fxt-core' ), Schema::availability() ),
-			'regulator'    => array( __( 'Regulation', 'fxt-core' ), __( 'Any regulator', 'fxt-core' ), $term_options( Content_Types::REGULATOR ) ),
-			'platform'     => array( __( 'Trading platform', 'fxt-core' ), __( 'Any platform', 'fxt-core' ), $term_options( Content_Types::PLATFORM ) ),
-			'deposit'      => array( __( 'Minimum deposit', 'fxt-core' ), __( 'Any amount', 'fxt-core' ), $deposit_options ),
-			'account'      => array( __( 'Account type', 'fxt-core' ), __( 'Any account type', 'fxt-core' ), $term_options( Content_Types::ACCOUNT_TYPE ) ),
-			'status'       => array( __( 'Research status', 'fxt-core' ), __( 'Any status', 'fxt-core' ), Schema::review_status() ),
+		$countries = array();
+		foreach ( Repository::directory_markets() as $market ) {
+			$countries[ $market['code'] ] = $market['name'];
+		}
+
+		$options = array(
+			'country'      => $countries,
+			'availability' => array(
+				'yes'        => $names['availability_yes'],
+				'restricted' => $names['availability_restricted'],
+				'pending'    => $names['availability_pending'],
+			),
+			'regulator'    => $term_options( Content_Types::REGULATOR ),
+			'platform'     => $term_options( Content_Types::PLATFORM ),
+			'deposit'      => $deposit,
+			'account'      => $term_options( Content_Types::ACCOUNT_TYPE ),
+			'status'       => array(
+				'published' => $names['status_published'],
+				'updating'  => $names['status_updating'],
+				'pending'   => $names['status_pending'],
+			),
 		);
+
+		$out = array();
+		foreach ( Repository::setting( 'directory_filters' ) as $row ) {
+			if ( ! $include_hidden && ! empty( $row['hidden'] ) ) {
+				continue;
+			}
+			$row['options']     = $options[ $row['key'] ];
+			$out[ $row['key'] ] = $row;
+		}
+		return $out;
 	}
 
 	/**
@@ -286,7 +331,7 @@ final class Blocks {
 				if ( '' !== $filters['q'] && false === mb_stripos( $b['name'], $filters['q'] ) ) {
 					return false;
 				}
-				if ( '' !== $filters['availability'] && Repository::availability( $b, $code ) !== $filters['availability'] ) {
+				if ( '' !== $code && '' !== $filters['availability'] && Repository::availability( $b, $code ) !== $filters['availability'] ) {
 					return false;
 				}
 				if ( '' !== $filters['regulator'] ) {

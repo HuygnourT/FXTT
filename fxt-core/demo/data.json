@@ -331,7 +331,7 @@
 						"licence": "TBD",
 						"jurisdiction": "Seychelles",
 						"protection": "Negative balance protection (to verify)",
-						"verified": false
+						"source": "stated"
 					},
 					{
 						"key": "eu",
@@ -340,12 +340,13 @@
 						"licence": "TBD",
 						"jurisdiction": "Cyprus",
 						"protection": "Investor compensation scheme (to verify)",
-						"verified": false
+						"source": "stated"
 					}
 				],
 				"fxt_markets": {
 					"VN": {
 						"availability": "yes",
+						"source": "tested",
 						"entity_key": "global",
 						"local_payments": "VietQR, local bank transfer",
 						"deposit": "complete",
@@ -356,6 +357,7 @@
 					},
 					"TH": {
 						"availability": "yes",
+						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Thai QR (PromptPay)",
 						"deposit": "complete",
@@ -366,6 +368,7 @@
 					},
 					"ID": {
 						"availability": "yes",
+						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "in-progress",
@@ -376,6 +379,7 @@
 					},
 					"PH": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "GCash (to verify)",
 						"deposit": "",
@@ -386,6 +390,7 @@
 					},
 					"KH": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "",
@@ -423,6 +428,49 @@
 						"platform": "",
 						"support": "",
 						"last_tested": ""
+					}
+				},
+				"fxt_sources": {
+					"regulators": {
+						"source": "stated"
+					},
+					"min_deposit": {
+						"source": "stated"
+					},
+					"platforms": {
+						"source": "stated"
+					},
+					"accounts": {
+						"source": "stated"
+					},
+					"currencies": {
+						"source": "stated"
+					},
+					"leverage": {
+						"source": "stated"
+					},
+					"spread": {
+						"source": "stated"
+					},
+					"commission": {
+						"source": "stated"
+					},
+					"swap": {
+						"source": "stated"
+					},
+					"execution": {
+						"source": "stated"
+					},
+					"order_types": {
+						"source": "stated"
+					},
+					"other_fees": {
+						"source": "stated"
+					},
+					"payment_methods": {
+						"source": "tested",
+						"ref": "Sample test evidence",
+						"checked": "2026-09-12"
 					}
 				}
 			},
@@ -539,12 +587,13 @@
 						"licence": "TBD",
 						"jurisdiction": "Vanuatu",
 						"protection": "Negative balance protection (to verify)",
-						"verified": false
+						"source": "stated"
 					}
 				],
 				"fxt_markets": {
 					"VN": {
 						"availability": "yes",
+						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "complete",
@@ -555,6 +604,7 @@
 					},
 					"TH": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Thai QR (PromptPay)",
 						"deposit": "planned",
@@ -575,6 +625,7 @@
 					},
 					"PH": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "",
@@ -585,6 +636,7 @@
 					},
 					"KH": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Research pending",
 						"deposit": "",
@@ -622,6 +674,47 @@
 						"platform": "",
 						"support": "",
 						"last_tested": ""
+					}
+				},
+				"fxt_sources": {
+					"regulators": {
+						"source": "stated"
+					},
+					"min_deposit": {
+						"source": "stated"
+					},
+					"platforms": {
+						"source": "stated"
+					},
+					"accounts": {
+						"source": "stated"
+					},
+					"currencies": {
+						"source": "stated"
+					},
+					"leverage": {
+						"source": "stated"
+					},
+					"spread": {
+						"source": "stated"
+					},
+					"commission": {
+						"source": "stated"
+					},
+					"swap": {
+						"source": "stated"
+					},
+					"execution": {
+						"source": "stated"
+					},
+					"order_types": {
+						"source": "stated"
+					},
+					"other_fees": {
+						"source": "stated"
+					},
+					"payment_methods": {
+						"source": "stated"
 					}
 				}
 			},
@@ -737,12 +830,13 @@
 						"licence": "TBD",
 						"jurisdiction": "Seychelles",
 						"protection": "Negative balance protection (to verify)",
-						"verified": false
+						"source": "stated"
 					}
 				],
 				"fxt_markets": {
 					"VN": {
 						"availability": "yes",
+						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "complete",
@@ -753,6 +847,7 @@
 					},
 					"TH": {
 						"availability": "yes",
+						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Thai QR (PromptPay)",
 						"deposit": "complete",
@@ -763,6 +858,7 @@
 					},
 					"ID": {
 						"availability": "restricted",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "",
 						"deposit": "",
@@ -773,6 +869,7 @@
 					},
 					"PH": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "",
@@ -803,6 +900,7 @@
 					},
 					"BN": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "International wire",
 						"deposit": "",
@@ -820,6 +918,47 @@
 						"platform": "",
 						"support": "",
 						"last_tested": ""
+					}
+				},
+				"fxt_sources": {
+					"regulators": {
+						"source": "stated"
+					},
+					"min_deposit": {
+						"source": "stated"
+					},
+					"platforms": {
+						"source": "stated"
+					},
+					"accounts": {
+						"source": "stated"
+					},
+					"currencies": {
+						"source": "stated"
+					},
+					"leverage": {
+						"source": "stated"
+					},
+					"spread": {
+						"source": "stated"
+					},
+					"commission": {
+						"source": "stated"
+					},
+					"swap": {
+						"source": "stated"
+					},
+					"execution": {
+						"source": "stated"
+					},
+					"order_types": {
+						"source": "stated"
+					},
+					"other_fees": {
+						"source": "stated"
+					},
+					"payment_methods": {
+						"source": "stated"
 					}
 				}
 			},
@@ -918,12 +1057,13 @@
 						"licence": "TBD",
 						"jurisdiction": "Research pending",
 						"protection": "Research pending",
-						"verified": false
+						"source": ""
 					}
 				],
 				"fxt_markets": {
 					"VN": {
 						"availability": "yes",
+						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "International wire only",
 						"deposit": "complete",
@@ -934,6 +1074,7 @@
 					},
 					"TH": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "International wire only",
 						"deposit": "",
@@ -944,6 +1085,7 @@
 					},
 					"ID": {
 						"availability": "restricted",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "",
 						"deposit": "",
@@ -984,6 +1126,7 @@
 					},
 					"BN": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "International wire only",
 						"deposit": "",
@@ -1001,6 +1144,47 @@
 						"platform": "",
 						"support": "",
 						"last_tested": ""
+					}
+				},
+				"fxt_sources": {
+					"regulators": {
+						"source": "stated"
+					},
+					"min_deposit": {
+						"source": "stated"
+					},
+					"platforms": {
+						"source": "stated"
+					},
+					"accounts": {
+						"source": "stated"
+					},
+					"currencies": {
+						"source": "stated"
+					},
+					"leverage": {
+						"source": "stated"
+					},
+					"spread": {
+						"source": "stated"
+					},
+					"commission": {
+						"source": "stated"
+					},
+					"swap": {
+						"source": "stated"
+					},
+					"execution": {
+						"source": "stated"
+					},
+					"order_types": {
+						"source": "stated"
+					},
+					"other_fees": {
+						"source": "stated"
+					},
+					"payment_methods": {
+						"source": "stated"
 					}
 				}
 			},
@@ -1120,12 +1304,13 @@
 						"licence": "TBD",
 						"jurisdiction": "The Bahamas",
 						"protection": "Negative balance protection (to verify)",
-						"verified": false
+						"source": "stated"
 					}
 				],
 				"fxt_markets": {
 					"VN": {
 						"availability": "yes",
+						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "complete",
@@ -1136,6 +1321,7 @@
 					},
 					"TH": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Thai QR (PromptPay)",
 						"deposit": "",
@@ -1156,6 +1342,7 @@
 					},
 					"PH": {
 						"availability": "yes",
+						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "in-progress",
@@ -1166,6 +1353,7 @@
 					},
 					"KH": {
 						"availability": "restricted",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "",
 						"deposit": "",
@@ -1203,6 +1391,47 @@
 						"platform": "",
 						"support": "",
 						"last_tested": ""
+					}
+				},
+				"fxt_sources": {
+					"regulators": {
+						"source": "stated"
+					},
+					"min_deposit": {
+						"source": "stated"
+					},
+					"platforms": {
+						"source": "stated"
+					},
+					"accounts": {
+						"source": "stated"
+					},
+					"currencies": {
+						"source": "stated"
+					},
+					"leverage": {
+						"source": "stated"
+					},
+					"spread": {
+						"source": "stated"
+					},
+					"commission": {
+						"source": "stated"
+					},
+					"swap": {
+						"source": "stated"
+					},
+					"execution": {
+						"source": "stated"
+					},
+					"order_types": {
+						"source": "stated"
+					},
+					"other_fees": {
+						"source": "stated"
+					},
+					"payment_methods": {
+						"source": "stated"
 					}
 				}
 			},
@@ -1294,7 +1523,7 @@
 						"licence": "TBD",
 						"jurisdiction": "Research pending",
 						"protection": "Research pending",
-						"verified": false
+						"source": ""
 					}
 				],
 				"fxt_markets": {
@@ -1310,6 +1539,7 @@
 					},
 					"TH": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Research pending",
 						"deposit": "",
@@ -1320,6 +1550,7 @@
 					},
 					"ID": {
 						"availability": "yes",
+						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer (to verify)",
 						"deposit": "",
@@ -1378,7 +1609,8 @@
 						"support": "",
 						"last_tested": ""
 					}
-				}
+				},
+				"fxt_sources": {}
 			},
 			"content": "<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"quick-facts\">Quick facts</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"quick-facts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"verdict\">Trader verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:quote {\"className\":\"is-style-verdict\"} -->\n<blockquote class=\"wp-block-quote is-style-verdict\"><!-- wp:paragraph -->\n<p>FP Markets is in our research queue. We list it so readers can see what is coming, but we do not publish a score before entity mapping and payment tests are complete.</p>\n<!-- /wp:paragraph --></blockquote>\n<!-- /wp:quote -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"regulation\">Regulation and client protection</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">The brand is not the company that holds your money. For clients in each country, this is the chain we trace and verify on official registers.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"regulation\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"costs\">Trading costs and execution</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Spreads are averages we observed on EUR/USD across five sessions, including the London open, not the advertised minimum.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"costs\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"platforms\">Platforms</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"platforms\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"payments\">Deposit and withdrawal</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Payment options depend on the entity and the country. We move real money through local methods and time each step.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"payments\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"accounts\">Account types</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"accounts\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"pros-cons\">Pros and cons</h2>\n<!-- /wp:heading -->\n\n<!-- wp:columns {\"className\":\"is-style-pros-cons\"} -->\n<div class=\"wp-block-columns is-style-pros-cons\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What worked in our research</h3>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-note\"} -->\n<p class=\"is-style-note\">Research pending.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:heading {\"level\":3} -->\n<h3 class=\"wp-block-heading\">What to weigh carefully</h3>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-note\"} -->\n<p class=\"is-style-note\">Research pending.</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"evidence\">Research evidence</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">Test status by country. Evidence pages show timestamps, amounts and redacted screenshots for each test.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:fxt/broker-data {\"section\":\"evidence\"} /-->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"method\">How we evaluated this broker</h2>\n<!-- /wp:heading -->\n\n<!-- wp:list {\"className\":\"is-style-check\"} -->\n<ul class=\"wp-block-list is-style-check\"><!-- wp:list-item -->\n<li>Mapped which legal entity onboards clients in each market we cover, then looked it up on the regulator&#8217;s register.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Opened a live account, completed verification and recorded every step with timestamps.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Deposited and withdrew real money using local methods, and measured spreads across five sessions.</li>\n<!-- /wp:list-item -->\n<!-- wp:list-item -->\n<li>Scored six weighted categories. Commercial relationships were not part of the scoring.</li>\n<!-- /wp:list-item --></ul>\n<!-- /wp:list -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\" id=\"final-verdict\">Final verdict</h2>\n<!-- /wp:heading -->\n\n<!-- wp:fxt/broker-data {\"section\":\"final-score\"} /-->\n\n<!-- wp:paragraph {\"className\":\"is-style-lead\"} -->\n<p class=\"is-style-lead\">No verdict yet. Research pending.</p>\n<!-- /wp:paragraph -->"
 		}

@@ -38,6 +38,14 @@ $uid      = wp_unique_id( 'cmp-' );
 $entity  = static function ( $b ) use ( $code ) {
 	return Repository::entity( $b, $code );
 };
+// Regulator for the country + how that was established (source label).
+$regulator = static function ( $b ) use ( $code ) {
+	$e = Repository::entity( $b, $code );
+	if ( '' === (string) $e['regulator'] ) {
+		return fxt_core_unverified( '', false );
+	}
+	return esc_html( $e['regulator'] ) . ' ' . fxt_core_source_tag( Repository::entity_source( $b, $code ) );
+};
 $row     = static function ( $b ) use ( $code ) {
 	$r = Repository::market_row( $b, $code );
 	return $r ? $r : array();
@@ -75,9 +83,8 @@ $preview_rows = array(
 		return fxt_core_badge( 'availability', Repository::availability( $b, $code ) );
 	} ),
 	/* translators: %s: country */
-	'regulator'    => array( sprintf( __( 'Regulator for %s', 'fxt-core' ), $country ), static function ( $b ) use ( $entity ) {
-		$e = $entity( $b );
-		return fxt_core_unverified( $e['regulator'], $e['verified'] );
+	'regulator'    => array( sprintf( __( 'Regulator for %s', 'fxt-core' ), $country ), static function ( $b ) use ( $regulator ) {
+		return $regulator( $b );
 	} ),
 	'deposit'      => array( __( 'Minimum deposit', 'fxt-core' ), static function ( $b ) {
 		return esc_html( fxt_core_min_deposit( $b ) );
@@ -124,9 +131,8 @@ $groups = array(
 			array( __( 'Legal entity', 'fxt-core' ), static function ( $b ) use ( $entity, $text ) {
 				return $text( $entity( $b )['name'] );
 			} ),
-			array( __( 'Regulator', 'fxt-core' ), static function ( $b ) use ( $entity ) {
-				$e = $entity( $b );
-				return fxt_core_unverified( $e['regulator'], $e['verified'] );
+			array( __( 'Regulator', 'fxt-core' ), static function ( $b ) use ( $regulator ) {
+				return $regulator( $b );
 			} ),
 			array( __( 'Licence', 'fxt-core' ), static function ( $b ) use ( $entity, $text ) {
 				return $text( $entity( $b )['licence'] );
@@ -410,7 +416,7 @@ $cell = static function ( $render, $b ) {
 	<?php endif; ?>
 
 	<div class="cmp-footer">
-		<p class="cmp-footer__note"><?php esc_html_e( 'Costs are averages from our test sessions, not advertised minimums. Regulators marked unverified have not been checked against official registers.', 'fxt-core' ); ?></p>
+		<p class="cmp-footer__note"><?php esc_html_e( 'Costs are averages from our test sessions, not advertised minimums. Source labels show whether a fact was tested by us, verified at source or stated by the broker.', 'fxt-core' ); ?></p>
 		<div class="cmp-footer__actions">
 			<?php if ( ! $show_all ) : ?>
 				<a class="btn btn--secondary" href="<?php echo esc_url( add_query_arg( array( 'brokers' => implode( ',', $selected ), 'all' => 1 ), $here ) ); ?>" data-cmp-all><?php esc_html_e( 'Compare All Brokers', 'fxt-core' ); ?></a>

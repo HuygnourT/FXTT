@@ -128,3 +128,12 @@
 .fxt-market-add select { max-width: 320px; }
 .fxt-market__actions { margin: 0; padding: 0 12px 12px; }
 .fxt-weight-total--bad { color: #b32d2e; font-weight: 600; }
+
+/* Data sources table (Broker data: sources). */
+.fxt-sources { margin-top: 6px; }
+.fxt-sources th[scope="row"] { width: 22%; font-weight: 600; }
+.fxt-sources td { vertical-align: middle; }
+.fxt-sources select,
+.fxt-sources input[type="text"],
+.fxt-sources input[type="date"] { width: 100%; max-width: none; }
+.fxt-field--sources + .notice { margin-top: 12px; }

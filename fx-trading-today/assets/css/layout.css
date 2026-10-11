@@ -541,3 +541,10 @@
   .toc a:hover { color: var(--color-ink); border-left-color: var(--color-ink-3); }
   .toc a[aria-current="true"] { color: var(--color-accent); border-left-color: var(--color-accent); font-weight: 600; }
 }
+
+.country-dialog__title {
+  display: block;
+  font-family: var(--font-display);
+  line-height: 1.2;
+  color: var(--color-ink);
+}

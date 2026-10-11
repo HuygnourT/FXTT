@@ -97,3 +97,21 @@ Text labels in the interface (microcopy such as "Change country" or "Read review
 Every **H/P** item above has moved to **D**: the data comes from one source and is editable in Admin (Broker Reviews, Countries, Platforms, Test Evidence, Users, Menus, Settings, block sidebar). What remains in PHP is only interface microcopy (button labels, empty-state messages), which stays translatable via `__()`.
 
 Upgrading from v1.0: no re-import needed. Old weights become score categories, the full country list is seeded on the first visit to Admin, old `fxt_records` data is still read, and the `mega-top-brokers` menu class still works.
+
+# Audit for version 1.2 (feedback: semantics, country filter, provenance, filter text)
+
+| Item | Before (1.1) | After (1.2) |
+|---|---|---|
+| "Select your country" (country dialog) | `<h2 id="fxt-country-title">` | `<span class="country-dialog__title" id="fxt-country-title">`; dialog still named by `aria-labelledby`; computed style identical |
+| "Filter brokers" | `<h2>` | `<span class="reviews-filters__title">`; computed style identical |
+| Result heading | `<h2 aria-live>` "6 brokers for Vietnam" from the visitor's country | Only H2 of the results: "{n} forex brokers reviewed", same filtered list as the cards, singular form, updated by JS from the server render |
+| Directory country filter | All 250 countries; defaults to the saved/visitor country; choosing one stored the site-wide cookie and reloaded | Only countries with published research (see README 3b), A to Z, default "Select a country", no counts/markers, filter only (no cookie, no reload); availability disabled until chosen; invalid or ineligible values ignored server-side (page, no-JS form, REST) |
+| "Countries researched N of M" (directory rows, broker cards) | Market test statuses vs researched countries | "Deposit & withdrawal tests: n methods tested" from published evidence (`Repository::test_stats()`) |
+| Source of facts | One checkbox per legal entity ("verified"); fixed "unverified" tags | `fxt_sources` meta (13 broker facts), `source` per legal entity and per country row; labels Tested / Verified at source / Broker-stated / Source not classified / Needs review |
+| Pending score | "Pending" + "Research score" printed together ("PendingResearch score") | `fxt_core_score_is_pending()` + "Score pending" everywhere; caption hidden while pending |
+| Directory text | `__()` strings in PHP | Settings > FX Trading Today > Broker Reviews filters (filters repeater with stable keys, option names, page text with `{count}`/`{country}`) |
+| Settings page | One long form | Tabs; saving one tab keeps the other tab's values |
+
+Data model changes (all additive): post meta `fxt_sources`; legal entity fields `source`, `source_ref`, `checked` (replaces `verified`); country row field `source`; settings `directory_filters`, `directory_options`, `directory_ui`. Broker cache key `fxt_core_brokers_v2`.
+
+Not changed on purpose (outside this brief): the global country dialog still lists all countries with their research status; the review page quick fact "Available in N of M researched countries" and the optional comparison row "Countries researched" still exist; the author field "Markets tested in person" is public when filled in.

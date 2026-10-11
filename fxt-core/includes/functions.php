@@ -172,13 +172,89 @@ function fxt_core_min_deposit( array $broker ) {
 }
 
 /**
- * Score label ("4.5" or "Pending").
+ * Score label ("4.5" or "Score pending").
  *
  * @param array $broker Normalized broker.
  * @return string
  */
 function fxt_core_score_label( array $broker ) {
-	return null === $broker['score'] ? __( 'Pending', 'fxt-core' ) : number_format_i18n( $broker['score'], 1 );
+	return fxt_core_score_is_pending( $broker ) ? fxt_core_score_pending_text() : number_format_i18n( $broker['score'], 1 );
+}
+
+/**
+ * Score status. A broker's score is "pending" until every score category has
+ * a value (or an override is set); the stored data is not changed by this.
+ *
+ * @param array $broker Normalized broker.
+ * @return bool
+ */
+function fxt_core_score_is_pending( array $broker ) {
+	return null === $broker['score'];
+}
+
+/**
+ * "4 methods tested": distinct deposit/withdrawal methods with completed,
+ * published tests (see Repository::test_stats() for the methodology).
+ *
+ * @param array $broker Normalized broker.
+ * @return string
+ */
+function fxt_core_methods_tested_text( array $broker ) {
+	$count = Repository::methods_tested( $broker );
+	/* translators: %d: number of payment methods */
+	return sprintf( _n( '%d method tested', '%d methods tested', $count, 'fxt-core' ), $count );
+}
+
+/**
+ * "Source: Tested" line above a data table.
+ *
+ * @param array $state Result of Repository::source() and friends.
+ * @return string HTML.
+ */
+function fxt_core_source_line( array $state ) {
+	return '<p class="data-source">' . esc_html__( 'Source:', 'fxt-core' ) . ' ' . fxt_core_source_tag( $state ) . '</p>';
+}
+
+/**
+ * Result heading of the Broker Reviews page, e.g. "6 forex brokers reviewed".
+ * Uses the singular text for exactly one broker.
+ *
+ * @param int $count Number of brokers matching the active filters.
+ * @return string Plain text.
+ */
+function fxt_core_directory_heading( $count ) {
+	return Repository::ui_text( 1 === (int) $count ? 'results_heading_one' : 'results_heading', array( 'count' => number_format_i18n( (int) $count ) ) );
+}
+
+/**
+ * Text shown instead of a number while the score is pending.
+ *
+ * @return string
+ */
+function fxt_core_score_pending_text() {
+	return __( 'Score pending', 'fxt-core' );
+}
+
+/**
+ * Compact source label for one fact: Tested, Verified at source,
+ * Broker-stated, or a neutral state when it is not classified (or marked
+ * Tested without published evidence). A reference URL turns the label into
+ * a link; the check date is added for screen readers and as a tooltip.
+ *
+ * @param array $state Result of Repository::source() and friends.
+ * @return string HTML.
+ */
+function fxt_core_source_tag( array $state ) {
+	$source = '' === $state['source'] ? 'none' : $state['source'];
+	$date   = $state['checked'] ? fxt_core_date( $state['checked'] ) : '';
+	/* translators: %s: date */
+	$title  = $date ? sprintf( __( 'Checked %s', 'fxt-core' ), $date ) : '';
+	$inner  = esc_html( $state['label'] ) . ( $title ? '<span class="u-visually-hidden">, ' . esc_html( $title ) . '</span>' : '' );
+	$attrs  = ' class="source-tag source-tag--' . esc_attr( $source ) . '"' . ( $title ? ' title="' . esc_attr( $title ) . '"' : '' );
+	if ( in_array( $source, array( 'verified', 'tested' ), true ) && preg_match( '#^https?://#i', $state['ref'] ) ) {
+		return '<a' . $attrs . ' href="' . esc_url( $state['ref'] ) . '" rel="nofollow noopener" target="_blank">' . $inner . '<span class="u-visually-hidden"> ' . esc_html__( '(opens the source in a new tab)', 'fxt-core' ) . '</span></a>';
+	}
+	return '<span' . $attrs . '>' . $inner . '</span>';
 }
 
 /**
@@ -289,8 +365,8 @@ function fxt_core_badge( $kind, $value, $extra = '' ) {
  * @return string
  */
 function fxt_core_score( array $broker ) {
-	if ( null === $broker['score'] ) {
-		return '<span class="score score--pending">' . esc_html__( 'Pending', 'fxt-core' ) . '</span>';
+	if ( fxt_core_score_is_pending( $broker ) ) {
+		return '<span class="score score--pending">' . esc_html( fxt_core_score_pending_text() ) . '</span>';
 	}
 	return sprintf( '<span class="score">%s<span class="score__scale">/5</span></span>', esc_html( number_format_i18n( $broker['score'], 1 ) ) );
 }

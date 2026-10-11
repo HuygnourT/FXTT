@@ -8,7 +8,8 @@
 	'use strict';
 
 	const core = window.fxtCore || {};
-	const FILTERS = [ 'q', 'availability', 'regulator', 'platform', 'deposit', 'account', 'status', 'sort' ];
+	// Query parameters. Labels are configurable in Admin; these keys are not.
+	const FILTERS = [ 'q', 'country', 'availability', 'regulator', 'platform', 'deposit', 'account', 'status', 'sort' ];
 
 	function init( root ) {
 		const form = root.querySelector( '[data-dir-form]' );
@@ -33,6 +34,29 @@
 
 		let timer = 0;
 		let request = 0;
+
+		// Availability is per country: usable only once a country is chosen.
+		function syncAvailability() {
+			const country = form.elements.namedItem( 'country' );
+			const availability = form.elements.namedItem( 'availability' );
+			if ( ! availability ) {
+				return;
+			}
+			const hasCountry = !! ( country && country.value );
+			if ( ! hasCountry ) {
+				availability.value = '';
+			}
+			availability.disabled = ! hasCountry;
+			const hint = document.getElementById( availability.id + '-hint' );
+			if ( hint ) {
+				hint.hidden = hasCountry;
+				if ( hasCountry ) {
+					availability.removeAttribute( 'aria-describedby' );
+				} else {
+					availability.setAttribute( 'aria-describedby', hint.id );
+				}
+			}
+		}
 
 		function values() {
 			const data = new FormData( form );
@@ -68,8 +92,12 @@
 						count.textContent = text.textContent.trim();
 					}
 					const url = new URL( window.location.href );
-					FILTERS.concat( [ 'country' ] ).forEach( ( key ) => url.searchParams.delete( key ) );
-					Object.keys( filters ).forEach( ( key ) => url.searchParams.set( key, filters[ key ] ) );
+					FILTERS.forEach( ( key ) => url.searchParams.delete( key ) );
+					Object.keys( filters ).forEach( ( key ) => {
+						if ( 'sort' !== key || 'score' !== filters[ key ] ) {
+							url.searchParams.set( key, filters[ key ] );
+						}
+					} );
 					window.history.replaceState( null, '', url.toString() );
 				} )
 				.catch( () => form.submit() )
@@ -90,13 +118,13 @@
 			schedule( 0 );
 		} );
 
-		// The country select stores the preference and reloads (whole page depends on it).
+		// The directory's country is a filter like the others: it does not
+		// change the visitor's saved country and does not reload the page.
 		root.addEventListener( 'change', ( event ) => {
-			if ( event.target.matches( '[data-dir-country]' ) ) {
-				core.setCountry( event.target.value );
-				return;
-			}
 			if ( event.target.name && FILTERS.indexOf( event.target.name ) !== -1 ) {
+				if ( 'country' === event.target.name ) {
+					syncAvailability();
+				}
 				schedule( 0 );
 			}
 		} );
@@ -113,10 +141,12 @@
 			if ( remove ) {
 				event.preventDefault();
 				setField( remove.getAttribute( 'data-dir-remove' ), '' );
+				syncAvailability();
 				schedule( 0 );
 			} else if ( clear ) {
 				event.preventDefault();
 				FILTERS.forEach( ( key ) => setField( key, 'sort' === key ? 'score' : '' ) );
+				syncAvailability();
 				schedule( 0 );
 				const search = form.querySelector( '[name="q"]' );
 				if ( search ) {

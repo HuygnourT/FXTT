@@ -29,6 +29,7 @@ final class Admin {
 				'fxt-trading'   => array( __( 'Broker data: trading conditions and costs', 'fxt-core' ), array( 'fxt_trading', 'fxt_costs', 'fxt_payments' ) ),
 				'fxt-entities'  => array( __( 'Broker data: accounts and legal entities', 'fxt-core' ), array( 'fxt_accounts', 'fxt_entities' ) ),
 				'fxt-markets'   => array( __( 'Broker data: conditions by country', 'fxt-core' ), array( 'fxt_markets' ) ),
+				'fxt-sources'   => array( __( 'Broker data: sources', 'fxt-core' ), array( 'fxt_sources' ) ),
 			),
 			Content_Types::EVIDENCE => array(
 				'fxt-test'      => array( __( 'Evidence: test details', 'fxt-core' ), array( 'fxt_broker_id', 'fxt_market', 'fxt_status', 'fxt_period', 'fxt_account_label' ) ),
@@ -87,7 +88,15 @@ final class Admin {
 						}
 						echo '<div class="fxt-fields">';
 						foreach ( $box[1] as $key ) {
-							Fields::render( $schema[ $key ], 'fxt_meta[' . $key . ']', get_post_meta( $post->ID, $key, true ), 'fxt-' . $key );
+							$value = get_post_meta( $post->ID, $key, true );
+							if ( 'fxt_entities' === $key && is_array( $value ) ) {
+								// Version 1.1 "verified" checkbox -> source select.
+								$value = array_map( array( Repository::class, 'normalize_entity' ), $value );
+							}
+							Fields::render( $schema[ $key ], 'fxt_meta[' . $key . ']', $value, 'fxt-' . $key );
+							if ( 'fxt_sources' === $key ) {
+								self::sources_warning( $post );
+							}
 						}
 						echo '</div>';
 					},
@@ -97,6 +106,39 @@ final class Admin {
 				);
 				$first = false;
 			}
+		}
+	}
+
+	/**
+	 * List facts marked "Tested" that have no published test evidence behind
+	 * them. They are shown as "Needs review" on the site until evidence is
+	 * published or the source is changed.
+	 *
+	 * @param \WP_Post $post Broker post.
+	 */
+	private static function sources_warning( $post ) {
+		$broker = Repository::normalize_broker( $post );
+		$rows   = Schema::source_rows();
+		$flags  = array();
+		foreach ( $rows as $key => $label ) {
+			if ( 'review' === Repository::source( $broker, $key )['source'] ) {
+				$flags[] = $label;
+			}
+		}
+		foreach ( $broker['entities'] as $entity ) {
+			if ( 'tested' === $entity['source'] && 'review' === Repository::resolve_source( array( 'source' => 'tested' ), $broker )['source'] ) {
+				/* translators: %s: legal entity name */
+				$flags[] = sprintf( __( 'Legal entity %s', 'fxt-core' ), $entity['name'] ? $entity['name'] : $entity['key'] );
+			}
+		}
+		foreach ( (array) $broker['markets'] as $code => $row ) {
+			if ( 'review' === Repository::availability_source( $broker, $code )['source'] ) {
+				/* translators: %s: ISO country code */
+				$flags[] = sprintf( __( 'Availability in %s', 'fxt-core' ), $code );
+			}
+		}
+		if ( $flags ) {
+			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Marked "Tested" but no published test evidence with completed tests backs it, so the site shows "Needs review":', 'fxt-core' ) . ' ' . esc_html( implode( ', ', $flags ) ) . '.</p></div>';
 		}
 	}
 
@@ -303,14 +345,59 @@ final class Admin {
 	 * @return array
 	 */
 	public static function sanitize_settings( $raw ) {
-		$raw   = is_array( $raw ) ? $raw : array();
+		$raw      = is_array( $raw ) ? $raw : array();
+		$previous = get_option( Repository::SETTINGS, array() );
+		$previous = is_array( $previous ) ? $previous : array();
+		// The settings page has tabs; a tab only submits its own fields.
+		$tab   = isset( $raw['_tab'] ) ? sanitize_key( $raw['_tab'] ) : '';
 		$clean = array();
 		foreach ( Schema::settings() as $key => $field ) {
+			$field_tab = isset( $field['tab'] ) ? $field['tab'] : 'general';
+			if ( $tab && $tab !== $field_tab ) {
+				$clean[ $key ] = isset( $previous[ $key ] ) ? $previous[ $key ] : null;
+				continue;
+			}
 			$clean[ $key ] = Fields::sanitize( $field, isset( $raw[ $key ] ) ? $raw[ $key ] : null );
 		}
-		$clean['score_categories'] = self::validate_categories( $clean['score_categories'] );
-		$clean['deposit_bands']    = $clean['deposit_bands'] ? array_values( array_unique( array_map( 'strval', array_map( 'absint', $clean['deposit_bands'] ) ) ) ) : null;
+		if ( ! $tab || 'general' === $tab ) {
+			$clean['score_categories'] = self::validate_categories( $clean['score_categories'] );
+			$clean['deposit_bands']    = $clean['deposit_bands'] ? array_values( array_unique( array_map( 'strval', array_map( 'absint', $clean['deposit_bands'] ) ) ) ) : null;
+		}
+		if ( ! $tab || 'directory' === $tab ) {
+			$clean['directory_filters'] = self::validate_directory_filters( $clean['directory_filters'] );
+		}
 		return $clean;
+	}
+
+	/**
+	 * Directory filter rows: each filter once. A duplicate row is dropped
+	 * with a notice; filters missing from the list keep their default text.
+	 *
+	 * @param array|null $rows Sanitized repeater rows.
+	 * @return array|null
+	 */
+	private static function validate_directory_filters( $rows ) {
+		$seen  = array();
+		$out   = array();
+		$dupes = array();
+		$keys  = Schema::directory_filter_keys();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$key = isset( $row['key'] ) ? (string) $row['key'] : '';
+			if ( ! isset( $keys[ $key ] ) ) {
+				continue;
+			}
+			if ( isset( $seen[ $key ] ) ) {
+				$dupes[] = $keys[ $key ];
+				continue;
+			}
+			$seen[ $key ] = true;
+			$out[]        = $row;
+		}
+		if ( $dupes ) {
+			/* translators: %s: filter names */
+			add_settings_error( Repository::SETTINGS, 'fxt-filters', sprintf( __( 'Each filter can be listed once. Removed duplicate rows: %s.', 'fxt-core' ), implode( ', ', array_unique( $dupes ) ) ), 'warning' );
+		}
+		return $out ? $out : null;
 	}
 
 	/**
@@ -393,12 +480,39 @@ final class Admin {
 			return;
 		}
 		$settings = Repository::settings();
+		$tabs     = array(
+			'general'   => __( 'General', 'fxt-core' ),
+			'directory' => __( 'Broker Reviews filters', 'fxt-core' ),
+		);
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- tab navigation only.
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
+		$tab = isset( $tabs[ $tab ] ) ? $tab : 'general';
+
 		echo '<div class="wrap"><h1>' . esc_html__( 'FX Trading Today settings', 'fxt-core' ) . '</h1>';
-		echo '<p>' . esc_html__( 'Site-wide content used by the theme and blocks. Brand name and logo are set in Appearance > Customize > Site Identity.', 'fxt-core' ) . '</p>';
+		echo '<nav class="nav-tab-wrapper" aria-label="' . esc_attr__( 'Settings sections', 'fxt-core' ) . '">';
+		foreach ( $tabs as $slug => $label ) {
+			printf(
+				'<a href="%s" class="nav-tab%s"%s>%s</a>',
+				esc_url( add_query_arg( array( 'page' => 'fxt-settings', 'tab' => $slug ), admin_url( 'options-general.php' ) ) ),
+				$slug === $tab ? ' nav-tab-active' : '',
+				$slug === $tab ? ' aria-current="page"' : '',
+				esc_html( $label )
+			);
+		}
+		echo '</nav>';
+		if ( 'directory' === $tab ) {
+			echo '<p>' . esc_html__( 'Text of the filter panel and results on the Broker Reviews page. This only changes what visitors read: broker data, filter keys and filtering logic stay the same.', 'fxt-core' ) . '</p>';
+		} else {
+			echo '<p>' . esc_html__( 'Site-wide content used by the theme and blocks. Brand name and logo are set in Appearance > Customize > Site Identity.', 'fxt-core' ) . '</p>';
+		}
 		echo '<form method="post" action="options.php">';
 		settings_fields( 'fxt_settings_group' );
+		echo '<input type="hidden" name="' . esc_attr( Repository::SETTINGS ) . '[_tab]" value="' . esc_attr( $tab ) . '">';
 		echo '<div class="fxt-fields fxt-fields--settings">';
 		foreach ( Schema::settings() as $key => $field ) {
+			if ( ( isset( $field['tab'] ) ? $field['tab'] : 'general' ) !== $tab ) {
+				continue;
+			}
 			Fields::render( $field, Repository::SETTINGS . '[' . $key . ']', isset( $settings[ $key ] ) ? $settings[ $key ] : null, 'fxt-setting-' . $key );
 		}
 		echo '</div>';

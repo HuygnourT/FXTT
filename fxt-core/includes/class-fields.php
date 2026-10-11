@@ -127,6 +127,19 @@ final class Fields {
 				}
 				return $rows ? $rows : null;
 
+			case 'sources':
+				$map = array();
+				$raw = is_array( $raw ) ? $raw : array();
+				foreach ( array_keys( $field['rows'] ) as $row_key ) {
+					if ( isset( $raw[ $row_key ] ) && is_array( $raw[ $row_key ] ) ) {
+						$clean = self::sanitize_group( $field['fields'], $raw[ $row_key ] );
+						if ( null !== $clean ) {
+							$map[ $row_key ] = $clean;
+						}
+					}
+				}
+				return $map ? $map : null;
+
 			case 'market_map':
 				$map = array();
 				$raw = is_array( $raw ) ? $raw : array();
@@ -217,6 +230,12 @@ final class Fields {
 					'type'  => array( 'array', 'null' ),
 					'items' => array( 'type' => 'object', 'properties' => self::rest_properties( $field['fields'] ) ),
 				);
+			case 'sources':
+				$rows = array();
+				foreach ( array_keys( $field['rows'] ) as $row_key ) {
+					$rows[ $row_key ] = array( 'type' => 'object', 'properties' => self::rest_properties( $field['fields'] ) );
+				}
+				return array( 'type' => array( 'object', 'null' ), 'properties' => $rows );
 			case 'market_map':
 				return array(
 					'type'                 => array( 'object', 'null' ),
@@ -257,6 +276,7 @@ final class Fields {
 			'repeater'   => 'array',
 			'group'      => 'object',
 			'market_map' => 'object',
+			'sources'    => 'object',
 		);
 		return isset( $map[ $field['type'] ] ) ? $map[ $field['type'] ] : 'string';
 	}
@@ -277,7 +297,7 @@ final class Fields {
 		$type = $field['type'];
 		echo '<div class="fxt-field fxt-field--' . esc_attr( $type ) . '">';
 
-		if ( in_array( $type, array( 'group', 'repeater', 'market_map' ), true ) ) {
+		if ( in_array( $type, array( 'group', 'repeater', 'market_map', 'sources' ), true ) ) {
 			echo '<p class="fxt-field__label">' . esc_html( $field['label'] ) . '</p>';
 		} elseif ( 'checkbox' !== $type ) {
 			echo '<label class="fxt-field__label" for="' . esc_attr( $id ) . '">' . esc_html( $field['label'] ) . '</label>';
@@ -391,6 +411,10 @@ final class Fields {
 				self::render_market_map( $field, $name, is_array( $value ) ? $value : array(), $id );
 				break;
 
+			case 'sources':
+				self::render_sources( $field, $name, is_array( $value ) ? $value : array(), $id );
+				break;
+
 			case 'url':
 			case 'date':
 			case 'datetime':
@@ -409,6 +433,34 @@ final class Fields {
 					esc_attr( (string) $value )
 				);
 		}
+	}
+
+	/**
+	 * Source classification table: one row per fact, columns = sub-fields.
+	 *
+	 * @param array  $field Field definition (rows + fields).
+	 * @param string $name  Input name.
+	 * @param array  $value Saved map row key => values.
+	 * @param string $id    DOM id.
+	 */
+	private static function render_sources( array $field, $name, array $value, $id ) {
+		echo '<table class="widefat striped fxt-sources"><thead><tr><th scope="col">' . esc_html__( 'Fact', 'fxt-core' ) . '</th>';
+		foreach ( $field['fields'] as $sub ) {
+			echo '<th scope="col">' . esc_html( $sub['label'] ) . '</th>';
+		}
+		echo '</tr></thead><tbody>';
+		foreach ( $field['rows'] as $row_key => $row_label ) {
+			$row = isset( $value[ $row_key ] ) && is_array( $value[ $row_key ] ) ? $value[ $row_key ] : array();
+			echo '<tr><th scope="row">' . esc_html( $row_label ) . '</th>';
+			foreach ( $field['fields'] as $key => $sub ) {
+				$sub_id = $id . '-' . $row_key . '-' . $key;
+				echo '<td><label class="screen-reader-text" for="' . esc_attr( $sub_id ) . '">' . esc_html( $row_label . ': ' . $sub['label'] ) . '</label>';
+				self::render_control( $sub, $name . '[' . $row_key . '][' . $key . ']', isset( $row[ $key ] ) ? $row[ $key ] : null, $sub_id );
+				echo '</td>';
+			}
+			echo '</tr>';
+		}
+		echo '</tbody></table>';
 	}
 
 	/**

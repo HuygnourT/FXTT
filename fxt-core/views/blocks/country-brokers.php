@@ -98,7 +98,11 @@ $method    = fxt_core_page_url( 'methodology' );
 		<span><?php /* translators: %s: number of brokers */ printf( esc_html__( '%s pending', 'fxt-core' ), '<strong>' . (int) $counts['pending'] . '</strong>' ); ?></span>
 	</p>
 	<?php if ( $directory ) : ?>
-		<a class="link-strong" href="<?php echo esc_url( add_query_arg( 'country', $code, $directory ) ); ?>">
+		<?php
+		// The directory's country filter only offers countries with published research.
+		$fxt_dir_url = in_array( $code, wp_list_pluck( Repository::directory_markets(), 'code' ), true ) ? add_query_arg( 'country', $code, $directory ) : $directory;
+		?>
+		<a class="link-strong" href="<?php echo esc_url( $fxt_dir_url ); ?>">
 			<?php
 			/* translators: %s: country */
 			printf( esc_html__( 'All brokers for %s', 'fxt-core' ), esc_html( $country ) );

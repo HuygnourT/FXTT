@@ -38,7 +38,7 @@ $labels       = Schema::availability();
 				esc_html__( 'Clients in %1$s are onboarded by %2$s, regulated by %3$s in %4$s.', 'fxt-core' ),
 				esc_html( $country ),
 				'<strong>' . esc_html( $entity['name'] ) . '</strong>',
-				'<strong>' . fxt_core_unverified( $entity['regulator'], $entity['verified'] ) . '</strong>', // phpcs:ignore WordPress.Security.EscapeOutput
+				'<strong>' . fxt_core_text( $entity['regulator'] ) . '</strong> ' . fxt_core_source_tag( \FXT\Core\Repository::entity_source( $broker, $code ) ), // phpcs:ignore WordPress.Security.EscapeOutput
 				esc_html( $entity['jurisdiction'] ? $entity['jurisdiction'] : __( 'TBD', 'fxt-core' ) )
 			);
 			?>

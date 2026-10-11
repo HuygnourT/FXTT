@@ -14,6 +14,7 @@ $tiles  = array();
 foreach ( \FXT\Core\Repository::terms( \FXT\Core\Content_Types::PLATFORM ) as $platform_term ) {
 	$tiles[ $platform_term['slug'] ] = $platform_term['full_name'];
 }
+echo fxt_core_source_line( \FXT\Core\Repository::source( $broker, 'platforms' ) ); // phpcs:ignore WordPress.Security.EscapeOutput
 ?>
 <ul class="platform-grid">
 	<?php foreach ( $tiles as $slug => $name ) : ?>

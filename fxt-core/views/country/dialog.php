@@ -15,7 +15,8 @@ $current = Repository::current_market();
 ?>
 <dialog class="country-dialog" aria-labelledby="fxt-country-title" data-country-dialog>
 	<div class="country-dialog__head">
-		<h2 class="country-dialog__title" id="fxt-country-title"><?php esc_html_e( 'Select your country', 'fxt-core' ); ?></h2>
+		<?php // Not a heading: the dialog is named by aria-labelledby, and the page outline stays clean. ?>
+		<span class="country-dialog__title" id="fxt-country-title"><?php esc_html_e( 'Select your country', 'fxt-core' ); ?></span>
 		<button class="icon-btn" type="button" data-country-close>
 			<?php echo fxt_core_icon( 'close' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<span class="u-visually-hidden"><?php esc_html_e( 'Close', 'fxt-core' ); ?></span>

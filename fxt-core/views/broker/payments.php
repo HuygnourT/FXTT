@@ -56,6 +56,10 @@ if ( $pay['bank'] && ! $local ) {
 </p>
 
 <?php if ( $rows ) : ?>
+	<?php echo fxt_core_source_line( Repository::source( $broker, 'payment_methods' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+<?php endif; ?>
+
+<?php if ( $rows ) : ?>
 	<div class="table-scroll">
 		<table class="data-table">
 			<thead><tr>

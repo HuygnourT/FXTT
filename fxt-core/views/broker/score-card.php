@@ -18,8 +18,8 @@ $has     = null !== $broker['score'] && ! empty( $broker['breakdown'] );
 	<div class="score-card__head">
 		<span class="u-label"><?php esc_html_e( 'Research score', 'fxt-core' ); ?></span>
 		<p class="score-card__value">
-			<?php if ( null === $broker['score'] ) : ?>
-				<?php esc_html_e( 'Pending', 'fxt-core' ); ?>
+			<?php if ( fxt_core_score_is_pending( $broker ) ) : ?>
+				<?php echo esc_html( fxt_core_score_pending_text() ); ?>
 			<?php else : ?>
 				<?php echo esc_html( number_format_i18n( $broker['score'], 1 ) ); ?><span>/ 5</span>
 			<?php endif; ?>

@@ -16,12 +16,15 @@ $market  = Repository::market( $code );
 $entity  = Repository::entity( $broker, $code );
 $country = $market ? $market['name'] : $code;
 
+$source = Repository::entity_source( $broker, $code );
+
+// Label, value, note, show the entity's source label.
 $chain = array(
-	array( __( 'Broker brand', 'fxt-core' ), $broker['name'], __( 'Marketing name', 'fxt-core' ), '' ),
-	array( __( 'Legal entity', 'fxt-core' ), $entity['name'], __( 'Holds your account', 'fxt-core' ), $entity['verified'] ? '' : __( 'Unverified', 'fxt-core' ) ),
-	array( __( 'Regulator', 'fxt-core' ), $entity['regulator'], __( 'Supervises the entity', 'fxt-core' ), $entity['verified'] ? '' : __( 'Unverified', 'fxt-core' ) ),
-	array( __( 'Licence', 'fxt-core' ), $entity['licence'], __( 'Register number', 'fxt-core' ), '' ),
-	array( __( 'Jurisdiction', 'fxt-core' ), $entity['jurisdiction'], __( 'Law that applies', 'fxt-core' ), '' ),
+	array( __( 'Broker brand', 'fxt-core' ), $broker['name'], __( 'Marketing name', 'fxt-core' ), false ),
+	array( __( 'Legal entity', 'fxt-core' ), $entity['name'], __( 'Holds your account', 'fxt-core' ), true ),
+	array( __( 'Regulator', 'fxt-core' ), $entity['regulator'], __( 'Supervises the entity', 'fxt-core' ), true ),
+	array( __( 'Licence', 'fxt-core' ), $entity['licence'], __( 'Register number', 'fxt-core' ), true ),
+	array( __( 'Jurisdiction', 'fxt-core' ), $entity['jurisdiction'], __( 'Law that applies', 'fxt-core' ), false ),
 );
 ?>
 <ol class="entity-chain" aria-label="<?php /* translators: %s: country */ echo esc_attr( sprintf( __( 'Regulatory chain for %s', 'fxt-core' ), $country ) ); ?>">
@@ -31,7 +34,7 @@ $chain = array(
 			<span class="entity-chain__value"><?php echo fxt_core_text( $node[1] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
 			<span class="entity-chain__note"><?php echo esc_html( $node[2] ); ?></span>
 			<?php if ( $node[3] && '' !== (string) $node[1] ) : ?>
-				<span class="unverified"><?php echo esc_html( $node[3] ); ?></span>
+				<?php echo fxt_core_source_tag( $source ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<?php endif; ?>
 		</li>
 	<?php endforeach; ?>
@@ -67,7 +70,7 @@ $chain = array(
 			<tbody>
 			<?php
 			foreach ( $broker['entities'] as $row ) :
-				$row    = wp_parse_args( array_filter( (array) $row, static function ( $v ) { return null !== $v; } ), array( 'key' => '', 'name' => '', 'regulator' => '', 'jurisdiction' => '', 'verified' => false ) );
+				$row    = Repository::normalize_entity( $row );
 				$serves = array();
 				foreach ( Repository::markets() as $fxt_market ) {
 					$served_by = Repository::entity( $broker, $fxt_market['code'] );
@@ -78,7 +81,7 @@ $chain = array(
 				?>
 				<tr>
 					<th scope="row"><?php echo fxt_core_text( $row['name'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></th>
-					<td><?php echo fxt_core_unverified( $row['regulator'], ! empty( $row['verified'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
+					<td><?php echo fxt_core_text( $row['regulator'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?> <?php echo '' !== $row['regulator'] ? fxt_core_source_tag( Repository::resolve_source( array( 'source' => $row['source'], 'ref' => $row['source_ref'], 'checked' => $row['checked'] ), $broker ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 					<td><?php echo fxt_core_text( $row['jurisdiction'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 					<td class="u-mono"><?php echo $serves ? esc_html( implode( ', ', $serves ) ) : '<span class="muted">' . esc_html__( 'None in our markets', 'fxt-core' ) . '</span>'; ?></td>
 				</tr>

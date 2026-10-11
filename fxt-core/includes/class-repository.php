@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Repository {
 
-	const CACHE_KEY     = 'fxt_core_brokers_v1';
+	const CACHE_KEY     = 'fxt_core_brokers_v2'; // v2: sources, normalized entities.
 	const COOKIE        = 'fxt_country';
 	const SETTINGS      = 'fxt_settings';
 
@@ -25,6 +25,9 @@ final class Repository {
 
 	/** @var array|null Per-request broker cache. */
 	private static $brokers = null;
+
+	/** @var array|null Per-request test statistics (see test_stats()). */
+	private static $test_stats = null;
 
 	/**
 	 * Cache invalidation hooks.
@@ -53,10 +56,12 @@ final class Repository {
 	 */
 	public static function flush() {
 		delete_transient( self::CACHE_KEY );
+		delete_transient( 'fxt_core_brokers_v1' ); // Left by version 1.1.x.
 		self::$brokers      = null;
 		self::$markets      = null;
 		self::$market_index = null;
 		self::$term_lists   = array();
+		self::$test_stats   = null;
 	}
 
 	/**
@@ -111,7 +116,77 @@ final class Repository {
 				}
 			}
 		}
+		foreach ( array( 'directory_options', 'directory_ui' ) as $group ) {
+			// Empty fields fall back to the default wording, field by field.
+			$values             = isset( $saved[ $group ] ) && is_array( $saved[ $group ] ) ? $saved[ $group ] : array();
+			$settings[ $group ] = array_merge(
+				$defaults[ $group ],
+				array_filter(
+					$values,
+					static function ( $value ) {
+						return null !== $value && '' !== $value;
+					}
+				)
+			);
+		}
+		$settings['directory_filters'] = self::normalize_directory_filters( isset( $saved['directory_filters'] ) ? $saved['directory_filters'] : null );
 		return $settings;
+	}
+
+	/**
+	 * Directory filter rows: known keys only, each once, in the saved order.
+	 * Keys missing from the saved list are appended with default wording, so
+	 * a filter can only be hidden on purpose (the "Hide" checkbox).
+	 *
+	 * @param mixed $rows Saved rows.
+	 * @return array[] Each: key, label, placeholder, description, hidden.
+	 */
+	public static function normalize_directory_filters( $rows ) {
+		$defaults = array();
+		foreach ( Schema::default_directory_filters() as $row ) {
+			$defaults[ $row['key'] ] = $row;
+		}
+		$out = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			$key = isset( $row['key'] ) ? (string) $row['key'] : '';
+			if ( ! isset( $defaults[ $key ] ) || isset( $out[ $key ] ) ) {
+				continue;
+			}
+			$clean = $defaults[ $key ];
+			foreach ( array( 'label', 'placeholder', 'description' ) as $field ) {
+				if ( isset( $row[ $field ] ) && '' !== (string) $row[ $field ] ) {
+					$clean[ $field ] = (string) $row[ $field ];
+				}
+			}
+			$clean['hidden'] = ! empty( $row['hidden'] );
+			$out[ $key ]     = $clean;
+		}
+		foreach ( $defaults as $key => $row ) {
+			if ( ! isset( $out[ $key ] ) ) {
+				$out[ $key ] = $row;
+			}
+		}
+		return array_values( $out );
+	}
+
+	/**
+	 * One text of the Broker Reviews page with {count} and {country} filled in.
+	 * Values are plain text; callers escape on output.
+	 *
+	 * @param string $key  Key of directory_ui.
+	 * @param array  $vars Placeholder values: count, country.
+	 * @return string
+	 */
+	public static function ui_text( $key, array $vars = array() ) {
+		$ui   = self::setting( 'directory_ui' );
+		$text = isset( $ui[ $key ] ) ? (string) $ui[ $key ] : '';
+		$map  = array();
+		foreach ( array( 'count', 'country' ) as $name ) {
+			if ( isset( $vars[ $name ] ) ) {
+				$map[ '{' . $name . '}' ] = (string) $vars[ $name ];
+			}
+		}
+		return wp_strip_all_tags( strtr( $text, $map ) );
 	}
 
 	/**
@@ -480,7 +555,8 @@ final class Repository {
 			'costs'           => wp_parse_args( $meta( 'fxt_costs', array() ), array( 'spread' => '', 'commission' => '', 'swap' => '', 'other_fees' => '' ) ),
 			'payments'        => wp_parse_args( $meta( 'fxt_payments', array() ), array( 'bank' => false, 'cards' => false, 'ewallets' => false, 'crypto' => false, 'time_local' => '', 'time_cards' => '', 'time_ewallets' => '', 'time_crypto' => '' ) ),
 			'accounts'        => $meta( 'fxt_accounts', array() ),
-			'entities'        => $meta( 'fxt_entities', array() ),
+			'entities'        => array_map( array( __CLASS__, 'normalize_entity' ), (array) $meta( 'fxt_entities', array() ) ),
+			'sources'         => (array) $meta( 'fxt_sources', array() ),
 			'markets'         => $meta( 'fxt_markets', array() ),
 			'affiliate_url'   => $meta( 'fxt_affiliate_url', '' ),
 			'cta_label'       => $meta( 'fxt_cta_label', '' ),
@@ -488,6 +564,225 @@ final class Repository {
 			'regulator_slugs' => array_keys( $terms( Content_Types::REGULATOR ) ),
 			'platforms'       => $terms( Content_Types::PLATFORM ),
 			'account_types'   => array_keys( $terms( Content_Types::ACCOUNT_TYPE ) ),
+		);
+	}
+
+	/**
+	 * Legal entity row with defaults. Version 1.1 stored a "verified"
+	 * checkbox; it reads as source "verified" until the row is saved again.
+	 *
+	 * @param mixed $entity Saved row.
+	 * @return array
+	 */
+	public static function normalize_entity( $entity ) {
+		$entity = array_filter(
+			(array) $entity,
+			static function ( $v ) {
+				return null !== $v;
+			}
+		);
+		$entity = wp_parse_args( $entity, array( 'key' => '', 'name' => '', 'regulator' => '', 'licence' => '', 'jurisdiction' => '', 'protection' => '', 'source' => '', 'source_ref' => '', 'checked' => '' ) );
+		if ( '' === (string) $entity['source'] && ! empty( $entity['verified'] ) ) {
+			$entity['source'] = 'verified';
+		}
+		unset( $entity['verified'] );
+		return $entity;
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Data provenance
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Resolve a stored classification into what may be displayed.
+	 * "Tested" is shown only when published test evidence backs it;
+	 * otherwise the fact is flagged for review instead of passing as tested.
+	 *
+	 * @param array       $stored    { source, ref, checked }.
+	 * @param array       $broker    Normalized broker.
+	 * @param string|null $code      Country the fact belongs to (null = any country).
+	 * @return array { source: tested|verified|stated|review|'', ref, checked, label }
+	 */
+	public static function resolve_source( array $stored, array $broker, $code = null ) {
+		$labels = Schema::sources();
+		$source = isset( $stored['source'] ) ? (string) $stored['source'] : '';
+		if ( ! isset( $labels[ $source ] ) ) {
+			$source = '';
+		}
+		if ( 'tested' === $source && ! self::has_published_tests( $broker['id'], $code ) ) {
+			$source = 'review';
+		}
+		$label = 'review' === $source ? __( 'Needs review', 'fxt-core' ) : ( '' === $source ? __( 'Source not classified', 'fxt-core' ) : $labels[ $source ] );
+		return array(
+			'source'  => $source,
+			'ref'     => isset( $stored['ref'] ) ? (string) $stored['ref'] : '',
+			'checked' => isset( $stored['checked'] ) ? (string) $stored['checked'] : '',
+			'label'   => $label,
+		);
+	}
+
+	/**
+	 * Source of one broker-level fact (see Schema::source_rows()).
+	 *
+	 * @param array  $broker Normalized broker.
+	 * @param string $key    Row key.
+	 * @return array See resolve_source().
+	 */
+	public static function source( array $broker, $key ) {
+		$stored = isset( $broker['sources'][ $key ] ) && is_array( $broker['sources'][ $key ] ) ? $broker['sources'][ $key ] : array();
+		return self::resolve_source( $stored, $broker );
+	}
+
+	/**
+	 * Source of the legal entity / regulator / licence serving a country.
+	 *
+	 * @param array  $broker Normalized broker.
+	 * @param string $code   ISO code.
+	 * @return array See resolve_source().
+	 */
+	public static function entity_source( array $broker, $code ) {
+		$entity = self::entity( $broker, $code );
+		return self::resolve_source( array( 'source' => $entity['source'], 'ref' => $entity['source_ref'], 'checked' => $entity['checked'] ), $broker, $code );
+	}
+
+	/**
+	 * Source of a broker's availability in a country.
+	 *
+	 * @param array  $broker Normalized broker.
+	 * @param string $code   ISO code.
+	 * @return array See resolve_source().
+	 */
+	public static function availability_source( array $broker, $code ) {
+		$row = self::market_row( $broker, $code );
+		return self::resolve_source( array( 'source' => $row && isset( $row['source'] ) ? $row['source'] : '', 'checked' => $row && ! empty( $row['last_tested'] ) ? $row['last_tested'] : '' ), $broker, $code );
+	}
+
+	/* ---------------------------------------------------------------------
+	 * Test statistics
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Statistics from published test evidence of published brokers.
+	 *
+	 * Methodology for "methods tested": a payment method counts once per
+	 * broker when at least one deposit or withdrawal test row with status
+	 * "Completed" uses it in a published evidence set. Methods are matched
+	 * by name (case and spacing ignored), so the same method used for both
+	 * a deposit and a withdrawal, or in several countries, counts as one.
+	 * Tests in progress, failed tests and broker-stated methods are not
+	 * counted.
+	 *
+	 * @return array broker_id => { methods: string[], markets: string[] }
+	 */
+	public static function test_stats() {
+		if ( null !== self::$test_stats ) {
+			return self::$test_stats;
+		}
+		$published = array();
+		foreach ( self::brokers() as $broker ) {
+			$published[ $broker['id'] ] = true;
+		}
+		$stats = array();
+		foreach ( self::evidence_index() as $row ) {
+			if ( empty( $published[ $row['broker_id'] ] ) ) {
+				continue;
+			}
+			$methods = array();
+			foreach ( array( 'fxt_deposits', 'fxt_withdrawals' ) as $key ) {
+				foreach ( (array) get_post_meta( $row['id'], $key, true ) as $test ) {
+					$status = isset( $test['status'] ) ? (string) $test['status'] : '';
+					$name   = isset( $test['method'] ) ? trim( preg_replace( '/\s+/', ' ', (string) $test['method'] ) ) : '';
+					if ( 'completed' !== $status || '' === $name ) {
+						continue;
+					}
+					$methods[ mb_strtolower( $name ) ] = $name;
+				}
+			}
+			if ( ! $methods ) {
+				continue;
+			}
+			if ( ! isset( $stats[ $row['broker_id'] ] ) ) {
+				$stats[ $row['broker_id'] ] = array( 'methods' => array(), 'markets' => array() );
+			}
+			$stats[ $row['broker_id'] ]['methods'] += $methods;
+			if ( $row['market'] ) {
+				$stats[ $row['broker_id'] ]['markets'][ strtoupper( $row['market'] ) ] = true;
+			}
+		}
+		foreach ( $stats as $id => $stat ) {
+			$stats[ $id ] = array(
+				'methods' => array_values( $stat['methods'] ),
+				'markets' => array_keys( $stat['markets'] ),
+			);
+		}
+		self::$test_stats = $stats;
+		return $stats;
+	}
+
+	/**
+	 * Number of distinct deposit/withdrawal methods tested for a broker.
+	 *
+	 * @param array $broker Normalized broker.
+	 * @return int
+	 */
+	public static function methods_tested( array $broker ) {
+		$stats = self::test_stats();
+		return isset( $stats[ $broker['id'] ] ) ? count( $stats[ $broker['id'] ]['methods'] ) : 0;
+	}
+
+	/**
+	 * Whether completed tests are published for a broker (optionally in one country).
+	 *
+	 * @param int         $broker_id Broker ID.
+	 * @param string|null $code      ISO code, or null for any country.
+	 * @return bool
+	 */
+	public static function has_published_tests( $broker_id, $code = null ) {
+		$stats = self::test_stats();
+		if ( ! isset( $stats[ $broker_id ] ) ) {
+			return false;
+		}
+		return null === $code || in_array( strtoupper( (string) $code ), $stats[ $broker_id ]['markets'], true );
+	}
+
+	/**
+	 * Countries offered by the Broker Reviews country filter (A to Z).
+	 *
+	 * A country qualifies when published research backs it: published test
+	 * evidence with completed tests for a published broker, or a published
+	 * broker's availability in that country classified as Tested or Verified
+	 * at source. The list is one merged set: it carries no counts and no
+	 * marker of why a country qualifies, so it cannot be used to tell
+	 * test-account countries from other researched countries.
+	 *
+	 * @return array[] Markets.
+	 */
+	public static function directory_markets() {
+		$codes = array();
+		foreach ( self::test_stats() as $stat ) {
+			foreach ( $stat['markets'] as $code ) {
+				$codes[ $code ] = true;
+			}
+		}
+		foreach ( self::brokers() as $broker ) {
+			foreach ( (array) $broker['markets'] as $code => $row ) {
+				$availability = isset( $row['availability'] ) ? $row['availability'] : 'pending';
+				if ( 'pending' === $availability ) {
+					continue;
+				}
+				$source = self::availability_source( $broker, $code );
+				if ( in_array( $source['source'], array( 'tested', 'verified' ), true ) ) {
+					$codes[ strtoupper( $code ) ] = true;
+				}
+			}
+		}
+		return array_values(
+			array_filter(
+				self::markets(),
+				static function ( $market ) use ( $codes ) {
+					return isset( $codes[ $market['code'] ] );
+				}
+			)
 		);
 	}
 
@@ -510,17 +805,21 @@ final class Repository {
 	 * @return array Entity fields; empty strings when unknown.
 	 */
 	public static function entity( array $broker, $code ) {
-		$empty = array( 'key' => '', 'name' => '', 'regulator' => '', 'licence' => '', 'jurisdiction' => '', 'protection' => '', 'verified' => false );
-		if ( empty( $broker['entities'] ) ) {
-			return $empty;
-		}
-		$key = ! empty( $broker['markets'][ $code ]['entity_key'] ) ? $broker['markets'][ $code ]['entity_key'] : '';
-		foreach ( $broker['entities'] as $entity ) {
-			if ( $key && isset( $entity['key'] ) && $entity['key'] === $key ) {
-				return wp_parse_args( array_filter( $entity, static function ( $v ) { return null !== $v; } ), $empty );
+		$found = null;
+		if ( ! empty( $broker['entities'] ) ) {
+			$key   = ! empty( $broker['markets'][ $code ]['entity_key'] ) ? $broker['markets'][ $code ]['entity_key'] : '';
+			$found = $broker['entities'][0];
+			foreach ( $broker['entities'] as $entity ) {
+				if ( $key && isset( $entity['key'] ) && $entity['key'] === $key ) {
+					$found = $entity;
+					break;
+				}
 			}
 		}
-		return wp_parse_args( array_filter( $broker['entities'][0], static function ( $v ) { return null !== $v; } ), $empty );
+		$entity = self::normalize_entity( $found ? $found : array() );
+		// Kept for views that only need verified / not verified.
+		$entity['verified'] = 'verified' === $entity['source'];
+		return $entity;
 	}
 
 	/**

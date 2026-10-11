@@ -8,7 +8,7 @@
  *   3. sanitization on save
  *
  * Field keys:
- *   type      text|textarea|number|url|date|datetime|select|checkbox|list|group|repeater|market_map|post|media
+ *   type      text|textarea|number|url|date|datetime|select|checkbox|list|group|repeater|market_map|sources|post|media
  *   label     admin label
  *   help      optional description under the field
  *   options   select options [value => label]
@@ -27,6 +27,62 @@ defined( 'ABSPATH' ) || exit;
  * Schema registry.
  */
 final class Schema {
+
+	/**
+	 * Data provenance: how a fact was obtained. Stored keys never change;
+	 * labels are display text.
+	 *
+	 * @return array key => label ('' = not classified yet)
+	 */
+	public static function sources() {
+		return array(
+			''         => __( 'Not classified', 'fxt-core' ),
+			'tested'   => __( 'Tested', 'fxt-core' ),
+			'verified' => __( 'Verified at source', 'fxt-core' ),
+			'stated'   => __( 'Broker-stated', 'fxt-core' ),
+		);
+	}
+
+	/**
+	 * Broker facts that carry their own source classification
+	 * (rows of the review page). Key => admin label.
+	 *
+	 * Per-entity facts (legal entity, regulator, licence) use the "Source"
+	 * field of each legal entity; per-country availability uses the
+	 * "Availability source" field of each country row.
+	 *
+	 * @return array
+	 */
+	public static function source_rows() {
+		return array(
+			'regulators'       => __( 'Regulators (group)', 'fxt-core' ),
+			'min_deposit'      => __( 'Minimum deposit', 'fxt-core' ),
+			'platforms'        => __( 'Platforms', 'fxt-core' ),
+			'accounts'         => __( 'Account types', 'fxt-core' ),
+			'currencies'       => __( 'Base currencies', 'fxt-core' ),
+			'leverage'         => __( 'Maximum leverage', 'fxt-core' ),
+			'spread'           => __( 'Typical spread', 'fxt-core' ),
+			'commission'       => __( 'Commission', 'fxt-core' ),
+			'swap'             => __( 'Swap', 'fxt-core' ),
+			'execution'        => __( 'Execution model', 'fxt-core' ),
+			'order_types'      => __( 'Order types', 'fxt-core' ),
+			'other_fees'       => __( 'Other fees', 'fxt-core' ),
+			'payment_methods'  => __( 'Payment methods and processing times', 'fxt-core' ),
+		);
+	}
+
+	/**
+	 * Sub-fields of one source classification.
+	 *
+	 * @return array
+	 */
+	public static function source_fields() {
+		return array(
+			'source'  => array( 'type' => 'select', 'label' => __( 'Source', 'fxt-core' ), 'options' => self::sources() ),
+			'ref'     => array( 'type' => 'text', 'label' => __( 'Reference (URL or note)', 'fxt-core' ) ),
+			'checked' => array( 'type' => 'date', 'label' => __( 'Checked on', 'fxt-core' ) ),
+		);
+	}
 
 	/**
 	 * Availability of a broker in one market.
@@ -175,7 +231,9 @@ final class Schema {
 					'licence'      => array( 'type' => 'text', 'label' => __( 'Licence number', 'fxt-core' ) ),
 					'jurisdiction' => array( 'type' => 'text', 'label' => __( 'Jurisdiction', 'fxt-core' ) ),
 					'protection'   => array( 'type' => 'text', 'label' => __( 'Client protection', 'fxt-core' ) ),
-					'verified'     => array( 'type' => 'checkbox', 'label' => __( 'Verified on official register', 'fxt-core' ) ),
+					'source'       => array( 'type' => 'select', 'label' => __( 'Source of entity and licence data', 'fxt-core' ), 'options' => self::sources(), 'help' => __( 'Use "Verified at source" only after checking the official register.', 'fxt-core' ) ),
+					'source_ref'   => array( 'type' => 'text', 'label' => __( 'Register link or reference', 'fxt-core' ) ),
+					'checked'      => array( 'type' => 'date', 'label' => __( 'Checked on', 'fxt-core' ) ),
 				),
 			),
 			'fxt_markets'         => array(
@@ -184,6 +242,7 @@ final class Schema {
 				'help'   => __( 'Availability, entity and test status for each market. Countries are managed under Broker Reviews > Markets.', 'fxt-core' ),
 				'fields' => array(
 					'availability'   => array( 'type' => 'select', 'label' => __( 'Availability', 'fxt-core' ), 'options' => self::availability() ),
+					'source'         => array( 'type' => 'select', 'label' => __( 'Availability source', 'fxt-core' ), 'options' => self::sources(), 'help' => __( '"Tested" needs published test evidence for this country.', 'fxt-core' ) ),
 					'entity_key'     => array( 'type' => 'text', 'label' => __( 'Entity key', 'fxt-core' ) ),
 					'local_payments' => array( 'type' => 'text', 'label' => __( 'Local payment methods', 'fxt-core' ) ),
 					'deposit'        => array( 'type' => 'select', 'label' => __( 'Deposit tests', 'fxt-core' ), 'options' => self::test_status() ),
@@ -195,6 +254,13 @@ final class Schema {
 			),
 			'fxt_affiliate_url'   => array( 'type' => 'url', 'label' => __( 'Affiliate URL', 'fxt-core' ), 'help' => __( 'Rendered with rel="sponsored nofollow" and an "affiliate link" label. The button is hidden while this is empty.', 'fxt-core' ) ),
 			'fxt_cta_label'       => array( 'type' => 'text', 'label' => __( 'Affiliate button label', 'fxt-core' ), 'help' => __( 'Default: "Visit {broker}". "(affiliate link)" is always added.', 'fxt-core' ) ),
+			'fxt_sources'         => array(
+				'type'   => 'sources',
+				'label'  => __( 'Data sources', 'fxt-core' ),
+				'help'   => __( 'How each fact on the review page was obtained. Tested: our own documented test (needs published test evidence for this broker). Verified at source: checked against an official or primary source. Broker-stated: published by the broker, not checked. Rows left "Not classified" show a neutral "Source not classified" label.', 'fxt-core' ),
+				'rows'   => self::source_rows(),
+				'fields' => self::source_fields(),
+			),
 		);
 	}
 
@@ -401,6 +467,150 @@ final class Schema {
 					'methodology' => array( 'type' => 'post', 'post_type' => 'page', 'label' => __( 'Research Methodology', 'fxt-core' ) ),
 				),
 			),
+
+			// Tab "Broker Reviews filters": display text only. Internal filter keys,
+			// query parameters and broker data never change with these labels.
+			'directory_filters'    => array(
+				'type'   => 'repeater',
+				'tab'    => 'directory',
+				'label'  => __( 'Filters', 'fxt-core' ),
+				'help'   => __( 'One row per filter. Row order is the order on the page. "Filter" is the internal key and is used once; the other fields are display text only. Empty text fields use the default wording.', 'fxt-core' ),
+				'fields' => array(
+					'key'         => array( 'type' => 'select', 'label' => __( 'Filter', 'fxt-core' ), 'options' => self::directory_filter_keys() ),
+					'label'       => array( 'type' => 'text', 'label' => __( 'Label', 'fxt-core' ) ),
+					'placeholder' => array( 'type' => 'text', 'label' => __( 'Placeholder (first option)', 'fxt-core' ) ),
+					'description' => array( 'type' => 'text', 'label' => __( 'Description under the filter', 'fxt-core' ) ),
+					'hidden'      => array( 'type' => 'checkbox', 'label' => __( 'Hide this filter', 'fxt-core' ) ),
+				),
+			),
+			'directory_options'    => array(
+				'type'   => 'group',
+				'tab'    => 'directory',
+				'label'  => __( 'Filter option names', 'fxt-core' ),
+				'help'   => __( 'Names shown inside the Availability, Research status and Minimum deposit filters. Regulators, platforms and account types use their names under Broker Reviews. {amount} is replaced by the amount.', 'fxt-core' ),
+				'fields' => array(
+					'availability_yes'        => array( 'type' => 'text', 'label' => __( 'Availability: available', 'fxt-core' ) ),
+					'availability_restricted' => array( 'type' => 'text', 'label' => __( 'Availability: not accepting residents', 'fxt-core' ) ),
+					'availability_pending'    => array( 'type' => 'text', 'label' => __( 'Availability: pending', 'fxt-core' ) ),
+					'status_published'        => array( 'type' => 'text', 'label' => __( 'Research status: published', 'fxt-core' ) ),
+					'status_updating'         => array( 'type' => 'text', 'label' => __( 'Research status: update in progress', 'fxt-core' ) ),
+					'status_pending'          => array( 'type' => 'text', 'label' => __( 'Research status: research pending', 'fxt-core' ) ),
+					'deposit_zero'            => array( 'type' => 'text', 'label' => __( 'Minimum deposit: no minimum', 'fxt-core' ) ),
+					'deposit_band'            => array( 'type' => 'text', 'label' => __( 'Minimum deposit: other amounts', 'fxt-core' ) ),
+				),
+			),
+			'directory_ui'         => array(
+				'type'   => 'group',
+				'tab'    => 'directory',
+				'label'  => __( 'Text on the Broker Reviews page', 'fxt-core' ),
+				'help'   => __( 'Placeholders: {count} = number of matching brokers, {country} = the selected country (or the "No country selected" text). Other braces are shown as typed; HTML is not allowed.', 'fxt-core' ),
+				'fields' => array(
+					'panel_title'         => array( 'type' => 'text', 'label' => __( 'Filter panel title', 'fxt-core' ) ),
+					'clear_all'           => array( 'type' => 'text', 'label' => __( 'Clear filters link', 'fxt-core' ) ),
+					'search_label'        => array( 'type' => 'text', 'label' => __( 'Search label (screen readers)', 'fxt-core' ) ),
+					'search_placeholder'  => array( 'type' => 'text', 'label' => __( 'Search placeholder', 'fxt-core' ) ),
+					'apply'               => array( 'type' => 'text', 'label' => __( 'Apply button (shown without JavaScript)', 'fxt-core' ) ),
+					'sort_label'          => array( 'type' => 'text', 'label' => __( 'Sort label', 'fxt-core' ) ),
+					'sort_score'          => array( 'type' => 'text', 'label' => __( 'Sort option: research score', 'fxt-core' ) ),
+					'sort_recent'         => array( 'type' => 'text', 'label' => __( 'Sort option: recently reviewed', 'fxt-core' ) ),
+					'sort_deposit'        => array( 'type' => 'text', 'label' => __( 'Sort option: minimum deposit', 'fxt-core' ) ),
+					'results_heading'     => array( 'type' => 'text', 'label' => __( 'Result heading', 'fxt-core' ) ),
+					'results_heading_one' => array( 'type' => 'text', 'label' => __( 'Result heading for exactly one broker', 'fxt-core' ) ),
+					'no_country'          => array( 'type' => 'text', 'label' => __( '"No country selected" text for {country}', 'fxt-core' ) ),
+					'search_chip'         => array( 'type' => 'text', 'label' => __( 'Active search chip prefix', 'fxt-core' ) ),
+					'remove_filter'       => array( 'type' => 'text', 'label' => __( 'Remove filter (screen readers)', 'fxt-core' ) ),
+					'empty_title'         => array( 'type' => 'text', 'label' => __( 'No results: title', 'fxt-core' ) ),
+					'empty_text'          => array( 'type' => 'textarea', 'label' => __( 'No results: message', 'fxt-core' ) ),
+					'empty_button'        => array( 'type' => 'text', 'label' => __( 'No results: button', 'fxt-core' ) ),
+					'result_note'         => array( 'type' => 'textarea', 'label' => __( 'Result note (below the list)', 'fxt-core' ) ),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Directory filters: internal key => admin name. Keys are query parameters
+	 * and never change.
+	 *
+	 * @return array
+	 */
+	public static function directory_filter_keys() {
+		return array(
+			'country'      => __( 'Country', 'fxt-core' ),
+			'availability' => __( 'Availability', 'fxt-core' ),
+			'regulator'    => __( 'Regulation', 'fxt-core' ),
+			'platform'     => __( 'Trading platform', 'fxt-core' ),
+			'deposit'      => __( 'Minimum deposit', 'fxt-core' ),
+			'account'      => __( 'Account type', 'fxt-core' ),
+			'status'       => __( 'Research status', 'fxt-core' ),
+		);
+	}
+
+	/**
+	 * Default directory filter rows.
+	 *
+	 * @return array[]
+	 */
+	public static function default_directory_filters() {
+		return array(
+			array( 'key' => 'country', 'label' => __( 'Country', 'fxt-core' ), 'placeholder' => __( 'Select a country', 'fxt-core' ), 'description' => '', 'hidden' => false ),
+			array( 'key' => 'availability', 'label' => __( 'Availability', 'fxt-core' ), 'placeholder' => __( 'Any availability', 'fxt-core' ), 'description' => __( 'Select a country to use this filter.', 'fxt-core' ), 'hidden' => false ),
+			array( 'key' => 'regulator', 'label' => __( 'Regulation', 'fxt-core' ), 'placeholder' => __( 'Any regulator', 'fxt-core' ), 'description' => '', 'hidden' => false ),
+			array( 'key' => 'platform', 'label' => __( 'Trading platform', 'fxt-core' ), 'placeholder' => __( 'Any platform', 'fxt-core' ), 'description' => '', 'hidden' => false ),
+			array( 'key' => 'deposit', 'label' => __( 'Minimum deposit', 'fxt-core' ), 'placeholder' => __( 'Any amount', 'fxt-core' ), 'description' => '', 'hidden' => false ),
+			array( 'key' => 'account', 'label' => __( 'Account type', 'fxt-core' ), 'placeholder' => __( 'Any account type', 'fxt-core' ), 'description' => '', 'hidden' => false ),
+			array( 'key' => 'status', 'label' => __( 'Research status', 'fxt-core' ), 'placeholder' => __( 'Any status', 'fxt-core' ), 'description' => '', 'hidden' => false ),
+		);
+	}
+
+	/**
+	 * Default filter option names.
+	 *
+	 * @return array
+	 */
+	public static function default_directory_options() {
+		$availability = self::availability();
+		$status       = self::review_status();
+		return array(
+			'availability_yes'        => $availability['yes'],
+			'availability_restricted' => $availability['restricted'],
+			'availability_pending'    => $availability['pending'],
+			'status_published'        => $status['published'],
+			'status_updating'         => $status['updating'],
+			'status_pending'          => $status['pending'],
+			'deposit_zero'            => '$0',
+			/* translators: {amount} is a placeholder replaced by an amount in USD. Keep it as is. */
+			'deposit_band'            => __( 'Up to {amount}', 'fxt-core' ),
+		);
+	}
+
+	/**
+	 * Default text of the Broker Reviews page.
+	 *
+	 * @return array
+	 */
+	public static function default_directory_ui() {
+		return array(
+			'panel_title'         => __( 'Filter brokers', 'fxt-core' ),
+			'clear_all'           => __( 'Clear all', 'fxt-core' ),
+			'search_label'        => __( 'Search brokers', 'fxt-core' ),
+			'search_placeholder'  => __( 'Search brokers', 'fxt-core' ),
+			'apply'               => __( 'Apply filters', 'fxt-core' ),
+			'sort_label'          => __( 'Sort by', 'fxt-core' ),
+			'sort_score'          => __( 'Research score', 'fxt-core' ),
+			'sort_recent'         => __( 'Recently reviewed', 'fxt-core' ),
+			'sort_deposit'        => __( 'Minimum deposit', 'fxt-core' ),
+			/* translators: Keep {count} as is. */
+			'results_heading'     => __( '{count} forex brokers reviewed', 'fxt-core' ),
+			/* translators: Keep {count} as is. */
+			'results_heading_one' => __( '{count} forex broker reviewed', 'fxt-core' ),
+			'no_country'          => __( 'all countries', 'fxt-core' ),
+			'search_chip'         => __( 'Search', 'fxt-core' ),
+			'remove_filter'       => __( 'Remove filter', 'fxt-core' ),
+			'empty_title'         => __( 'No brokers match these filters.', 'fxt-core' ),
+			'empty_text'          => __( 'Try removing a filter, or choose another country. Some markets still have few verified brokers.', 'fxt-core' ),
+			'empty_button'        => __( 'Clear all filters', 'fxt-core' ),
+			'result_note'         => __( 'Each fact on a review is labelled by source: Tested, Verified at source or Broker-stated. Regulators are listed as the brand states them until checked against official registers.', 'fxt-core' ),
 		);
 	}
 
@@ -424,6 +634,9 @@ final class Schema {
 			'score_categories'     => self::default_categories(),
 			'deposit_bands'        => array( '0', '50', '100', '200' ),
 			'pages'                => array( 'directory' => null, 'compare' => null, 'evidence' => null, 'methodology' => null ),
+			'directory_filters'    => self::default_directory_filters(),
+			'directory_options'    => self::default_directory_options(),
+			'directory_ui'         => self::default_directory_ui(),
 		);
 	}
 }

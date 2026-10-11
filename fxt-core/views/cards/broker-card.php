@@ -26,18 +26,15 @@ $country = $market ? $market['name'] : $code;
 	</div>
 	<p class="broker-card__score">
 		<span class="broker-card__score-value"><?php echo esc_html( fxt_core_score_label( $broker ) ); ?></span>
-		<span class="broker-card__score-scale"><?php esc_html_e( '/ 5 research score', 'fxt-core' ); ?></span>
+		<?php if ( ! fxt_core_score_is_pending( $broker ) ) : ?>
+			<span class="broker-card__score-scale"><?php esc_html_e( '/ 5 research score', 'fxt-core' ); ?></span>
+		<?php endif; ?>
 	</p>
 	<?php echo fxt_core_regulators( $broker['regulators'], 3 ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	<dl class="kv">
 		<div class="kv__row"><dt><?php esc_html_e( 'Min deposit', 'fxt-core' ); ?></dt><dd><?php echo esc_html( fxt_core_min_deposit( $broker ) ); ?></dd></div>
 		<div class="kv__row"><dt><?php esc_html_e( 'Platforms', 'fxt-core' ); ?></dt><dd><?php echo esc_html( implode( ', ', fxt_core_platform_names( $broker, true ) ) ); ?></dd></div>
-		<div class="kv__row"><dt><?php esc_html_e( 'Countries researched', 'fxt-core' ); ?></dt><dd>
-			<?php
-			/* translators: 1: researched markets, 2: total markets */
-			printf( esc_html__( '%1$d of %2$d', 'fxt-core' ), count( Repository::tested_markets( $broker ) ), count( Repository::researched_markets() ) );
-			?>
-		</dd></div>
+		<div class="kv__row"><dt><?php esc_html_e( 'Deposit & withdrawal tests', 'fxt-core' ); ?></dt><dd><?php echo esc_html( fxt_core_methods_tested_text( $broker ) ); ?></dd></div>
 	</dl>
 	<div class="broker-card__foot">
 		<p class="broker-card__date">
