@@ -5,7 +5,7 @@ Production build of Prototype V3, packaged as two parts:
 | Gói | Vai trò |
 |---|---|
 | `fx-trading-today` (theme) | Presentation only: `theme.json`, CSS, PHP templates, header/footer, patterns, block styles |
-| `fxt-core` (plugin) | Data and logic: CPTs, taxonomies, meta, settings, 10 dynamic blocks, REST render, country picker, demo importer |
+| `fxt-core` (plugin) | Data and logic: CPTs, taxonomies, meta, settings, 12 blocks, REST render, country picker, demo importer |
 
 Data stays in the plugin, so content survives a theme change. The theme never reads meta keys directly; it calls the plugin's template API (`fxt_core_*`).
 
@@ -43,6 +43,10 @@ The importer:
 | **Score categories** (add / edit / delete / reorder, weight, description, evidence used) | **Settings > FX Trading Today > Score categories**. Weights must total 100; an invalid set is rejected | Homepage methodology, Methodology page, review score card, every broker score |
 | Directory "Minimum deposit" filter amounts | Settings > FX Trading Today > General > Minimum deposit filter | Directory |
 | **Broker Reviews filter text**: filter labels, placeholders, descriptions, order, show/hide, option names, panel title, sort labels, result heading, result note, empty-result text, clear buttons | **Settings > FX Trading Today > Broker Reviews filters**. Placeholders `{count}` and `{country}`; empty fields use the default wording | Broker Reviews page only. Broker data, filter keys and filtering logic never change with these labels |
+| **Country context on reviews** (heading, description, "Change country" link, accepting / accepting without entity / not accepting / unknown messages) and the default **Trader verdict for countries not accepted** | **Settings > FX Trading Today > Review page**. Placeholders `{broker}`, `{country}`, `{entity}`, `{regulator}`, `{jurisdiction}` | Country context box and verdict on every review |
+| Country-specific messages (all brokers in one country) | Broker Reviews > Countries > *country*: "Country context: …" (3 fields) | Overrides the Settings defaults for that country |
+| Broker + country message and **Trader verdict for this country** | Broker Reviews > *broker* > Broker data: conditions by country > *country*: "Country context message", "Trader verdict for this country" | Highest priority for that broker and country |
+| Sections hidden when residents are not accepted | Gutenberg: wrap them in the **Country eligibility section** block (demo: Regulation and client protection, Deposit and withdrawal) | Review body |
 | **Data sources** of each fact (Tested / Verified at source / Broker-stated), reference link, check date | Broker Reviews > *broker* > **Broker data: sources**; per legal entity: "Source of entity and licence data"; per country: "Availability source" | Source labels on the review page, directory rows, comparison table; eligible countries of the directory filter |
 | Test evidence (broker × country): period, account, summary, timeline, **each deposit/withdrawal test** (method, amount, date, time, fee, result, status, steps, broker/bank status, masked details, **screenshot**, **verified by/on**, note) | Broker Reviews > Test Evidence (sidebar: "Edit evidence data") | Evidence page, evidence viewer, index, review "Research evidence", homepage snapshot |
 | Author: name, photo, role, short/long bio, expertise, figures, principles, disclosure, **profile links** | Users > *user* > section "FX Trading Today author profile" | Bylines, author boxes, author page, Query Loop bylines, structured data |
@@ -91,6 +95,16 @@ Every block is server-rendered; data is never copied into the post content.
 - **Source labels**: Tested (our documented test), Verified at source (checked against an official or primary source), Broker-stated (published by the broker, not checked). Unclassified facts show "Source not classified". A fact marked Tested without published completed tests for that broker (and country, where it applies) shows "Needs review" and the broker screen lists it in a warning. A Verified or Tested label with an http(s) reference links to it; the check date is in the tooltip and screen-reader text.
 - **Score pending**: shown wherever a score is not complete yet (directory, cards, review, comparison, mega menu). No number and no "Research score" caption is shown with it.
 
+## 3c. Version 1.3 rules
+
+- **Country selector works the same on every page.** Choosing a country stores it (cookie) and refreshes every country-dependent region in place through REST: homepage blocks, comparison, broker reviews (badges, country context and the whole review body), evidence index. Nothing reloads. When a page comes from a full-page cache rendered for another country, the page corrects itself on load to the saved country, so the choice is kept while navigating.
+- **Eligibility** per review = the broker's "Availability" for the visitor's country. Only "Not accepting residents" is restricted: content inside **Country eligibility section** blocks is hidden, the table of contents follows, and the **Trader verdict** block shows the country row's verdict or the default verdict from Settings. "Availability pending" (unknown/unverified) never hides anything.
+- **Priority of texts**: broker + country row > country (Broker Reviews > Countries) > Settings > Review page > built-in default. Admin text is plain text; HTML is removed.
+- **Trader verdict** block: the verdict written in the block is the default; a country row verdict replaces it for that country (keeping the block's quote style; the "Most relevant for" line is kept only for accepted countries).
+- **Test Evidence pages** show "Last updated {date}" (post modification date) instead of Country and Test period; the evidence index shows "Last updated" too. Country, period and all relations stay in the record.
+- **Affiliate button** shows only "Affiliate button label" (default "Visit {broker}"). The link keeps `rel="sponsored nofollow"`, and the affiliate disclosure stays in the footer.
+- **Broker Reviews filter** uses its own parameter `?market=XX`, so it never changes or reads the site-wide `?country=`.
+
 ## 4. Country, cache, privacy
 
 - The country is a **preference**: `?country=XX` > cookie `fxt_country` > the default setting. The site **never reads location**.
@@ -125,6 +139,12 @@ Every block is server-rendered; data is never copied into the post content.
 63/63 automated checks through the admin screens and the frontend pass (headings and outline, country filter default/eligibility/order/privacy/no-JS/REST, count and grammar, methods tested and its reaction to publishing or unpublishing evidence, source labels including "Needs review", label/heading/note/option edits, hidden filters, filter order, placeholder safety, tab saving, importer rerun). The 47 interaction journeys, the 22 version 1.1 checks and the block-validity check of all 23 demo items still pass; the PHP log stays empty. Computed styles of the former headings are identical to version 1.1.
 
 Upgrading from 1.1: no re-import needed. Legal entities saved with the old "Verified on official register" checkbox read as "Verified at source" until saved again. Facts without a classification show "Source not classified" until an editor sets one. Filter text uses the defaults until the new settings tab is saved. The directory now uses its own country filter, so links such as "All brokers for Vietnam" only pre-select a country that qualifies.
+
+## 6d. Acceptance checks (version 1.3)
+
+53/53 checks through real admin screens and the browser pass: in-place country change on reviews (badges, context, sections, verdict, table of contents, author box kept), restore on accepted countries, unknown eligibility untouched, persistence across reviews / homepage / compare / evidence pages, `?country` in the URL, a page cached for another country corrected on load, directory `?market`, evidence Last updated, affiliate label, Review page settings, country and broker-country overrides with priority, section toggle in Gutenberg, block validity, importer rerun keeping admin text. The 63 version 1.2 checks, 47 interaction journeys, 22 version 1.1 checks and the block-validity check of all 23 demo items pass.
+
+Upgrading from 1.2: no re-import needed for the selector, evidence and button changes. To hide sections on existing reviews, wrap them in a **Country eligibility section** block and put the verdict quote in a **Trader verdict** block (or re-import the demo for the demo reviews). Links to the directory with `?country=` should use `?market=`.
 
 ## 7. Known differences from the prototype
 

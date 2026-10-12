@@ -9,7 +9,7 @@
 
 	const core = window.fxtCore || {};
 	// Query parameters. Labels are configurable in Admin; these keys are not.
-	const FILTERS = [ 'q', 'country', 'availability', 'regulator', 'platform', 'deposit', 'account', 'status', 'sort' ];
+	const FILTERS = [ 'q', 'market', 'availability', 'regulator', 'platform', 'deposit', 'account', 'status', 'sort' ];
 
 	function init( root ) {
 		const form = root.querySelector( '[data-dir-form]' );
@@ -37,7 +37,7 @@
 
 		// Availability is per country: usable only once a country is chosen.
 		function syncAvailability() {
-			const country = form.elements.namedItem( 'country' );
+			const country = form.elements.namedItem( 'market' );
 			const availability = form.elements.namedItem( 'availability' );
 			if ( ! availability ) {
 				return;
@@ -122,7 +122,7 @@
 		// change the visitor's saved country and does not reload the page.
 		root.addEventListener( 'change', ( event ) => {
 			if ( event.target.name && FILTERS.indexOf( event.target.name ) !== -1 ) {
-				if ( 'country' === event.target.name ) {
+				if ( 'market' === event.target.name ) {
 					syncAvailability();
 				}
 				schedule( 0 );

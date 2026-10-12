@@ -64,9 +64,9 @@ final class Assets {
 		$config = array(
 			'renderUrl' => esc_url_raw( rest_url( 'fxt/v1/render' ) ),
 			'cookie'    => Repository::COOKIE,
+			// The country this page was rendered for. country.js compares it with
+			// the saved choice, so pages served from a full-page cache still follow it.
 			'current'   => Repository::current_market(),
-			// Pages whose whole body depends on the country reload instead of refreshing regions.
-			'reload'    => is_singular( array( Content_Types::BROKER, Content_Types::EVIDENCE ) ),
 		);
 		wp_enqueue_script( 'fxt-core-country' );
 		wp_add_inline_script( 'fxt-core-country', 'window.fxtCore = ' . wp_json_encode( $config ) . ';', 'before' );

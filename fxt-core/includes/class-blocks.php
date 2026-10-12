@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Blocks {
 
-	const BLOCKS = array( 'country-brokers', 'broker-cards', 'broker-compare', 'broker-data', 'evidence-data', 'score-weights', 'broker-directory', 'evidence-list', 'evidence-snapshot', 'post-byline' );
+	const BLOCKS = array( 'country-brokers', 'broker-cards', 'broker-compare', 'broker-data', 'evidence-data', 'score-weights', 'broker-directory', 'evidence-list', 'evidence-snapshot', 'post-byline', 'eligibility-section', 'trader-verdict' );
 
 	/** @var bool Whether the evidence viewer markup still has to be printed. */
 	private static $viewer_pending = false;
@@ -224,30 +224,32 @@ final class Blocks {
 
 	/**
 	 * Read directory filters from a request. The country is the directory's
-	 * own filter: it defaults to no country (the visitor's saved country is
-	 * not applied here) and only countries offered by the filter are accepted.
+	 * own filter (query parameter "market", so it never collides with the
+	 * site-wide "country" preference): it defaults to no country, the
+	 * visitor's saved country is not applied here, and only countries
+	 * offered by the filter are accepted.
 	 *
 	 * @param array $source $_GET or REST args.
 	 * @return array
 	 */
 	public static function directory_filters( array $source ) {
-		$keys    = array( 'q', 'country', 'availability', 'regulator', 'platform', 'deposit', 'account', 'status' );
+		$keys    = array( 'q', 'market', 'availability', 'regulator', 'platform', 'deposit', 'account', 'status' );
 		$filters = array();
 		foreach ( $keys as $key ) {
 			$filters[ $key ] = isset( $source[ $key ] ) && is_scalar( $source[ $key ] ) ? sanitize_text_field( wp_unslash( (string) $source[ $key ] ) ) : '';
 		}
 		$filters['deposit'] = '' === $filters['deposit'] ? '' : (string) absint( $filters['deposit'] );
 
-		$country            = strtoupper( $filters['country'] );
-		$filters['country'] = in_array( $country, wp_list_pluck( Repository::directory_markets(), 'code' ), true ) ? $country : '';
-		if ( '' === $filters['country'] ) {
+		$country           = strtoupper( $filters['market'] );
+		$filters['market'] = in_array( $country, wp_list_pluck( Repository::directory_markets(), 'code' ), true ) ? $country : '';
+		if ( '' === $filters['market'] ) {
 			$filters['availability'] = ''; // Availability is per country.
 		}
 
 		// A hidden filter is never applied, even from a shared URL.
 		foreach ( Repository::setting( 'directory_filters' ) as $row ) {
 			if ( ! empty( $row['hidden'] ) ) {
-				$filters[ $row['key'] ] = '';
+				$filters[ self::directory_param( $row['key'] ) ] = '';
 			}
 		}
 
@@ -311,10 +313,21 @@ final class Blocks {
 			if ( ! $include_hidden && ! empty( $row['hidden'] ) ) {
 				continue;
 			}
-			$row['options']     = $options[ $row['key'] ];
-			$out[ $row['key'] ] = $row;
+			$row['options'] = $options[ $row['key'] ];
+			$out[ self::directory_param( $row['key'] ) ] = $row;
 		}
 		return $out;
+	}
+
+	/**
+	 * Query parameter of a directory filter. The "country" filter uses
+	 * "market" so it never collides with the site-wide ?country= preference.
+	 *
+	 * @param string $key Filter key (settings).
+	 * @return string
+	 */
+	public static function directory_param( $key ) {
+		return 'country' === $key ? 'market' : $key;
 	}
 
 	/**

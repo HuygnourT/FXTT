@@ -925,3 +925,6 @@
   line-height: 1.2;
   color: var(--color-ink);
 }
+
+/* Optional description under the country context heading (Settings > Review page). */
+.country-context__description { font-size: var(--text-small); color: var(--color-ink-2); }

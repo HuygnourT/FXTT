@@ -31,10 +31,10 @@ $compare = fxt_core_compare_url( array_merge( array( $broker['slug'] ), $others 
 	<?php if ( $broker['affiliate_url'] && ( ! isset( $args['show_affiliate'] ) || $args['show_affiliate'] ) ) : ?>
 		<a class="btn btn--secondary" href="<?php echo esc_url( $broker['affiliate_url'] ); ?>" rel="sponsored nofollow noopener" target="_blank">
 			<?php
+			// Only the label set in Admin (Affiliate button label); the affiliate
+			// disclosure is shown elsewhere on the page and rel="sponsored" stays.
 			/* translators: %s: broker name */
-			$cta_label = $broker['cta_label'] ? $broker['cta_label'] : sprintf( __( 'Visit %s', 'fxt-core' ), $broker['name'] );
-			/* translators: %s: button label */
-			echo esc_html( sprintf( __( '%s (affiliate link)', 'fxt-core' ), $cta_label ) );
+			echo esc_html( $broker['cta_label'] ? $broker['cta_label'] : sprintf( __( 'Visit %s', 'fxt-core' ), $broker['name'] ) );
 			?>
 			<?php echo fxt_core_icon( 'external', 'icon--sm' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<span class="u-visually-hidden"><?php esc_html_e( '(opens in a new tab)', 'fxt-core' ); ?></span>

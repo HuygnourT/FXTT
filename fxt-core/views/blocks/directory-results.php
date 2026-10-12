@@ -14,7 +14,7 @@ use FXT\Core\Blocks;
 defined( 'ABSPATH' ) || exit;
 
 $filters = $args['filters'];
-$code    = $filters['country'];
+$code    = $filters['market'];
 $market  = $code ? Repository::market( $code ) : null;
 $brokers = Blocks::filter_brokers( $filters, $code );
 $base    = $args['base_url'];
@@ -48,7 +48,7 @@ if ( 'score' !== $filters['sort'] ) {
 		<?php
 		foreach ( $active as $key => $text ) :
 			$without = array_diff_key( $query, array( $key => true ) );
-			if ( 'country' === $key ) {
+			if ( 'market' === $key ) {
 				unset( $without['availability'] ); // Availability needs a country.
 			}
 			?>

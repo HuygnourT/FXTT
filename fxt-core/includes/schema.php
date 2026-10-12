@@ -250,10 +250,12 @@ final class Schema {
 					'platform'       => array( 'type' => 'select', 'label' => __( 'Platform tests', 'fxt-core' ), 'options' => self::test_status() ),
 					'support'        => array( 'type' => 'select', 'label' => __( 'Support tests', 'fxt-core' ), 'options' => self::test_status() ),
 					'last_tested'    => array( 'type' => 'date', 'label' => __( 'Last tested', 'fxt-core' ) ),
+					'context'        => array( 'type' => 'textarea', 'label' => __( 'Country context message (optional)', 'fxt-core' ), 'help' => __( 'Replaces the default country message on this review for this country. Placeholders: {broker}, {country}, {entity}, {regulator}, {jurisdiction}.', 'fxt-core' ) ),
+					'verdict'        => array( 'type' => 'textarea', 'label' => __( 'Trader verdict for this country (optional)', 'fxt-core' ), 'help' => __( 'Replaces the Trader verdict for visitors from this country. Empty: the review verdict is used, or the default "not accepting residents" verdict (Settings) when this broker does not accept residents.', 'fxt-core' ) ),
 				),
 			),
 			'fxt_affiliate_url'   => array( 'type' => 'url', 'label' => __( 'Affiliate URL', 'fxt-core' ), 'help' => __( 'Rendered with rel="sponsored nofollow" and an "affiliate link" label. The button is hidden while this is empty.', 'fxt-core' ) ),
-			'fxt_cta_label'       => array( 'type' => 'text', 'label' => __( 'Affiliate button label', 'fxt-core' ), 'help' => __( 'Default: "Visit {broker}". "(affiliate link)" is always added.', 'fxt-core' ) ),
+			'fxt_cta_label'       => array( 'type' => 'text', 'label' => __( 'Affiliate button label', 'fxt-core' ), 'help' => __( 'Shown as is on the review button. Default: "Visit {broker}". The link keeps rel="sponsored nofollow"; the affiliate disclosure is shown elsewhere on the page.', 'fxt-core' ) ),
 			'fxt_sources'         => array(
 				'type'   => 'sources',
 				'label'  => __( 'Data sources', 'fxt-core' ),
@@ -365,6 +367,9 @@ final class Schema {
 		return array(
 			'fxt_iso'      => array( 'type' => 'text', 'label' => __( 'ISO code', 'fxt-core' ), 'help' => __( 'Two letters, e.g. VN', 'fxt-core' ) ),
 			'fxt_currency' => array( 'type' => 'text', 'label' => __( 'Local currency', 'fxt-core' ) ),
+			'fxt_ctx_accepting' => array( 'type' => 'textarea', 'label' => __( 'Country context: broker accepts residents (optional)', 'fxt-core' ), 'help' => __( 'Replaces the default message on every review for this country. Placeholders: {broker}, {country}, {entity}, {regulator}, {jurisdiction}.', 'fxt-core' ) ),
+			'fxt_ctx_restricted' => array( 'type' => 'textarea', 'label' => __( 'Country context: broker does not accept residents (optional)', 'fxt-core' ) ),
+			'fxt_ctx_unknown'   => array( 'type' => 'textarea', 'label' => __( 'Country context: eligibility not confirmed (optional)', 'fxt-core' ) ),
 			'fxt_status'   => array( 'type' => 'select', 'label' => __( 'Research status', 'fxt-core' ), 'options' => array( '' => __( 'Not researched', 'fxt-core' ), 'published' => __( 'Published', 'fxt-core' ), 'in-progress' => __( 'In progress', 'fxt-core' ), 'planned' => __( 'Planned', 'fxt-core' ) ), 'help' => __( 'Researched countries appear in country shortcuts and in "N of M countries researched".', 'fxt-core' ) ),
 		);
 	}
@@ -465,6 +470,24 @@ final class Schema {
 					'compare'     => array( 'type' => 'post', 'post_type' => 'page', 'label' => __( 'Compare Brokers', 'fxt-core' ) ),
 					'evidence'    => array( 'type' => 'post', 'post_type' => 'page', 'label' => __( 'Test Evidence', 'fxt-core' ) ),
 					'methodology' => array( 'type' => 'post', 'post_type' => 'page', 'label' => __( 'Research Methodology', 'fxt-core' ) ),
+				),
+			),
+
+			// Tab "Review page": country context and eligibility texts.
+			'country_context'      => array(
+				'type'   => 'group',
+				'tab'    => 'review',
+				'label'  => __( 'Country context on broker reviews', 'fxt-core' ),
+				'help'   => __( 'Shown under the review title for the visitor\'s country. Placeholders: {broker}, {country}, {entity}, {regulator}, {jurisdiction}. Order of priority: the message of the broker\'s country row (Broker data: conditions by country), then the country\'s own message (Broker Reviews > Countries), then these defaults. Empty fields use the default wording.', 'fxt-core' ),
+				'fields' => array(
+					'heading'             => array( 'type' => 'text', 'label' => __( 'Heading', 'fxt-core' ) ),
+					'description'         => array( 'type' => 'textarea', 'label' => __( 'Description (optional, shown under the heading)', 'fxt-core' ) ),
+					'change'              => array( 'type' => 'text', 'label' => __( 'Change country link', 'fxt-core' ) ),
+					'accepting'           => array( 'type' => 'textarea', 'label' => __( 'Accepting residents', 'fxt-core' ) ),
+					'accepting_no_entity' => array( 'type' => 'textarea', 'label' => __( 'Accepting residents, entity not researched yet', 'fxt-core' ) ),
+					'restricted'          => array( 'type' => 'textarea', 'label' => __( 'Not accepting residents', 'fxt-core' ) ),
+					'unknown'             => array( 'type' => 'textarea', 'label' => __( 'Unknown / unverified eligibility', 'fxt-core' ) ),
+					'restricted_verdict'  => array( 'type' => 'textarea', 'label' => __( 'Trader verdict when the broker does not accept residents', 'fxt-core' ), 'help' => __( 'Used when the broker\'s country row has no verdict of its own.', 'fxt-core' ) ),
 				),
 			),
 
@@ -585,6 +608,31 @@ final class Schema {
 	}
 
 	/**
+	 * Default country context texts. The defaults reproduce the wording of
+	 * version 1.2, so nothing changes until an editor edits them.
+	 *
+	 * @return array
+	 */
+	public static function default_country_context() {
+		return array(
+			/* translators: Keep {country} as is. */
+			'heading'             => __( 'Reviewing for {country}', 'fxt-core' ),
+			'description'         => '',
+			'change'              => __( 'Change country', 'fxt-core' ),
+			/* translators: Keep the {placeholders} as they are. */
+			'accepting'           => __( 'Clients in {country} are onboarded by {entity}, regulated by {regulator} in {jurisdiction}.', 'fxt-core' ),
+			/* translators: Keep {country} as is. */
+			'accepting_no_entity' => __( 'Available for {country}. Entity, payments and tests below may not apply to residents of this country.', 'fxt-core' ),
+			/* translators: Keep the {placeholders} as they are. */
+			'restricted'          => __( '{broker} does not accept residents of {country}. Regulation, client protection and payment details are hidden because they do not apply to you.', 'fxt-core' ),
+			/* translators: Keep {country} as is. */
+			'unknown'             => __( 'Availability pending for {country}. Entity, payments and tests below may not apply to residents of this country.', 'fxt-core' ),
+			/* translators: Keep the {placeholders} as they are. */
+			'restricted_verdict'  => __( '{broker} does not accept residents of {country}, so we do not recommend trying to open an account from there. Compare brokers that accept clients in {country} instead.', 'fxt-core' ),
+		);
+	}
+
+	/**
 	 * Default text of the Broker Reviews page.
 	 *
 	 * @return array
@@ -634,6 +682,7 @@ final class Schema {
 			'score_categories'     => self::default_categories(),
 			'deposit_bands'        => array( '0', '50', '100', '200' ),
 			'pages'                => array( 'directory' => null, 'compare' => null, 'evidence' => null, 'methodology' => null ),
+			'country_context'      => self::default_country_context(),
 			'directory_filters'    => self::default_directory_filters(),
 			'directory_options'    => self::default_directory_options(),
 			'directory_ui'         => self::default_directory_ui(),

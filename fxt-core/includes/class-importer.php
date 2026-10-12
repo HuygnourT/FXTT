@@ -296,6 +296,18 @@ final class Importer {
 			// The demo only marks which countries are under research.
 			update_term_meta( $country['term_id'], 'fxt_status', $market['status'] );
 			update_term_meta( $country['term_id'], '_fxt_demo_status', 1 );
+			// Example country texts: written only while empty, so an editor's own
+			// text is never replaced; remove() deletes them only if still unchanged.
+			foreach ( array( 'fxt_ctx_accepting', 'fxt_ctx_restricted', 'fxt_ctx_unknown' ) as $key ) {
+				if ( empty( $market[ $key ] ) ) {
+					continue;
+				}
+				$current = (string) get_term_meta( $country['term_id'], $key, true );
+				if ( '' === $current ) {
+					update_term_meta( $country['term_id'], $key, sanitize_textarea_field( $market[ $key ] ) );
+					update_term_meta( $country['term_id'], '_fxt_demo_' . $key, md5( sanitize_textarea_field( $market[ $key ] ) ) );
+				}
+			}
 		}
 		/* translators: 1: total countries, 2: researched countries */
 		$this->log[] = sprintf( __( '%1$d countries available (%2$d marked as researched)', 'fxt-core' ), count( Repository::markets() ), count( $markets ) );
@@ -914,6 +926,13 @@ final class Importer {
 		foreach ( is_wp_error( $flagged ) ? array() : $flagged as $term_id ) {
 			delete_term_meta( $term_id, 'fxt_status' );
 			delete_term_meta( $term_id, '_fxt_demo_status' );
+			foreach ( array( 'fxt_ctx_accepting', 'fxt_ctx_restricted', 'fxt_ctx_unknown' ) as $key ) {
+				$marker = (string) get_term_meta( $term_id, '_fxt_demo_' . $key, true );
+				if ( $marker && md5( (string) get_term_meta( $term_id, $key, true ) ) === $marker ) {
+					delete_term_meta( $term_id, $key );
+				}
+				delete_term_meta( $term_id, '_fxt_demo_' . $key );
+			}
 		}
 
 		delete_option( 'fxt_demo_imported' );

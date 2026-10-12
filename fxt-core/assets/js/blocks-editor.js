@@ -11,7 +11,7 @@
 	const el = wp.element.createElement;
 	const { __ } = wp.i18n;
 	const { registerBlockType } = wp.blocks;
-	const { InspectorControls, useBlockProps } = wp.blockEditor;
+	const { InspectorControls, useBlockProps, InnerBlocks } = wp.blockEditor;
 	const { PanelBody, RangeControl, SelectControl, TextControl, ToggleControl, CheckboxControl, Button, Disabled, Spinner } = wp.components;
 	const ServerSideRender = wp.serverSideRender;
 	const { useSelect } = wp.data;
@@ -314,6 +314,51 @@
 		'fxt/evidence-snapshot',
 		'fxt/post-byline',
 	];
+
+	/* ---------------------------------------------------------------------
+	 * Container blocks for country eligibility (review pages). Their inner
+	 * blocks are ordinary editorial content; PHP decides per country whether
+	 * they are shown (eligibility section) or replaced (trader verdict).
+	 * ------------------------------------------------------------------ */
+
+	registerBlockType( 'fxt/eligibility-section', {
+		edit( props ) {
+			const blockProps = useBlockProps( { className: 'fxt-eligibility-section' } );
+			return el(
+				'div',
+				blockProps,
+				el( InspectorControls, null, el( PanelBody, { title: __( 'Settings', 'fxt-core' ) },
+					el( ToggleControl, {
+						label: __( 'Hide when the broker does not accept residents of the visitor\'s country', 'fxt-core' ),
+						help: __( 'Countries with unknown or unverified eligibility always see this section.', 'fxt-core' ),
+						checked: !! props.attributes.hideWhenRestricted,
+						onChange: ( v ) => props.setAttributes( { hideWhenRestricted: v } ),
+					} )
+				) ),
+				el( 'p', { className: 'fxt-block-hint' }, props.attributes.hideWhenRestricted
+					? __( 'Country eligibility section: hidden for countries whose residents this broker does not accept.', 'fxt-core' )
+					: __( 'Country eligibility section: always shown.', 'fxt-core' ) ),
+				el( InnerBlocks, { templateLock: false } )
+			);
+		},
+		save: () => el( InnerBlocks.Content ),
+	} );
+
+	registerBlockType( 'fxt/trader-verdict', {
+		edit() {
+			const blockProps = useBlockProps( { className: 'fxt-trader-verdict' } );
+			return el(
+				'div',
+				blockProps,
+				el( 'p', { className: 'fxt-block-hint' }, __( 'Trader verdict: shown as written below. A country can replace it (Broker data: conditions by country > Trader verdict for this country); countries whose residents the broker does not accept get the default verdict from Settings > FX Trading Today > Review page.', 'fxt-core' ) ),
+				el( InnerBlocks, {
+					templateLock: false,
+					template: [ [ 'core/quote', { className: 'is-style-verdict' }, [ [ 'core/paragraph', {} ] ] ] ],
+				} )
+			);
+		},
+		save: () => el( InnerBlocks.Content ),
+	} );
 
 	names.forEach( ( name ) => {
 		registerBlockType( name, {

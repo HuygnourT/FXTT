@@ -40,7 +40,7 @@ $ui      = static function ( $key ) {
 				foreach ( $fields as $name => $field ) :
 					$field_id = $uid . '-' . $name;
 					// Availability depends on a country; it is disabled until one is chosen.
-					$disabled = 'availability' === $name && '' === $filters['country'];
+					$disabled = 'availability' === $name && '' === $filters['market'];
 					$hint     = '' !== (string) $field['description'] && ( 'availability' !== $name || $disabled );
 					?>
 					<div class="field" data-dir-field="<?php echo esc_attr( $name ); ?>">
@@ -63,7 +63,7 @@ $ui      = static function ( $key ) {
 
 	<section class="reviews-results" aria-labelledby="<?php echo esc_attr( $uid ); ?>-count">
 		<div class="results-bar">
-			<h2 class="results-bar__title" id="<?php echo esc_attr( $uid ); ?>-count" aria-live="polite" data-dir-count><?php echo esc_html( fxt_core_directory_heading( count( Blocks::filter_brokers( $filters, $filters['country'] ) ) ) ); ?></h2>
+			<h2 class="results-bar__title" id="<?php echo esc_attr( $uid ); ?>-count" aria-live="polite" data-dir-count><?php echo esc_html( fxt_core_directory_heading( count( Blocks::filter_brokers( $filters, $filters['market'] ) ) ) ); ?></h2>
 			<div class="results-bar__sort">
 				<label class="field__label" for="<?php echo esc_attr( $uid ); ?>-sort"><?php echo esc_html( $ui( 'sort_label' ) ); ?></label>
 				<select class="select" id="<?php echo esc_attr( $uid ); ?>-sort" name="sort" form="<?php echo esc_attr( $uid ); ?>-form">

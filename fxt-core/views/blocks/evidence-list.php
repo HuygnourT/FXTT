@@ -95,9 +95,8 @@ $pending_title   = $args['pendingTitle'] ? $args['pendingTitle'] : __( 'Testing 
 								/* translators: %d: number of payment tests */
 								echo ' &middot; ' . esc_html( sprintf( _n( '%d payment test', '%d payment tests', $tests, 'fxt-core' ), $tests ) );
 							}
-							if ( $record && $record['period']['to'] ) {
-								echo ' &middot; ' . esc_html( fxt_core_date( $record['period']['to'] ) );
-							}
+							/* translators: %s: date */
+							echo ' &middot; ' . esc_html( sprintf( __( 'Last updated %s', 'fxt-core' ), fxt_core_date( $row['modified'] ) ) );
 							?>
 						</span>
 						<span class="link-card__text"><?php echo esc_html( $row['title'] ); ?></span>

@@ -1,7 +1,8 @@
 /**
  * Table of contents: built from the H2 headings of the content (headings
  * without an anchor get one), then a scroll-spy marks the current section
- * with aria-current="true".
+ * with aria-current="true". Rebuilt after the content is refreshed for
+ * another country (event "fxt:regions"), since sections can appear or go.
  */
 ( function () {
 	'use strict';
@@ -10,11 +11,20 @@
 		return text.toLowerCase().normalize( 'NFD' ).replace( /[̀-ͯ]/g, '' ).replace( /[^a-z0-9]+/g, '-' ).replace( /^-|-$/g, '' ) || 'section';
 	}
 
+	const observers = new WeakMap();
+
 	function init( toc ) {
 		const content = toc.parentElement.querySelector( '.doc-content' );
 		if ( ! content ) {
 			return;
 		}
+		// Reset a previous build.
+		if ( observers.has( toc ) ) {
+			observers.get( toc ).disconnect();
+			observers.delete( toc );
+		}
+		toc.querySelectorAll( 'a' ).forEach( ( a ) => a.remove() );
+		toc.hidden = true;
 		const headings = Array.from( content.querySelectorAll( ':scope > h2, :scope > .wp-block-group > h2' ) ).filter( ( h ) => ! h.closest( '.author-box' ) );
 		if ( headings.length < 2 ) {
 			return;
@@ -54,8 +64,10 @@
 			entries.filter( ( e ) => e.isIntersecting ).forEach( ( e ) => setActive( e.target.id ) );
 		}, { rootMargin: '-15% 0px -75% 0px' } );
 		headings.forEach( ( h ) => observer.observe( h ) );
+		observers.set( toc, observer );
 		setActive( headings[ 0 ].id );
 	}
 
 	document.querySelectorAll( '[data-toc]' ).forEach( init );
+	document.addEventListener( 'fxt:regions', () => document.querySelectorAll( '[data-toc]' ).forEach( init ) );
 }() );

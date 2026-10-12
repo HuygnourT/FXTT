@@ -17,15 +17,10 @@ while ( have_posts() ) :
 	the_post();
 	$fxt_evidence = \FXT\Core\Repository::evidence( get_the_ID() );
 	$fxt_broker   = $fxt_evidence ? fxt_core_broker( $fxt_evidence['broker_id'] ) : null;
-	$fxt_market   = $fxt_evidence ? fxt_core_market( $fxt_evidence['market'] ) : null;
-	$fxt_country  = $fxt_market ? $fxt_market['name'] : '';
 	$fxt_done     = $fxt_evidence && 'completed' === $fxt_evidence['status'];
 	$fxt_crumbs   = array( array( __( 'Broker Reviews', 'fx-trading-today' ), fxt_tt_url( 'directory' ) ) );
 	if ( $fxt_broker ) {
 		$fxt_crumbs[] = array( $fxt_broker['name'], $fxt_broker['url'] );
-		if ( $fxt_country ) {
-			$fxt_crumbs[] = array( $fxt_country, add_query_arg( 'country', $fxt_evidence['market'], $fxt_broker['url'] ) . '#payments' );
-		}
 	}
 	$fxt_crumbs[] = array( __( 'Test Evidence', 'fx-trading-today' ), '' );
 	?>
@@ -41,8 +36,9 @@ while ( have_posts() ) :
 				<?php
 				fxt_tt_the_byline(
 					array(
-						'date'  => $fxt_evidence ? $fxt_evidence['period']['to'] : get_the_date( 'Y-m-d' ),
-						'label' => __( 'Published', 'fx-trading-today' ),
+						// Country and test period stay in the record; the page shows the last update.
+						'date'  => get_the_modified_date( 'Y-m-d' ),
+						'label' => __( 'Last updated', 'fx-trading-today' ),
 					)
 				);
 				?>

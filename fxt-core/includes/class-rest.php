@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Rest {
 
-	const VIEWS = array( 'country-brokers', 'broker-cards', 'compare', 'directory-results', 'evidence-list' );
+	const VIEWS = array( 'country-brokers', 'broker-cards', 'compare', 'directory-results', 'evidence-list', 'review-badges', 'review-context', 'review-body' );
 
 	/**
 	 * Hooks.
@@ -76,6 +76,12 @@ final class Rest {
 		$base = Blocks::safe_base( $request['base'] );
 
 		switch ( $request['view'] ) {
+			case 'review-badges':
+			case 'review-context':
+			case 'review-body':
+				$html = self::review_region( $request['view'], isset( $args['broker'] ) ? absint( $args['broker'] ) : 0 );
+				break;
+
 			case 'country-brokers':
 				$html = fxt_core_get_view( 'blocks/country-brokers', Blocks::hero_args( $args ) );
 				break;
@@ -115,8 +121,42 @@ final class Rest {
 				);
 		}
 
-		$response = new \WP_REST_Response( array( 'html' => $html ) );
+		$response = new \WP_REST_Response( array( 'html' => $html, 'country' => Repository::current_market() ) );
 		$response->header( 'Cache-Control', 'no-store' );
 		return $response;
+	}
+
+	/**
+	 * Country-dependent regions of a published broker review. The body is the
+	 * review's own block content rendered for the requested country, so
+	 * eligibility sections and the trader verdict follow the country.
+	 *
+	 * @param string $view   review-badges|review-context|review-body.
+	 * @param int    $post_id Broker post ID.
+	 * @return string HTML.
+	 */
+	private static function review_region( $view, $post_id ) {
+		$post = $post_id ? get_post( $post_id ) : null;
+		if ( ! $post || Content_Types::BROKER !== $post->post_type || 'publish' !== $post->post_status || post_password_required( $post ) ) {
+			return '';
+		}
+		$broker = Repository::broker( $post );
+		$code   = Repository::current_market();
+		if ( 'review-badges' === $view ) {
+			return fxt_core_get_view( 'broker/hero-badges', array( 'broker' => $broker, 'code' => $code ) );
+		}
+		if ( 'review-context' === $view ) {
+			return fxt_core_get_view( 'broker/country-context', array( 'broker' => $broker, 'code' => $code ) );
+		}
+		// The review body is rendered like the_content() on the page.
+		$previous        = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+		$GLOBALS['post'] = $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restored below.
+		setup_postdata( $post );
+		$html = apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- core filter.
+		$GLOBALS['post'] = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		if ( $previous ) {
+			setup_postdata( $previous );
+		}
+		return $html;
 	}
 }

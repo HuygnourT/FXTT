@@ -482,6 +482,7 @@ final class Admin {
 		$settings = Repository::settings();
 		$tabs     = array(
 			'general'   => __( 'General', 'fxt-core' ),
+			'review'    => __( 'Review page', 'fxt-core' ),
 			'directory' => __( 'Broker Reviews filters', 'fxt-core' ),
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- tab navigation only.
@@ -502,6 +503,8 @@ final class Admin {
 		echo '</nav>';
 		if ( 'directory' === $tab ) {
 			echo '<p>' . esc_html__( 'Text of the filter panel and results on the Broker Reviews page. This only changes what visitors read: broker data, filter keys and filtering logic stay the same.', 'fxt-core' ) . '</p>';
+		} elseif ( 'review' === $tab ) {
+			echo '<p>' . esc_html__( 'Default texts of broker reviews that depend on the visitor\'s country. Per country: Broker Reviews > Countries. Per broker and country: Broker data: conditions by country on each review. When a broker does not accept residents of a country, review sections wrapped in a "Country eligibility section" block are hidden and the Trader verdict block shows the verdict below (or the country row\'s own verdict).', 'fxt-core' ) . '</p>';
 		} else {
 			echo '<p>' . esc_html__( 'Site-wide content used by the theme and blocks. Brand name and logo are set in Appearance > Customize > Site Identity.', 'fxt-core' ) . '</p>';
 		}

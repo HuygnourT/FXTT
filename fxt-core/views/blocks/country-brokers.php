@@ -100,7 +100,7 @@ $method    = fxt_core_page_url( 'methodology' );
 	<?php if ( $directory ) : ?>
 		<?php
 		// The directory's country filter only offers countries with published research.
-		$fxt_dir_url = in_array( $code, wp_list_pluck( Repository::directory_markets(), 'code' ), true ) ? add_query_arg( 'country', $code, $directory ) : $directory;
+		$fxt_dir_url = in_array( $code, wp_list_pluck( Repository::directory_markets(), 'code' ), true ) ? add_query_arg( 'market', $code, $directory ) : $directory;
 		?>
 		<a class="link-strong" href="<?php echo esc_url( $fxt_dir_url ); ?>">
 			<?php

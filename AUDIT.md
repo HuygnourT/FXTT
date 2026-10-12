@@ -115,3 +115,18 @@ Upgrading from v1.0: no re-import needed. Old weights become score categories, t
 Data model changes (all additive): post meta `fxt_sources`; legal entity fields `source`, `source_ref`, `checked` (replaces `verified`); country row field `source`; settings `directory_filters`, `directory_options`, `directory_ui`. Broker cache key `fxt_core_brokers_v2`.
 
 Not changed on purpose (outside this brief): the global country dialog still lists all countries with their research status; the review page quick fact "Available in N of M researched countries" and the optional comparison row "Countries researched" still exist; the author field "Markets tested in person" is public when filled in.
+
+# Audit for version 1.3 (country selector, eligibility, evidence, CTA, country context)
+
+| Item | Before (1.2) | After (1.3) |
+|---|---|---|
+| Country change on reviews, evidence, directory | Full page reload (`fxtCore.reload`); with a full-page cache the reload returned the cached country, so only the homepage (REST regions) appeared to work | No reload anywhere: regions refresh through REST (`review-badges`, `review-context`, `review-body` added); on load a page rendered for another country re-syncs to the saved one |
+| Directory filter parameter | `?country=` (shared with the site preference, changed the header country) | `?market=` |
+| Not accepting residents | Only a message; all sections shown | `fxt/eligibility-section` hides wrapped sections; `fxt/trader-verdict` shows country/default verdict; TOC rebuilt |
+| Country context texts | `__()` strings in the view | Settings > Review page, per-country term fields, per broker-country row fields (priority in that order, reversed) |
+| Evidence header | Country, Test period, "Published" = period end | "Last updated" = post modified date; country crumb removed; index rows show Last updated |
+| Affiliate button | Label + "(affiliate link)" | Label only (rel="sponsored nofollow" kept, footer disclosure kept) |
+
+Data model (additive): market row fields `context`, `verdict`; country term meta `fxt_ctx_accepting`, `fxt_ctx_restricted`, `fxt_ctx_unknown`; setting `country_context`; blocks `fxt/eligibility-section`, `fxt/trader-verdict`.
+
+Kept on purpose: evidence titles/excerpts written by editors may still name the country, and the "Other test countries" chips on evidence pages still list the broker's other test countries.

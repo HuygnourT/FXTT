@@ -60,6 +60,26 @@ function fxt_core_broker( $post = null ) {
 }
 
 /**
+ * The broker of the review being rendered (page, block preview or REST
+ * refresh), or null outside a broker review.
+ *
+ * @return array|null
+ */
+function fxt_core_review_broker() {
+	$post = get_post();
+	if ( ! $post || FXT\Core\Content_Types::BROKER !== $post->post_type ) {
+		// Block editor preview requests pass the post being edited.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only preview context.
+		$id   = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
+		$post = $id ? get_post( $id ) : null;
+		if ( ! $post || FXT\Core\Content_Types::BROKER !== $post->post_type ) {
+			return null;
+		}
+	}
+	return Repository::broker( $post );
+}
+
+/**
  * Author profile.
  *
  * @param int $user_id User ID.
@@ -203,6 +223,42 @@ function fxt_core_methods_tested_text( array $broker ) {
 	$count = Repository::methods_tested( $broker );
 	/* translators: %d: number of payment methods */
 	return sprintf( _n( '%d method tested', '%d methods tested', $count, 'fxt-core' ), $count );
+}
+
+/**
+ * Fill an admin-edited text with placeholders. The text is escaped first,
+ * so editors cannot inject markup; placeholder values are HTML prepared by
+ * the caller (already escaped). Unknown {braces} stay as typed.
+ *
+ * @param string $text Plain text from settings or meta.
+ * @param array  $html Placeholder name => safe HTML.
+ * @return string HTML.
+ */
+function fxt_core_fill( $text, array $html ) {
+	$map = array();
+	foreach ( $html as $name => $value ) {
+		$map[ '{' . $name . '}' ] = $value;
+	}
+	return strtr( esc_html( wp_strip_all_tags( (string) $text ) ), $map );
+}
+
+/**
+ * Placeholder values for country context texts and verdicts.
+ *
+ * @param array  $broker Normalized broker.
+ * @param string $code   ISO code.
+ * @return array name => safe HTML.
+ */
+function fxt_core_context_vars( array $broker, $code ) {
+	$market = Repository::market( $code );
+	$entity = Repository::entity( $broker, $code );
+	return array(
+		'broker'       => esc_html( $broker['name'] ),
+		'country'      => esc_html( $market ? $market['name'] : $code ),
+		'entity'       => '<strong>' . fxt_core_text( $entity['name'] ) . '</strong>',
+		'regulator'    => '<strong>' . fxt_core_text( $entity['regulator'] ) . '</strong>' . ( '' !== (string) $entity['regulator'] ? ' ' . fxt_core_source_tag( Repository::entity_source( $broker, $code ) ) : '' ),
+		'jurisdiction' => esc_html( $entity['jurisdiction'] ? $entity['jurisdiction'] : __( 'TBD', 'fxt-core' ) ),
+	);
 }
 
 /**

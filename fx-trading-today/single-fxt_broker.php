@@ -21,9 +21,8 @@ while ( have_posts() ) :
 	the_post();
 	$fxt_broker  = fxt_core_broker();
 	$fxt_code    = fxt_core_current_market();
-	$fxt_market  = fxt_core_market( $fxt_code );
-	$fxt_country = $fxt_market ? $fxt_market['name'] : $fxt_code;
-	$fxt_avail   = \FXT\Core\Repository::availability( $fxt_broker, $fxt_code );
+	// Country-dependent regions are refreshed in place when the visitor changes country.
+	$fxt_region  = wp_json_encode( array( 'broker' => $fxt_broker['id'] ) );
 	?>
 	<article <?php post_class(); ?>>
 		<header class="review-hero">
@@ -38,13 +37,8 @@ while ( have_posts() ) :
 				?>
 				<div class="review-hero__grid">
 					<div class="review-hero__copy">
-						<div class="review-hero__badges">
-							<?php
-							echo fxt_core_badge( 'status', $fxt_broker['status'] ); // phpcs:ignore WordPress.Security.EscapeOutput
-							/* translators: %s: country */
-							echo fxt_core_badge( 'availability', $fxt_avail, sprintf( __( ' in %s', 'fx-trading-today' ), $fxt_country ) ); // phpcs:ignore WordPress.Security.EscapeOutput
-							echo fxt_core_sample(); // phpcs:ignore WordPress.Security.EscapeOutput
-							?>
+						<div class="review-hero__badges" data-fxt-region="review-badges" data-fxt-args="<?php echo esc_attr( $fxt_region ); ?>">
+							<?php fxt_core_view( 'broker/hero-badges', array( 'broker' => $fxt_broker, 'code' => $fxt_code ) ); ?>
 						</div>
 						<h1 class="page-hero__title">
 							<?php
@@ -64,7 +58,9 @@ while ( have_posts() ) :
 						<?php if ( has_excerpt() ) : ?>
 							<p class="page-hero__lead"><?php echo esc_html( get_the_excerpt() ); ?></p>
 						<?php endif; ?>
-						<?php fxt_core_view( 'broker/country-context', array( 'broker' => $fxt_broker, 'code' => $fxt_code ) ); ?>
+						<div data-fxt-region="review-context" data-fxt-args="<?php echo esc_attr( $fxt_region ); ?>">
+							<?php fxt_core_view( 'broker/country-context', array( 'broker' => $fxt_broker, 'code' => $fxt_code ) ); ?>
+						</div>
 						<?php fxt_core_view( 'broker/actions', array( 'broker' => $fxt_broker ) ); ?>
 						<?php if ( fxt_tt_setting( 'sample_labels', false ) ) : ?>
 							<p class="review-hero__meta"><?php esc_html_e( 'Research and test data on this page are sample data.', 'fx-trading-today' ); ?></p>
@@ -79,7 +75,8 @@ while ( have_posts() ) :
 			<nav class="toc" aria-label="<?php esc_attr_e( 'On this page', 'fx-trading-today' ); ?>" data-toc hidden>
 				<p class="u-label toc__title"><?php esc_html_e( 'On this page', 'fx-trading-today' ); ?></p>
 			</nav>
-			<div class="doc-content entry-content prose prose--review">
+			<?php // The author box is kept when the content is refreshed for another country. ?>
+			<div class="doc-content entry-content prose prose--review" data-fxt-region="review-body" data-fxt-args="<?php echo esc_attr( $fxt_region ); ?>" data-fxt-keep=".author-box">
 				<?php the_content(); ?>
 				<?php fxt_tt_the_author_box( (int) get_the_author_meta( 'ID' ), __( 'Reviewed by', 'fx-trading-today' ) ); ?>
 			</div>

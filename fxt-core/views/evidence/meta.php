@@ -1,6 +1,8 @@
 <?php
 /**
  * Evidence header: meta strip and links to the other test countries.
+ * Country and test period stay in the record (backend) but are not shown;
+ * the page shows "Last updated" from the post's modification date.
  *
  * @var array $args { evidence: array }
  * @package FXT\Core
@@ -11,19 +13,11 @@ use FXT\Core\Repository;
 defined( 'ABSPATH' ) || exit;
 
 $evidence = $args['evidence'];
-$market   = Repository::market( $evidence['market'] );
 $broker   = Repository::broker( $evidence['broker_id'] );
 $author   = Repository::author( $evidence['author_id'] );
 $statuses = array( 'completed' => __( 'Completed', 'fxt-core' ), 'in-progress' => __( 'In progress', 'fxt-core' ) );
 ?>
 <dl class="meta-strip">
-	<div><dt><?php esc_html_e( 'Country', 'fxt-core' ); ?></dt><dd><?php echo esc_html( $market ? $market['name'] : $evidence['market'] ); ?></dd></div>
-	<div><dt><?php esc_html_e( 'Test period', 'fxt-core' ); ?></dt><dd>
-		<?php
-		/* translators: 1: start date, 2: end date */
-		echo esc_html( sprintf( __( '%1$s to %2$s', 'fxt-core' ), fxt_core_date( $evidence['period']['from'] ), fxt_core_date( $evidence['period']['to'] ) ) );
-		?>
-	</dd></div>
 	<div><dt><?php esc_html_e( 'Account type', 'fxt-core' ); ?></dt><dd><?php echo fxt_core_text( $evidence['account'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dd></div>
 	<div><dt><?php esc_html_e( 'Research status', 'fxt-core' ); ?></dt><dd><?php echo esc_html( isset( $statuses[ $evidence['status'] ] ) ? $statuses[ $evidence['status'] ] : $evidence['status'] ); ?></dd></div>
 	<?php if ( $author ) : ?>

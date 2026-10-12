@@ -116,7 +116,7 @@ final class Repository {
 				}
 			}
 		}
-		foreach ( array( 'directory_options', 'directory_ui' ) as $group ) {
+		foreach ( array( 'directory_options', 'directory_ui', 'country_context' ) as $group ) {
 			// Empty fields fall back to the default wording, field by field.
 			$values             = isset( $saved[ $group ] ) && is_array( $saved[ $group ] ) ? $saved[ $group ] : array();
 			$settings[ $group ] = array_merge(
@@ -786,6 +786,86 @@ final class Repository {
 		);
 	}
 
+	/* ---------------------------------------------------------------------
+	 * Country eligibility (review pages)
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Eligibility of residents of a country for a broker. Only a confirmed
+	 * "Not accepting residents" counts as restricted; pending, unknown or
+	 * unverified rows stay "unknown" and never hide content.
+	 *
+	 * @param array  $broker Normalized broker.
+	 * @param string $code   ISO code.
+	 * @return string accepting|restricted|unknown
+	 */
+	public static function eligibility( array $broker, $code ) {
+		$availability = self::availability( $broker, $code );
+		if ( 'restricted' === $availability ) {
+			return 'restricted';
+		}
+		return 'yes' === $availability ? 'accepting' : 'unknown';
+	}
+
+	/**
+	 * Country context of a review: heading, description and the message for
+	 * the visitor's country. Texts are plain; placeholders are filled by
+	 * fxt_core_fill(). Priority for the message: the broker's country row,
+	 * then the country's own message, then the defaults in Settings.
+	 *
+	 * @param array  $broker Normalized broker.
+	 * @param string $code   ISO code.
+	 * @return array { status, heading, description, change, message, source }
+	 */
+	public static function country_context( array $broker, $code ) {
+		$texts  = self::setting( 'country_context' );
+		$status = self::eligibility( $broker, $code );
+		$entity = self::entity( $broker, $code );
+		$key    = 'restricted' === $status ? 'restricted' : ( 'accepting' === $status ? ( $entity['name'] ? 'accepting' : 'accepting_no_entity' ) : 'unknown' );
+
+		$message = $texts[ $key ];
+		$from    = 'default';
+		$market  = self::market( $code );
+		$term    = array( 'accepting' => 'fxt_ctx_accepting', 'accepting_no_entity' => 'fxt_ctx_accepting', 'restricted' => 'fxt_ctx_restricted', 'unknown' => 'fxt_ctx_unknown' );
+		$country = $market ? trim( (string) get_term_meta( $market['term_id'], $term[ $key ], true ) ) : '';
+		if ( '' !== $country ) {
+			$message = $country;
+			$from    = 'country';
+		}
+		$row = self::market_row( $broker, $code );
+		if ( $row && ! empty( $row['context'] ) && '' !== trim( (string) $row['context'] ) ) {
+			$message = (string) $row['context'];
+			$from    = 'broker';
+		}
+		return array(
+			'status'      => $status,
+			'heading'     => $texts['heading'],
+			'description' => $texts['description'],
+			'change'      => $texts['change'],
+			'message'     => $message,
+			'source'      => $from,
+		);
+	}
+
+	/**
+	 * Trader verdict override for the visitor's country.
+	 *
+	 * @param array  $broker Normalized broker.
+	 * @param string $code   ISO code.
+	 * @return string Plain text, or '' to keep the review's own verdict.
+	 */
+	public static function country_verdict( array $broker, $code ) {
+		$row = self::market_row( $broker, $code );
+		if ( $row && ! empty( $row['verdict'] ) && '' !== trim( (string) $row['verdict'] ) ) {
+			return (string) $row['verdict'];
+		}
+		if ( 'restricted' === self::eligibility( $broker, $code ) ) {
+			$texts = self::setting( 'country_context' );
+			return (string) $texts['restricted_verdict'];
+		}
+		return '';
+	}
+
 	/**
 	 * Availability of a broker in a market.
 	 *
@@ -914,6 +994,7 @@ final class Repository {
 				'market'    => (string) get_post_meta( $post->ID, 'fxt_market', true ),
 				'status'    => (string) get_post_meta( $post->ID, 'fxt_status', true ),
 				'date'      => $post->post_date,
+				'modified'  => get_post_modified_time( 'Y-m-d', false, $post ),
 				'author_id' => (int) $post->post_author,
 			);
 		}
@@ -989,6 +1070,7 @@ final class Repository {
 			'withdrawals' => $withdrawals,
 			'records'     => $records,
 			'author_id'   => (int) $post->post_author,
+			'modified'    => get_post_modified_time( 'Y-m-d', false, $post ),
 		);
 	}
 
