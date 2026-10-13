@@ -134,16 +134,51 @@
 		}
 	} );
 
-	// Market rows: reflect the availability choice in the collapsed summary.
+	// Tested residents rows: reflect the deposit test status in the collapsed summary.
 	document.addEventListener( 'change', ( event ) => {
 		const select = event.target;
-		if ( ! select.matches( '.fxt-market select[name$="[availability]"]' ) ) {
+		if ( ! select.matches( '.fxt-market select[name$="[deposit]"]' ) ) {
 			return;
 		}
 		const state = select.closest( '.fxt-market' ).querySelector( '.fxt-market__state' );
 		if ( state ) {
-			state.textContent = select.options[ select.selectedIndex ].text;
+			state.textContent = state.textContent.replace( /:.*$/, ': ' + select.options[ select.selectedIndex ].text );
 		}
+	} );
+
+	// Accepting residents: country checklist (search, only selected, select/clear shown, count).
+	document.querySelectorAll( '[data-fxt-checklist]' ).forEach( ( box ) => {
+		const search = box.querySelector( '[data-fxt-checklist-search]' );
+		const only = box.querySelector( '[data-fxt-checklist-only]' );
+		const count = box.querySelector( '[data-fxt-checklist-count]' );
+		const items = Array.from( box.querySelectorAll( 'li[data-name]' ) );
+		const normalize = ( t ) => t.toLowerCase().normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' ).trim();
+		function apply() {
+			const term = normalize( search.value );
+			items.forEach( ( li ) => {
+				const checked = li.querySelector( 'input' ).checked;
+				li.hidden = ( term && li.getAttribute( 'data-name' ).indexOf( term ) === -1 ) || ( only.checked && ! checked );
+			} );
+			const n = items.filter( ( li ) => li.querySelector( 'input' ).checked ).length;
+			if ( count ) {
+				count.textContent = ( 1 === n ? count.getAttribute( 'data-one' ) : count.getAttribute( 'data-many' ) ).replace( '%s', String( n ) );
+			}
+		}
+		search.addEventListener( 'input', apply );
+		only.addEventListener( 'change', apply );
+		box.addEventListener( 'change', ( e ) => {
+			if ( e.target.matches( 'li input' ) ) {
+				apply();
+			}
+		} );
+		box.querySelector( '[data-fxt-checklist-all]' ).addEventListener( 'click', () => {
+			items.filter( ( li ) => ! li.hidden ).forEach( ( li ) => { li.querySelector( 'input' ).checked = true; } );
+			apply();
+		} );
+		box.querySelector( '[data-fxt-checklist-none]' ).addEventListener( 'click', () => {
+			items.filter( ( li ) => ! li.hidden ).forEach( ( li ) => { li.querySelector( 'input' ).checked = false; } );
+			apply();
+		} );
 	} );
 }() );
 

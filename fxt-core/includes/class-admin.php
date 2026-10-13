@@ -28,7 +28,8 @@ final class Admin {
 				'fxt-research'  => array( __( 'Broker data: research summary', 'fxt-core' ), array( 'fxt_status', 'fxt_score', 'fxt_score_breakdown', 'fxt_reviewed', 'fxt_monogram', 'fxt_founded', 'fxt_min_deposit', 'fxt_currencies', 'fxt_other_platforms', 'fxt_affiliate_url', 'fxt_cta_label' ) ),
 				'fxt-trading'   => array( __( 'Broker data: trading conditions and costs', 'fxt-core' ), array( 'fxt_trading', 'fxt_costs', 'fxt_payments' ) ),
 				'fxt-entities'  => array( __( 'Broker data: accounts and legal entities', 'fxt-core' ), array( 'fxt_accounts', 'fxt_entities' ) ),
-				'fxt-markets'   => array( __( 'Broker data: conditions by country', 'fxt-core' ), array( 'fxt_markets' ) ),
+				'fxt-accepting' => array( __( 'Broker data: accepting residents', 'fxt-core' ), array( 'fxt_accepting' ) ),
+				'fxt-markets'   => array( __( 'Broker data: tested residents', 'fxt-core' ), array( 'fxt_markets' ) ),
 				'fxt-sources'   => array( __( 'Broker data: sources', 'fxt-core' ), array( 'fxt_sources' ) ),
 			),
 			Content_Types::EVIDENCE => array(
@@ -89,6 +90,10 @@ final class Admin {
 						echo '<div class="fxt-fields">';
 						foreach ( $box[1] as $key ) {
 							$value = get_post_meta( $post->ID, $key, true );
+							if ( 'fxt_accepting' === $key && ! metadata_exists( 'post', $post->ID, 'fxt_accepting' ) ) {
+								// Pre-1.4 brokers: start from the countries their rows marked "Available".
+								$value = Repository::accepting_config( $post->ID );
+							}
 							if ( 'fxt_entities' === $key && is_array( $value ) ) {
 								// Version 1.1 "verified" checkbox -> source select.
 								$value = array_map( array( Repository::class, 'normalize_entity' ), $value );
@@ -131,11 +136,8 @@ final class Admin {
 				$flags[] = sprintf( __( 'Legal entity %s', 'fxt-core' ), $entity['name'] ? $entity['name'] : $entity['key'] );
 			}
 		}
-		foreach ( (array) $broker['markets'] as $code => $row ) {
-			if ( 'review' === Repository::availability_source( $broker, $code )['source'] ) {
-				/* translators: %s: ISO country code */
-				$flags[] = sprintf( __( 'Availability in %s', 'fxt-core' ), $code );
-			}
+		if ( 'tested' === $broker['accepting']['source'] && ! Repository::has_published_tests( $broker['id'] ) ) {
+			$flags[] = __( 'Accepting residents (availability source)', 'fxt-core' );
 		}
 		if ( $flags ) {
 			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'Marked "Tested" but no published test evidence with completed tests backs it, so the site shows "Needs review":', 'fxt-core' ) . ' ' . esc_html( implode( ', ', $flags ) ) . '.</p></div>';

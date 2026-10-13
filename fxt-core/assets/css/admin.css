@@ -137,3 +137,10 @@
 .fxt-sources input[type="text"],
 .fxt-sources input[type="date"] { width: 100%; max-width: none; }
 .fxt-field--sources + .notice { margin-top: 12px; }
+
+/* Accepting residents: country checklist */
+.fxt-checklist__tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 4px 0 8px; }
+.fxt-checklist__count { color: #50575e; }
+.fxt-checklist__list { columns: 4 14rem; column-gap: 16px; max-height: 320px; overflow: auto; margin: 0; padding: 8px 12px; border: 1px solid #c3c4c7; background: #fff; }
+.fxt-checklist__list li { break-inside: avoid; margin: 0 0 4px; }
+.fxt-checklist__code { color: #8c8f94; font-size: 11px; }

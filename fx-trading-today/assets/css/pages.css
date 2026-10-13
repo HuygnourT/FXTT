@@ -41,7 +41,9 @@
   overflow: hidden;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lg);
-  background: var(--color-line);
+  /* Cell lines come from the items (below), so a row that is not full
+     (a fact hidden for some countries) ends on the card colour, not grey. */
+  background: var(--color-surface);
 }
 
 .fact-grid__item {
@@ -50,6 +52,7 @@
   gap: 6px;
   padding: var(--space-4);
   background: var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-line);
 }
 
 .fact-grid__item dt {

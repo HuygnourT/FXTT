@@ -236,13 +236,23 @@ final class Schema {
 					'checked'      => array( 'type' => 'date', 'label' => __( 'Checked on', 'fxt-core' ) ),
 				),
 			),
+			// Single source of truth for where the broker accepts residents.
+			'fxt_accepting'       => array(
+				'type'   => 'group',
+				'label'  => __( 'Accepting residents', 'fxt-core' ),
+				'help'   => __( 'Tick every country whose residents this broker accepts. Countries left unticked are shown as "Not accepting residents" (only once at least one country is ticked; until then eligibility shows as pending). The source below applies to this whole list and is shown in Quick Facts.', 'fxt-core' ),
+				'fields' => array(
+					'countries' => array( 'type' => 'country_checklist', 'label' => __( 'Countries where residents are accepted', 'fxt-core' ) ),
+					'source'    => array( 'type' => 'select', 'label' => __( 'Availability source', 'fxt-core' ), 'options' => self::sources(), 'help' => __( 'Tested is shown only for countries with published test evidence; elsewhere it shows "Needs review".', 'fxt-core' ) ),
+					'ref'       => array( 'type' => 'text', 'label' => __( 'Reference (URL or note)', 'fxt-core' ) ),
+					'checked'   => array( 'type' => 'date', 'label' => __( 'Checked on', 'fxt-core' ) ),
+				),
+			),
 			'fxt_markets'         => array(
 				'type'   => 'market_map',
-				'label'  => __( 'Conditions by country', 'fxt-core' ),
-				'help'   => __( 'Availability, entity and test status for each market. Countries are managed under Broker Reviews > Markets.', 'fxt-core' ),
+				'label'  => __( 'Tested residents', 'fxt-core' ),
+				'help'   => __( 'Only countries where this broker was tested or researched in detail: legal entity, local payments, test status and optional texts. Independent from Accepting residents: an accepted country is not tested until it is added here.', 'fxt-core' ),
 				'fields' => array(
-					'availability'   => array( 'type' => 'select', 'label' => __( 'Availability', 'fxt-core' ), 'options' => self::availability() ),
-					'source'         => array( 'type' => 'select', 'label' => __( 'Availability source', 'fxt-core' ), 'options' => self::sources(), 'help' => __( '"Tested" needs published test evidence for this country.', 'fxt-core' ) ),
 					'entity_key'     => array( 'type' => 'text', 'label' => __( 'Entity key', 'fxt-core' ) ),
 					'local_payments' => array( 'type' => 'text', 'label' => __( 'Local payment methods', 'fxt-core' ) ),
 					'deposit'        => array( 'type' => 'select', 'label' => __( 'Deposit tests', 'fxt-core' ), 'options' => self::test_status() ),

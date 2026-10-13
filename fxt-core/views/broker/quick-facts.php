@@ -13,10 +13,8 @@ defined( 'ABSPATH' ) || exit;
 $broker    = $args['broker'];
 $code      = $args['code'];
 $entity    = Repository::entity( $broker, $code );
-$available = 0;
-foreach ( Repository::researched_markets() as $fxt_market ) {
-	$available += 'yes' === Repository::availability( $broker, $fxt_market['code'] ) ? 1 : 0;
-}
+$market    = Repository::market( $code );
+$available = Repository::accepting_count( $broker );
 $account_names = wp_list_pluck( $broker['accounts'], 'name' );
 $tag           = 'fxt_core_source_tag';
 ?>
@@ -25,10 +23,12 @@ $tag           = 'fxt_core_source_tag';
 		<dt><?php esc_html_e( 'Regulators (group)', 'fxt-core' ); ?> <?php echo $tag( Repository::source( $broker, 'regulators' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dt>
 		<dd><?php echo fxt_core_regulators( $broker['regulators'] ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in helper. ?></dd>
 	</div>
-	<div class="fact-grid__item">
-		<dt><?php /* translators: %s: ISO country code */ printf( esc_html__( 'Legal entity for %s', 'fxt-core' ), esc_html( $code ) ); ?> <?php echo $tag( Repository::entity_source( $broker, $code ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dt>
-		<dd><?php echo fxt_core_text( $entity['name'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dd>
-	</div>
+	<?php if ( Repository::is_tested_resident( $broker, $code ) ) : // Country-specific entity data only for Tested residents. ?>
+		<div class="fact-grid__item">
+			<dt><?php /* translators: %s: country name */ printf( esc_html__( 'Legal entity for %s', 'fxt-core' ), esc_html( $market ? $market['name'] : $code ) ); ?> <?php echo $tag( Repository::entity_source( $broker, $code ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dt>
+			<dd><?php echo fxt_core_text( $entity['name'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dd>
+		</div>
+	<?php endif; ?>
 	<div class="fact-grid__item">
 		<dt><?php esc_html_e( 'Minimum deposit', 'fxt-core' ); ?> <?php echo $tag( Repository::source( $broker, 'min_deposit' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dt>
 		<dd><?php echo esc_html( fxt_core_min_deposit( $broker ) ); ?></dd>
@@ -55,8 +55,12 @@ $tag           = 'fxt_core_source_tag';
 			<?php echo fxt_core_badge( 'availability', Repository::availability( $broker, $code ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<span class="muted">
 				<?php
-				/* translators: 1: number of countries, 2: researched countries */
-				printf( esc_html__( 'Available in %1$d of %2$d researched countries', 'fxt-core' ), (int) $available, count( Repository::researched_markets() ) );
+				if ( empty( $broker['accepting']['configured'] ) ) {
+					esc_html_e( 'Accepted countries not confirmed yet', 'fxt-core' );
+				} else {
+					/* translators: %s: number of countries whose residents are accepted */
+					printf( esc_html( _n( 'Available in %s country', 'Available in %s countries', $available, 'fxt-core' ) ), esc_html( number_format_i18n( $available ) ) );
+				}
 				?>
 			</span>
 		</dd>

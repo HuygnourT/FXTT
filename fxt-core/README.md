@@ -45,7 +45,7 @@ The importer:
 | **Broker Reviews filter text**: filter labels, placeholders, descriptions, order, show/hide, option names, panel title, sort labels, result heading, result note, empty-result text, clear buttons | **Settings > FX Trading Today > Broker Reviews filters**. Placeholders `{count}` and `{country}`; empty fields use the default wording | Broker Reviews page only. Broker data, filter keys and filtering logic never change with these labels |
 | **Country context on reviews** (heading, description, "Change country" link, accepting / accepting without entity / not accepting / unknown messages) and the default **Trader verdict for countries not accepted** | **Settings > FX Trading Today > Review page**. Placeholders `{broker}`, `{country}`, `{entity}`, `{regulator}`, `{jurisdiction}` | Country context box and verdict on every review |
 | Country-specific messages (all brokers in one country) | Broker Reviews > Countries > *country*: "Country context: …" (3 fields) | Overrides the Settings defaults for that country |
-| Broker + country message and **Trader verdict for this country** | Broker Reviews > *broker* > Broker data: conditions by country > *country*: "Country context message", "Trader verdict for this country" | Highest priority for that broker and country |
+| Broker + country message and **Trader verdict for this country** | Broker Reviews > *broker* > Broker data: tested residents > *country*: "Country context message", "Trader verdict for this country" | Highest priority for that broker and country |
 | Sections hidden when residents are not accepted | Gutenberg: wrap them in the **Country eligibility section** block (demo: Regulation and client protection, Deposit and withdrawal) | Review body |
 | **Data sources** of each fact (Tested / Verified at source / Broker-stated), reference link, check date | Broker Reviews > *broker* > **Broker data: sources**; per legal entity: "Source of entity and licence data"; per country: "Availability source" | Source labels on the review page, directory rows, comparison table; eligible countries of the directory filter |
 | Test evidence (broker × country): period, account, summary, timeline, **each deposit/withdrawal test** (method, amount, date, time, fee, result, status, steps, broker/bank status, masked details, **screenshot**, **verified by/on**, note) | Broker Reviews > Test Evidence (sidebar: "Edit evidence data") | Evidence page, evidence viewer, index, review "Research evidence", homepage snapshot |
@@ -105,6 +105,19 @@ Every block is server-rendered; data is never copied into the post content.
 - **Affiliate button** shows only "Affiliate button label" (default "Visit {broker}"). The link keeps `rel="sponsored nofollow"`, and the affiliate disclosure stays in the footer.
 - **Broker Reviews filter** uses its own parameter `?market=XX`, so it never changes or reads the site-wide `?country=`.
 
+## 3d. Version 1.4 rules: Accepting residents and Tested residents
+
+Each broker has two independent country sections:
+
+| Section | What it holds | Used for |
+|---|---|---|
+| **Broker data: accepting residents** | Checklist of all countries (search, "show selected only", select/clear shown, live count) + one **Availability source** (with reference and date) for the whole list | The only source of availability: hero badge, Quick Facts, country message, hidden sections and verdict, homepage "Brokers available in…", comparison, directory filter. Unticked countries = **Not accepting residents** (once at least one country is ticked; with none ticked, eligibility shows as pending everywhere) |
+| **Broker data: tested residents** | Only countries researched in detail: Entity key, local payments, deposit/withdrawal/platform/support test status, last tested, optional country message and verdict | Country-specific legal entity (Quick Facts, regulation chain, comparison, country message), payments, test status, evidence. Adding a country here never makes it "accepting" |
+
+Quick Facts: **"Legal entity for {country name}"** is shown only for Tested residents; **Country availability** shows the badge for the visitor's country, the Accepting residents source label and "Available in {n} countries" = number of ticked countries.
+
+Upgrading from 1.3: brokers keep working without re-saving. Until a broker is saved, its accepted countries are read from the old rows marked "Available" (and their shared source). Saving the broker stores the checklist and removes the old availability fields from its country rows; rows that only held availability can then be removed from Tested residents.
+
 ## 4. Country, cache, privacy
 
 - The country is a **preference**: `?country=XX` > cookie `fxt_country` > the default setting. The site **never reads location**.
@@ -145,6 +158,10 @@ Upgrading from 1.1: no re-import needed. Legal entities saved with the old "Veri
 53/53 checks through real admin screens and the browser pass: in-place country change on reviews (badges, context, sections, verdict, table of contents, author box kept), restore on accepted countries, unknown eligibility untouched, persistence across reviews / homepage / compare / evidence pages, `?country` in the URL, a page cached for another country corrected on load, directory `?market`, evidence Last updated, affiliate label, Review page settings, country and broker-country overrides with priority, section toggle in Gutenberg, block validity, importer rerun keeping admin text. The 63 version 1.2 checks, 47 interaction journeys, 22 version 1.1 checks and the block-validity check of all 23 demo items pass.
 
 Upgrading from 1.2: no re-import needed for the selector, evidence and button changes. To hide sections on existing reviews, wrap them in a **Country eligibility section** block and put the verdict quote in a **Trader verdict** block (or re-import the demo for the demo reviews). Links to the directory with `?country=` should use `?market=`.
+
+## 6e. Acceptance checks (version 1.4)
+
+31/31 checks through the broker edit screen and the frontend: two separate boxes, full checklist with search / selected-only / select-clear / count, migrated ticks, accepted vs not accepting, availability source in Quick Facts, count of ticked countries only, entity named by country and shown only for tested residents, independence of the two sections in both directions, homepage / comparison / directory following the list, empty list = pending, importer restore. All earlier suites pass (v1.3 51/51, v1.2 63/63, journeys 47/47, v1.1 22/22) and every demo item is valid in Gutenberg.
 
 ## 7. Known differences from the prototype
 

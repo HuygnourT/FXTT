@@ -1,0 +1,13 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/trader-verdict",
+	"title": "Trader verdict",
+	"category": "fxt",
+	"icon": "format-quote",
+	"description": "The review's Trader verdict (edit it inside the block). For the visitor's country it is replaced by the verdict of the broker's country row, or by the default verdict for countries whose residents the broker does not accept.",
+	"textdomain": "fxt-core",
+	"supports": { "html": false, "reusable": false },
+	"editorScript": "fxt-core-blocks",
+	"render": "file:./render.php"
+}

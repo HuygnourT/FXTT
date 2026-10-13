@@ -127,6 +127,20 @@ final class Fields {
 				}
 				return $rows ? $rows : null;
 
+			case 'country_checklist':
+				$valid = array();
+				foreach ( Repository::markets() as $market ) {
+					$valid[ $market['code'] ] = true;
+				}
+				$codes = array();
+				foreach ( is_array( $raw ) ? $raw : preg_split( '/[\s,]+/', (string) $raw ) as $code ) {
+					$code = strtoupper( sanitize_key( (string) $code ) );
+					if ( isset( $valid[ $code ] ) ) {
+						$codes[ $code ] = $code;
+					}
+				}
+				return $codes ? array_values( $codes ) : null;
+
 			case 'sources':
 				$map = array();
 				$raw = is_array( $raw ) ? $raw : array();
@@ -222,6 +236,7 @@ final class Fields {
 			case 'media':
 				return array( 'type' => array( 'integer', 'null' ) );
 			case 'list':
+			case 'country_checklist':
 				return array( 'type' => array( 'array', 'null' ), 'items' => array( 'type' => 'string' ) );
 			case 'group':
 				return array( 'type' => array( 'object', 'null' ), 'properties' => self::rest_properties( $field['fields'] ) );
@@ -273,6 +288,7 @@ final class Fields {
 			'post'       => 'integer',
 			'media'      => 'integer',
 			'list'       => 'array',
+			'country_checklist' => 'array',
 			'repeater'   => 'array',
 			'group'      => 'object',
 			'market_map' => 'object',
@@ -297,7 +313,7 @@ final class Fields {
 		$type = $field['type'];
 		echo '<div class="fxt-field fxt-field--' . esc_attr( $type ) . '">';
 
-		if ( in_array( $type, array( 'group', 'repeater', 'market_map', 'sources' ), true ) ) {
+		if ( in_array( $type, array( 'group', 'repeater', 'market_map', 'sources', 'country_checklist' ), true ) ) {
 			echo '<p class="fxt-field__label">' . esc_html( $field['label'] ) . '</p>';
 		} elseif ( 'checkbox' !== $type ) {
 			echo '<label class="fxt-field__label" for="' . esc_attr( $id ) . '">' . esc_html( $field['label'] ) . '</label>';
@@ -415,6 +431,10 @@ final class Fields {
 				self::render_sources( $field, $name, is_array( $value ) ? $value : array(), $id );
 				break;
 
+			case 'country_checklist':
+				self::render_country_checklist( $name, is_array( $value ) ? $value : array(), $id );
+				break;
+
 			case 'url':
 			case 'date':
 			case 'datetime':
@@ -433,6 +453,49 @@ final class Fields {
 					esc_attr( (string) $value )
 				);
 		}
+	}
+
+	/**
+	 * Every country (A to Z) as a checkbox, with a search box, a live count
+	 * and select all / clear; admin.js handles the filtering.
+	 *
+	 * @param string $name  Input name.
+	 * @param array  $value Selected ISO codes.
+	 * @param string $id    DOM id.
+	 */
+	private static function render_country_checklist( $name, array $value, $id ) {
+		$selected = array_flip( array_map( 'strtoupper', $value ) );
+		echo '<div class="fxt-checklist" data-fxt-checklist>';
+		echo '<p class="fxt-checklist__tools">';
+		printf( '<label class="screen-reader-text" for="%1$s-search">%2$s</label><input type="search" id="%1$s-search" class="regular-text" placeholder="%2$s" data-fxt-checklist-search autocomplete="off">', esc_attr( $id ), esc_attr__( 'Search countries', 'fxt-core' ) );
+		printf( ' <button type="button" class="button" data-fxt-checklist-all>%s</button>', esc_html__( 'Select all shown', 'fxt-core' ) );
+		printf( ' <button type="button" class="button" data-fxt-checklist-none>%s</button>', esc_html__( 'Clear shown', 'fxt-core' ) );
+		printf( ' <label><input type="checkbox" data-fxt-checklist-only> %s</label>', esc_html__( 'Show selected only', 'fxt-core' ) );
+		/* translators: %s: number of selected countries */
+		printf(
+			' <span class="fxt-checklist__count" data-fxt-checklist-count data-one="%s" data-many="%s" aria-live="polite">%s</span>',
+			/* translators: %s: number of selected countries (singular) */
+			esc_attr__( '%s country selected', 'fxt-core' ),
+			/* translators: %s: number of selected countries (plural) */
+			esc_attr__( '%s countries selected', 'fxt-core' ),
+			/* translators: %s: number of selected countries */
+			esc_html( sprintf( _n( '%s country selected', '%s countries selected', count( $selected ), 'fxt-core' ), number_format_i18n( count( $selected ) ) ) )
+		);
+		echo '</p>';
+		// An empty marker so an empty selection is still submitted (and saved as empty).
+		printf( '<input type="hidden" name="%s[]" value="">', esc_attr( $name ) );
+		echo '<ul class="fxt-checklist__list">';
+		foreach ( Repository::markets() as $market ) {
+			printf(
+				'<li data-name="%4$s"><label><input type="checkbox" name="%1$s[]" value="%2$s"%3$s> %5$s <span class="fxt-checklist__code">%2$s</span></label></li>',
+				esc_attr( $name ),
+				esc_attr( $market['code'] ),
+				isset( $selected[ $market['code'] ] ) ? ' checked' : '',
+				esc_attr( strtolower( remove_accents( $market['name'] ) . ' ' . $market['code'] ) ),
+				esc_html( $market['name'] )
+			);
+		}
+		echo '</ul></div>';
 	}
 
 	/**
@@ -514,8 +577,11 @@ final class Fields {
 	 * @param bool   $open     Render expanded.
 	 */
 	private static function render_market_row( array $field, $name, $code, $country, array $row, $id, $open = false ) {
-		$avail = isset( $row['availability'] ) ? $row['availability'] : 'pending';
-		$label = Schema::availability();
+		// Summary = deposit test status (availability lives in "Accepting residents").
+		$avail = isset( $row['deposit'] ) ? (string) $row['deposit'] : '';
+		$label = Schema::test_status();
+		/* translators: %s: test status */
+		$label = array_map( static function ( $l ) { return sprintf( __( 'Deposit tests: %s', 'fxt-core' ), $l ); }, $label );
 		printf(
 			'<details class="fxt-market" data-fxt-market="%1$s"%5$s><summary><strong>%1$s</strong> %2$s <span class="fxt-market__state">%3$s</span></summary><div class="fxt-group">',
 			esc_attr( $code ),

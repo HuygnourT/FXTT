@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/eligibility-section",
+	"title": "Country eligibility section",
+	"category": "fxt",
+	"icon": "location-alt",
+	"description": "Wraps part of a broker review (for example Regulation or Deposit and withdrawal). Hidden when the broker does not accept residents of the visitor's country; shown for accepted and unconfirmed countries.",
+	"textdomain": "fxt-core",
+	"attributes": {
+		"hideWhenRestricted": { "type": "boolean", "default": true }
+	},
+	"supports": { "html": false, "reusable": false },
+	"editorScript": "fxt-core-blocks",
+	"render": "file:./render.php"
+}

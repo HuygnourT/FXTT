@@ -130,3 +130,17 @@ Not changed on purpose (outside this brief): the global country dialog still lis
 Data model (additive): market row fields `context`, `verdict`; country term meta `fxt_ctx_accepting`, `fxt_ctx_restricted`, `fxt_ctx_unknown`; setting `country_context`; blocks `fxt/eligibility-section`, `fxt/trader-verdict`.
 
 Kept on purpose: evidence titles/excerpts written by editors may still name the country, and the "Other test countries" chips on evidence pages still list the broker's other test countries.
+
+# Audit for version 1.4 (Accepting residents / Tested residents)
+
+| Item | Before (1.3) | After (1.4) |
+|---|---|---|
+| Availability per country | Select in each "Conditions by country" row (only countries added as rows; others "pending") | `fxt_accepting.countries` checklist of all countries; unticked = Not accepting (once configured) |
+| Availability source | Per country row | One source for the list (`fxt_accepting.source/ref/checked`), shown in Quick Facts |
+| Country rows | Mixed availability + test data | "Tested residents": test data, entity, payments, texts only |
+| Quick Facts entity | "Legal entity for VN", first entity as fallback for any country | "Legal entity for Vietnam", only for Tested residents (`Repository::entity()` returns empty elsewhere) |
+| Quick Facts count | "Available in N of M researched countries" | "Available in N countries" = ticked countries |
+| Directory eligible countries | Rows with availability source tested/verified | Ticked countries when the list source is tested/verified, plus published evidence |
+| Fact grid | Grey gap when a fact is hidden | Lines drawn by items; short rows end on the card colour |
+
+Migration: read-time from v1.3 rows (`availability = yes`, shared `source`) until the broker is saved; nothing is deleted. Broker cache key `fxt_core_brokers_v3`.

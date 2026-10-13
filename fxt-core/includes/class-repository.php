@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Repository {
 
-	const CACHE_KEY     = 'fxt_core_brokers_v2'; // v2: sources, normalized entities.
+	const CACHE_KEY     = 'fxt_core_brokers_v3'; // v3: accepting residents.
 	const COOKIE        = 'fxt_country';
 	const SETTINGS      = 'fxt_settings';
 
@@ -56,7 +56,8 @@ final class Repository {
 	 */
 	public static function flush() {
 		delete_transient( self::CACHE_KEY );
-		delete_transient( 'fxt_core_brokers_v1' ); // Left by version 1.1.x.
+		delete_transient( 'fxt_core_brokers_v1' ); // Left by older versions.
+		delete_transient( 'fxt_core_brokers_v2' );
 		self::$brokers      = null;
 		self::$markets      = null;
 		self::$market_index = null;
@@ -558,6 +559,7 @@ final class Repository {
 			'entities'        => array_map( array( __CLASS__, 'normalize_entity' ), (array) $meta( 'fxt_entities', array() ) ),
 			'sources'         => (array) $meta( 'fxt_sources', array() ),
 			'markets'         => $meta( 'fxt_markets', array() ),
+			'accepting'       => self::accepting_config( $post->ID ),
 			'affiliate_url'   => $meta( 'fxt_affiliate_url', '' ),
 			'cta_label'       => $meta( 'fxt_cta_label', '' ),
 			'regulators'      => array_values( $terms( Content_Types::REGULATOR ) ),
@@ -565,6 +567,67 @@ final class Repository {
 			'platforms'       => $terms( Content_Types::PLATFORM ),
 			'account_types'   => array_keys( $terms( Content_Types::ACCOUNT_TYPE ) ),
 		);
+	}
+
+	/**
+	 * "Accepting residents" of a broker: the single source of truth for
+	 * availability. Brokers saved before version 1.4 kept availability per
+	 * country row; until the broker is saved again it is read from there
+	 * (countries marked "Available"; the source when all those rows agree).
+	 *
+	 * @param int $post_id Broker post ID.
+	 * @return array { countries: string[], source, ref, checked, configured: bool }
+	 */
+	public static function accepting_config( $post_id ) {
+		// metadata_exists(): a registered meta returns its default (empty array) when never saved.
+		$saved = metadata_exists( 'post', $post_id, 'fxt_accepting' ) ? get_post_meta( $post_id, 'fxt_accepting', true ) : null;
+		if ( is_array( $saved ) ) {
+			$countries = array_values( array_filter( array_map( 'strtoupper', (array) ( isset( $saved['countries'] ) ? $saved['countries'] : array() ) ) ) );
+			return array(
+				'countries'  => $countries,
+				'source'     => isset( $saved['source'] ) ? (string) $saved['source'] : '',
+				'ref'        => isset( $saved['ref'] ) ? (string) $saved['ref'] : '',
+				'checked'    => isset( $saved['checked'] ) ? (string) $saved['checked'] : '',
+				'configured' => (bool) $countries,
+			);
+		}
+		// Migration from version 1.3 country rows.
+		$countries = array();
+		$sources   = array();
+		foreach ( (array) get_post_meta( $post_id, 'fxt_markets', true ) as $code => $row ) {
+			if ( is_array( $row ) && isset( $row['availability'] ) && 'yes' === $row['availability'] ) {
+				$countries[]                 = strtoupper( (string) $code );
+				$sources[ isset( $row['source'] ) ? (string) $row['source'] : '' ] = true;
+			}
+		}
+		return array(
+			'countries'  => $countries,
+			'source'     => 1 === count( $sources ) ? (string) key( $sources ) : '',
+			'ref'        => '',
+			'checked'    => '',
+			'configured' => (bool) $countries,
+		);
+	}
+
+	/**
+	 * Number of countries whose residents a broker accepts.
+	 *
+	 * @param array $broker Normalized broker.
+	 * @return int
+	 */
+	public static function accepting_count( array $broker ) {
+		return count( $broker['accepting']['countries'] );
+	}
+
+	/**
+	 * Whether a country is in the broker's Tested residents.
+	 *
+	 * @param array  $broker Normalized broker.
+	 * @param string $code   ISO code.
+	 * @return bool
+	 */
+	public static function is_tested_resident( array $broker, $code ) {
+		return isset( $broker['markets'][ strtoupper( (string) $code ) ] );
 	}
 
 	/**
@@ -653,8 +716,9 @@ final class Repository {
 	 * @return array See resolve_source().
 	 */
 	public static function availability_source( array $broker, $code ) {
-		$row = self::market_row( $broker, $code );
-		return self::resolve_source( array( 'source' => $row && isset( $row['source'] ) ? $row['source'] : '', 'checked' => $row && ! empty( $row['last_tested'] ) ? $row['last_tested'] : '' ), $broker, $code );
+		// One source for the whole Accepting residents list (shown in Quick Facts).
+		$accepting = $broker['accepting'];
+		return self::resolve_source( array( 'source' => $accepting['source'], 'ref' => $accepting['ref'], 'checked' => $accepting['checked'] ), $broker, $code );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -750,8 +814,8 @@ final class Repository {
 	 *
 	 * A country qualifies when published research backs it: published test
 	 * evidence with completed tests for a published broker, or a published
-	 * broker's availability in that country classified as Tested or Verified
-	 * at source. The list is one merged set: it carries no counts and no
+	 * broker's Accepting residents list containing that country with its
+	 * source classified as Tested or Verified at source. The list is one merged set: it carries no counts and no
 	 * marker of why a country qualifies, so it cannot be used to tell
 	 * test-account countries from other researched countries.
 	 *
@@ -765,11 +829,7 @@ final class Repository {
 			}
 		}
 		foreach ( self::brokers() as $broker ) {
-			foreach ( (array) $broker['markets'] as $code => $row ) {
-				$availability = isset( $row['availability'] ) ? $row['availability'] : 'pending';
-				if ( 'pending' === $availability ) {
-					continue;
-				}
+			foreach ( $broker['accepting']['countries'] as $code ) {
 				$source = self::availability_source( $broker, $code );
 				if ( in_array( $source['source'], array( 'tested', 'verified' ), true ) ) {
 					$codes[ strtoupper( $code ) ] = true;
@@ -821,7 +881,7 @@ final class Repository {
 		$texts  = self::setting( 'country_context' );
 		$status = self::eligibility( $broker, $code );
 		$entity = self::entity( $broker, $code );
-		$key    = 'restricted' === $status ? 'restricted' : ( 'accepting' === $status ? ( $entity['name'] ? 'accepting' : 'accepting_no_entity' ) : 'unknown' );
+		$key    = 'restricted' === $status ? 'restricted' : ( 'accepting' === $status ? ( '' !== (string) $entity['name'] ? 'accepting' : 'accepting_no_entity' ) : 'unknown' );
 
 		$message = $texts[ $key ];
 		$from    = 'default';
@@ -874,11 +934,19 @@ final class Repository {
 	 * @return string yes|restricted|pending
 	 */
 	public static function availability( array $broker, $code ) {
-		return ! empty( $broker['markets'][ $code ]['availability'] ) ? $broker['markets'][ $code ]['availability'] : 'pending';
+		// From "Accepting residents" only. Before any country is ticked the
+		// broker's eligibility is unknown everywhere ("pending").
+		$accepting = $broker['accepting'];
+		if ( empty( $accepting['configured'] ) ) {
+			return 'pending';
+		}
+		return in_array( strtoupper( (string) $code ), $accepting['countries'], true ) ? 'yes' : 'restricted';
 	}
 
 	/**
-	 * The legal entity that serves a market (falls back to the first entity).
+	 * The legal entity that serves a market: the entity of its Tested residents
+	 * row (Entity key), or the first entity when that row names none. Empty for
+	 * countries outside Tested residents.
 	 *
 	 * @param array  $broker Normalized broker.
 	 * @param string $code   ISO code.
@@ -886,7 +954,8 @@ final class Repository {
 	 */
 	public static function entity( array $broker, $code ) {
 		$found = null;
-		if ( ! empty( $broker['entities'] ) ) {
+		// Country-specific entity data exists only for Tested residents.
+		if ( ! empty( $broker['entities'] ) && self::is_tested_resident( $broker, $code ) ) {
 			$key   = ! empty( $broker['markets'][ $code ]['entity_key'] ) ? $broker['markets'][ $code ]['entity_key'] : '';
 			$found = $broker['entities'][0];
 			foreach ( $broker['entities'] as $entity ) {

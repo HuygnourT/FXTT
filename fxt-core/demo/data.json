@@ -344,10 +344,20 @@
 						"source": "stated"
 					}
 				],
+				"fxt_accepting": {
+					"countries": [
+						"VN",
+						"TH",
+						"ID",
+						"PH",
+						"KH"
+					],
+					"source": "verified",
+					"ref": "Sample: account-opening pages checked per country",
+					"checked": "2026-09-15"
+				},
 				"fxt_markets": {
 					"VN": {
-						"availability": "yes",
-						"source": "tested",
 						"entity_key": "global",
 						"local_payments": "VietQR, local bank transfer",
 						"deposit": "complete",
@@ -357,8 +367,6 @@
 						"last_tested": "2026-09-10"
 					},
 					"TH": {
-						"availability": "yes",
-						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Thai QR (PromptPay)",
 						"deposit": "complete",
@@ -368,8 +376,6 @@
 						"last_tested": "2026-08-30"
 					},
 					"ID": {
-						"availability": "yes",
-						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "in-progress",
@@ -379,8 +385,6 @@
 						"last_tested": "2026-09-18"
 					},
 					"PH": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "GCash (to verify)",
 						"deposit": "",
@@ -390,40 +394,8 @@
 						"last_tested": ""
 					},
 					"KH": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"LA": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"BN": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"TL": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
 						"deposit": "",
 						"withdrawal": "",
 						"platform": "",
@@ -591,10 +563,19 @@
 						"source": "stated"
 					}
 				],
+				"fxt_accepting": {
+					"countries": [
+						"VN",
+						"TH",
+						"PH",
+						"KH"
+					],
+					"source": "verified",
+					"ref": "Sample: account-opening pages checked per country",
+					"checked": "2026-09-15"
+				},
 				"fxt_markets": {
 					"VN": {
-						"availability": "yes",
-						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "complete",
@@ -604,8 +585,6 @@
 						"last_tested": "2026-09-02"
 					},
 					"TH": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Thai QR (PromptPay)",
 						"deposit": "planned",
@@ -614,19 +593,7 @@
 						"support": "planned",
 						"last_tested": ""
 					},
-					"ID": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
 					"PH": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "",
@@ -636,40 +603,8 @@
 						"last_tested": ""
 					},
 					"KH": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Research pending",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"LA": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"BN": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"TL": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
 						"deposit": "",
 						"withdrawal": "",
 						"platform": "",
@@ -834,10 +769,19 @@
 						"source": "stated"
 					}
 				],
+				"fxt_accepting": {
+					"countries": [
+						"VN",
+						"TH",
+						"PH",
+						"BN"
+					],
+					"source": "verified",
+					"ref": "Sample: account-opening pages checked per country",
+					"checked": "2026-09-15"
+				},
 				"fxt_markets": {
 					"VN": {
-						"availability": "yes",
-						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "complete",
@@ -847,8 +791,6 @@
 						"last_tested": "2026-08-25"
 					},
 					"TH": {
-						"availability": "yes",
-						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Thai QR (PromptPay)",
 						"deposit": "complete",
@@ -858,8 +800,6 @@
 						"last_tested": "2026-08-12"
 					},
 					"ID": {
-						"availability": "restricted",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "",
 						"deposit": "",
@@ -870,8 +810,6 @@
 						"verdict": "{broker} does not open accounts for residents of {country} in our sample research, so this review does not apply to you. If you live in {country}, start from the brokers that accept residents there. Sample text."
 					},
 					"PH": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "",
@@ -880,41 +818,9 @@
 						"support": "",
 						"last_tested": ""
 					},
-					"KH": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"LA": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
 					"BN": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "International wire",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"TL": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
 						"deposit": "",
 						"withdrawal": "",
 						"platform": "",
@@ -1062,10 +968,18 @@
 						"source": ""
 					}
 				],
+				"fxt_accepting": {
+					"countries": [
+						"VN",
+						"TH",
+						"BN"
+					],
+					"source": "verified",
+					"ref": "Sample: account-opening pages checked per country",
+					"checked": "2026-09-15"
+				},
 				"fxt_markets": {
 					"VN": {
-						"availability": "yes",
-						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "International wire only",
 						"deposit": "complete",
@@ -1075,51 +989,8 @@
 						"last_tested": "2026-07-22"
 					},
 					"TH": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "International wire only",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"ID": {
-						"availability": "restricted",
-						"source": "stated",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"PH": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"KH": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"LA": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
 						"deposit": "",
 						"withdrawal": "",
 						"platform": "",
@@ -1127,20 +998,8 @@
 						"last_tested": ""
 					},
 					"BN": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "International wire only",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"TL": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
 						"deposit": "",
 						"withdrawal": "",
 						"platform": "",
@@ -1309,10 +1168,18 @@
 						"source": "stated"
 					}
 				],
+				"fxt_accepting": {
+					"countries": [
+						"VN",
+						"TH",
+						"PH"
+					],
+					"source": "verified",
+					"ref": "Sample: account-opening pages checked per country",
+					"checked": "2026-09-15"
+				},
 				"fxt_markets": {
 					"VN": {
-						"availability": "yes",
-						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "complete",
@@ -1322,8 +1189,6 @@
 						"last_tested": "2026-09-13"
 					},
 					"TH": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Thai QR (PromptPay)",
 						"deposit": "",
@@ -1332,19 +1197,7 @@
 						"support": "",
 						"last_tested": ""
 					},
-					"ID": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
 					"PH": {
-						"availability": "yes",
-						"source": "verified",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer",
 						"deposit": "in-progress",
@@ -1354,8 +1207,6 @@
 						"last_tested": "2026-09-20"
 					},
 					"KH": {
-						"availability": "restricted",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "",
 						"deposit": "",
@@ -1364,36 +1215,6 @@
 						"support": "",
 						"last_tested": "",
 						"context": "{broker} does not accept residents of {country} according to our sample research. The sections that would not apply to you are hidden. Sample text."
-					},
-					"LA": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"BN": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"TL": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
 					}
 				},
 				"fxt_sources": {
@@ -1529,20 +1350,15 @@
 						"source": ""
 					}
 				],
+				"fxt_accepting": {
+					"countries": [
+						"TH",
+						"ID"
+					],
+					"source": "stated"
+				},
 				"fxt_markets": {
-					"VN": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
 					"TH": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Research pending",
 						"deposit": "",
@@ -1552,60 +1368,8 @@
 						"last_tested": ""
 					},
 					"ID": {
-						"availability": "yes",
-						"source": "stated",
 						"entity_key": "global",
 						"local_payments": "Local bank transfer (to verify)",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"PH": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"KH": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"LA": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"BN": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
-						"deposit": "",
-						"withdrawal": "",
-						"platform": "",
-						"support": "",
-						"last_tested": ""
-					},
-					"TL": {
-						"availability": "pending",
-						"entity_key": "global",
-						"local_payments": "",
 						"deposit": "",
 						"withdrawal": "",
 						"platform": "",
