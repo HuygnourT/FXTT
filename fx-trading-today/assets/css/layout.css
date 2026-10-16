@@ -517,6 +517,10 @@
 
 @media (min-width: 1024px) {
   .doc-layout { grid-template-columns: 14rem minmax(0, 1fr); column-gap: var(--space-8); }
+  /* Content always sits in the wide column, even when the TOC is hidden (no headings). */
+  .doc-layout > .toc + * { grid-column: 2; }
+  .doc-layout:has(> .toc[hidden]) { grid-template-columns: minmax(0, 1fr); }
+  .doc-layout:has(> .toc[hidden]) > .toc + * { grid-column: 1; }
 
   .toc {
     display: block;

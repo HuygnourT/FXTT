@@ -279,6 +279,20 @@
 			el( ToggleControl, { key: 'sp', label: __( 'Show tests still in progress', 'fxt-core' ), checked: !! a.showPending, onChange: ( v ) => set( { showPending: v } ) } ),
 			a.showPending ? el( TextControl, { key: 'pd', label: __( 'Heading: tests in progress', 'fxt-core' ), placeholder: __( 'Testing in progress', 'fxt-core' ), value: a.pendingTitle, onChange: ( v ) => set( { pendingTitle: v } ) } ) : null,
 		],
+		'fxt/source-label': ( a, set ) => [
+			el( SelectControl, {
+				key: 'k',
+				label: __( 'Label', 'fxt-core' ),
+				value: a.kind,
+				options: Object.keys( config.labelKinds || {} ).map( ( k ) => ( { value: k, label: config.labelKinds[ k ] } ) ),
+				onChange: ( v ) => set( { kind: v } ),
+			} ),
+			el( TextControl, { key: 't', label: __( 'Label text (optional)', 'fxt-core' ), help: __( 'Empty: the label name.', 'fxt-core' ), value: a.text, onChange: ( v ) => set( { text: v } ) } ),
+			el( TextControl, { key: 'p', label: __( 'Text before the label', 'fxt-core' ), value: a.prefix, onChange: ( v ) => set( { prefix: v } ) } ),
+			el( TextControl, { key: 'n', label: __( 'Note after the label (optional)', 'fxt-core' ), value: a.note, onChange: ( v ) => set( { note: v } ) } ),
+			el( TextControl, { key: 'u', type: 'url', label: __( 'Link (optional)', 'fxt-core' ), help: __( 'Where a click on the label goes.', 'fxt-core' ), value: a.url, onChange: ( v ) => set( { url: v } ) } ),
+			a.url ? el( ToggleControl, { key: 'b', label: __( 'Open in a new tab', 'fxt-core' ), checked: !! a.newTab, onChange: ( v ) => set( { newTab: v } ) } ) : null,
+		],
 		'fxt/post-byline': ( a, set ) => [
 			el( ToggleControl, { key: 'r', label: __( 'Show author role', 'fxt-core' ), checked: !! a.showRole, onChange: ( v ) => set( { showRole: v } ) } ),
 			el( TextControl, { key: 'd', label: __( 'Text before the date', 'fxt-core' ), placeholder: __( 'e.g. Updated', 'fxt-core' ), value: a.dateLabel, onChange: ( v ) => set( { dateLabel: v } ) } ),
@@ -313,6 +327,7 @@
 		'fxt/evidence-list',
 		'fxt/evidence-snapshot',
 		'fxt/post-byline',
+		'fxt/source-label',
 	];
 
 	/* ---------------------------------------------------------------------

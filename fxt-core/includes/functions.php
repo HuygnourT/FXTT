@@ -272,6 +272,73 @@ function fxt_core_source_line( array $state ) {
 }
 
 /**
+ * Content under the author line of a post, page, review or evidence record:
+ * the page's own content, the default from Settings, or nothing.
+ *
+ * @param int|WP_Post|null $post Post.
+ * @return string HTML (limited inline HTML, already filtered).
+ */
+function fxt_core_byline_note( $post = null ) {
+	$post = get_post( $post );
+	if ( ! $post || ! in_array( $post->post_type, Schema::byline_types(), true ) ) {
+		return '';
+	}
+	$mode = (string) get_post_meta( $post->ID, 'fxt_byline_note_mode', true );
+	if ( 'hide' === $mode ) {
+		return '';
+	}
+	if ( 'custom' === $mode ) {
+		$text = (string) get_post_meta( $post->ID, 'fxt_byline_note', true );
+	} else {
+		$defaults = Repository::setting( 'byline_note' );
+		$switch   = array(
+			FXT\Core\Content_Types::BROKER   => 'reviews',
+			FXT\Core\Content_Types::EVIDENCE => 'evidence',
+			'post'                            => 'posts',
+			'page'                            => 'pages',
+		);
+		$key  = $switch[ $post->post_type ];
+		$text = ! empty( $defaults[ $key ] ) && isset( $defaults['text'] ) ? (string) $defaults['text'] : '';
+	}
+	$text = FXT\Core\Fields::clean_inline( $text );
+	if ( '' === $text ) {
+		return '';
+	}
+	return '<div class="byline-note">' . wpautop( fxt_core_label_markup( $text ) ) . '</div>';
+}
+
+/**
+ * Turn editor source labels into their final markup: a label without a link
+ * becomes a <span>; external links opened in a new tab get rel="noopener".
+ * Shared by post content (render_block) and short admin texts.
+ *
+ * @param string $html HTML.
+ * @return string
+ */
+function fxt_core_label_markup( $html ) {
+	if ( false === strpos( $html, 'fxt-source-label' ) ) {
+		return $html;
+	}
+	return preg_replace_callback(
+		'#<a\b([^>]*\bclass="[^"]*\bfxt-source-label\b[^"]*"[^>]*)>(.*?)</a>#is',
+		static function ( $m ) {
+			$attrs = $m[1];
+			$kind  = preg_match( '/\bdata-kind="([a-z]+)"/', $attrs, $k ) ? $k[1] : 'stated';
+			$kinds = Schema::label_kinds();
+			$kind  = isset( $kinds[ $kind ] ) ? $kind : 'stated';
+			$class = 'source-tag source-tag--' . ( 'unverified' === $kind ? 'none' : $kind ) . ' fxt-source-label';
+			$href  = preg_match( '/\bhref="([^"]*)"/', $attrs, $h ) ? html_entity_decode( $h[1] ) : '';
+			if ( '' === trim( $href ) ) {
+				return '<span class="' . esc_attr( $class ) . '" data-kind="' . esc_attr( $kind ) . '">' . $m[2] . '</span>';
+			}
+			$blank = (bool) preg_match( '/\btarget="_blank"/', $attrs );
+			return '<a class="' . esc_attr( $class ) . '" data-kind="' . esc_attr( $kind ) . '" href="' . esc_url( $href ) . '"' . ( $blank ? ' target="_blank" rel="noopener"' : '' ) . '>' . $m[2] . '</a>';
+		},
+		$html
+	);
+}
+
+/**
  * Result heading of the Broker Reviews page, e.g. "6 forex brokers reviewed".
  * Uses the singular text for exactly one broker.
  *

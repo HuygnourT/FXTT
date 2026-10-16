@@ -53,6 +53,9 @@ The importer:
 | Header menu, mega menu, footer columns | Appearance > Menus | Header, mobile drawer, footer |
 | Header button, banner, risk warning, affiliate disclosure, key pages | Settings > FX Trading Today | Header, footer, links in blocks |
 | Section copy (hero, how it works, independence…) | Gutenberg: Pages > *page* | — |
+| **Content under the author line** (default for the whole site) | **Settings > FX Trading Today > General > Content under the author line**: text (links, bold, italic and source labels allowed) + where it shows (broker reviews, test evidence, articles, pages) | Every page of the ticked types, directly below the author line at the top |
+| Content under the author line for **one page** | Editor sidebar box **"Under the author line"**: Use the site default / Custom text for this page / Hide on this page | That page only |
+| **Source labels inside the text** (Tested, Verified at source, Broker-stated, Not tested / Not verified) with an optional link | In any paragraph, list, heading or table cell: select text (or place the cursor), then the **Source label** button in the block toolbar (under the "More" arrow); or the **Source label** block for a "Source: [label] note" line | That page only |
 
 ### Mega menu (built entirely from menu items)
 
@@ -84,6 +87,7 @@ On pages that use the theme's templates, consecutive blocks at the **top** of th
 | Broker directory | Search + filters + sort | — |
 | Test evidence index | Published evidence + tests in progress | All countries (with country filter) or only the selected country; headings; show/hide in progress |
 | Post byline | Author + role + date + read time (inside Query Loop) | Show role, text before the date, read-time format |
+| Source label | One line "Source: [label] note" | Label, label text, text before the label, note, link, open in a new tab |
 
 Every block is server-rendered; data is never copied into the post content.
 
@@ -117,6 +121,16 @@ Each broker has two independent country sections:
 Quick Facts: **"Legal entity for {country name}"** is shown only for Tested residents; **Country availability** shows the badge for the visitor's country, the Accepting residents source label and "Available in {n} countries" = number of ticked countries.
 
 Upgrading from 1.3: brokers keep working without re-saving. Until a broker is saved, its accepted countries are read from the old rows marked "Available" (and their shared source). Saving the broker stores the checklist and removes the old availability fields from its country rows; rows that only held availability can then be removed from Tested residents.
+
+## 3e. Version 1.4.1 rules: content under the author line, source labels
+
+- **Content under the author line** sits directly below the author line at the top of reviews, evidence pages, articles and pages. The site default is set in Settings > General (with on/off per content type); each page can use the default, use its own text or hide it (sidebar box "Under the author line"). Allowed HTML: links, `<strong>`, `<em>`, `<br>`, `<code>` and source labels; scripts and other tags are removed on save and on output.
+- **Source labels** are the same four labels used by the broker data: **Tested**, **Verified at source**, **Broker-stated**, **Not tested / Not verified**. Two ways to add them:
+  - **Inline**: select words (they become the label text) or place the cursor (the label name, or your own text, is inserted), then the **Source label** toolbar button. Choose the label, an optional **link** and **Open in a new tab**. Clicking an existing label opens the same popover to change or remove it.
+  - **Block** "Source label": a line "Source: [label] note", with its own link and new-tab option.
+- A label **with a link** is a link to that URL (a small arrow marks it; new tab adds `rel="noopener"`); a label **without a link** is plain text. Labels use the site label styles; "Not tested / Not verified" has a dashed outline.
+- In the author-line text the label can also be written by hand: `<span class="fxt-source-label" data-kind="tested">Tested</span>` (kinds: `tested`, `verified`, `stated`, `unverified`), or `<a class="fxt-source-label" data-kind="verified" href="…">Verified at source</a>` for a link.
+- Article and page layout: when a page has no headings (no table of contents), the content now uses the full width instead of the narrow TOC column.
 
 ## 4. Country, cache, privacy
 
@@ -162,6 +176,10 @@ Upgrading from 1.2: no re-import needed for the selector, evidence and button ch
 ## 6e. Acceptance checks (version 1.4)
 
 31/31 checks through the broker edit screen and the frontend: two separate boxes, full checklist with search / selected-only / select-clear / count, migrated ticks, accepted vs not accepting, availability source in Quick Facts, count of ticked countries only, entity named by country and shown only for tested residents, independence of the two sections in both directions, homepage / comparison / directory following the list, empty list = pending, importer restore. All earlier suites pass (v1.3 51/51, v1.2 63/63, journeys 47/47, v1.1 22/22) and every demo item is valid in Gutenberg.
+
+## 6f. Acceptance checks (version 1.4.1)
+
+20/20 checks: site default under the author line (reviews, evidence, articles when enabled), placement right after the author line, per-page custom / hide / back to default, links kept and scripts removed, inline label through the toolbar (four labels, selected text, cursor insert, link + new tab), frontend markup (link vs plain text), Source label block, blocks valid after reload. All earlier suites pass (v1.4 31/31, v1.3 51/51, v1.2 63/63, journeys 47/47, v1.1 22/22), every demo item is valid in Gutenberg and the PHP log is clean.
 
 ## 7. Known differences from the prototype
 

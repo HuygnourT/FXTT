@@ -149,6 +149,9 @@ final class Content_Types {
 	public static function register_meta() {
 		self::register_set( 'post', Schema::broker(), self::BROKER );
 		self::register_set( 'post', Schema::evidence(), self::EVIDENCE );
+		foreach ( Schema::byline_types() as $post_type ) {
+			self::register_set( 'post', Schema::byline(), $post_type );
+		}
 		self::register_set( 'term', Schema::market(), self::MARKET );
 		self::register_set( 'term', Schema::platform(), self::PLATFORM );
 		self::register_set( 'user', Schema::author(), '' );

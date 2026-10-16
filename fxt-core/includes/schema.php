@@ -85,6 +85,54 @@ final class Schema {
 	}
 
 	/**
+	 * Source labels that editors can insert in content (inline format and
+	 * the "Source label" block). Key => default text.
+	 *
+	 * @return array
+	 */
+	public static function label_kinds() {
+		return array(
+			'tested'     => __( 'Tested', 'fxt-core' ),
+			'verified'   => __( 'Verified at source', 'fxt-core' ),
+			'stated'     => __( 'Broker-stated', 'fxt-core' ),
+			'unverified' => __( 'Not tested / Not verified', 'fxt-core' ),
+		);
+	}
+
+	/**
+	 * Per-post note under the byline (posts, pages, broker reviews, evidence).
+	 *
+	 * @return array
+	 */
+	public static function byline() {
+		return array(
+			'fxt_byline_note_mode' => array(
+				'type'    => 'select',
+				'label'   => __( 'Content under the author line', 'fxt-core' ),
+				'options' => array(
+					''       => __( 'Use the default (Settings)', 'fxt-core' ),
+					'custom' => __( 'Custom for this page', 'fxt-core' ),
+					'hide'   => __( 'Hide on this page', 'fxt-core' ),
+				),
+			),
+			'fxt_byline_note'      => array(
+				'type'  => 'html',
+				'label' => __( 'Custom content', 'fxt-core' ),
+				'help'  => __( 'Shown when "Custom for this page" is selected. Allowed: links, bold, italic, line breaks and source labels.', 'fxt-core' ),
+			),
+		);
+	}
+
+	/**
+	 * Post types that show the author line in their header.
+	 *
+	 * @return string[]
+	 */
+	public static function byline_types() {
+		return array( 'post', 'page', Content_Types::BROKER, Content_Types::EVIDENCE );
+	}
+
+	/**
 	 * Availability of a broker in one market.
 	 *
 	 * @return array
@@ -443,6 +491,18 @@ final class Schema {
 		return array(
 			'banner_enabled'       => array( 'type' => 'checkbox', 'label' => __( 'Show prototype banner', 'fxt-core' ) ),
 			'banner_text'          => array( 'type' => 'textarea', 'label' => __( 'Banner text', 'fxt-core' ) ),
+			'byline_note'          => array(
+				'type'   => 'group',
+				'label'  => __( 'Content under the author line (default)', 'fxt-core' ),
+				'help'   => __( 'Shown right under the author line at the top of the selected content types. Each page can use this default, its own content or hide it (sidebar box "Under the author line"). Empty: nothing is shown. Allowed: links, bold, italic, line breaks and source labels.', 'fxt-core' ),
+				'fields' => array(
+					'text'     => array( 'type' => 'html', 'label' => __( 'Default content', 'fxt-core' ) ),
+					'reviews'  => array( 'type' => 'checkbox', 'label' => __( 'Show on broker reviews', 'fxt-core' ) ),
+					'evidence' => array( 'type' => 'checkbox', 'label' => __( 'Show on test evidence', 'fxt-core' ) ),
+					'posts'    => array( 'type' => 'checkbox', 'label' => __( 'Show on articles', 'fxt-core' ) ),
+					'pages'    => array( 'type' => 'checkbox', 'label' => __( 'Show on pages with an author line', 'fxt-core' ) ),
+				),
+			),
 			'sample_labels'        => array( 'type' => 'checkbox', 'label' => __( 'Show "Sample data" labels', 'fxt-core' ), 'help' => __( 'Turn off once research data is verified.', 'fxt-core' ) ),
 			'default_market'       => array( 'type' => 'select', 'label' => __( 'Default country', 'fxt-core' ), 'options' => 'markets', 'help' => __( 'Used until a visitor chooses a country. No location data is read.', 'fxt-core' ) ),
 			'header_cta_label'     => array( 'type' => 'text', 'label' => __( 'Header button label', 'fxt-core' ) ),
@@ -681,6 +741,7 @@ final class Schema {
 		return array(
 			'banner_enabled'       => false,
 			'banner_text'          => '',
+			'byline_note'          => array( 'text' => '', 'reviews' => true, 'evidence' => true, 'posts' => true, 'pages' => true ),
 			'sample_labels'        => true,
 			'default_market'       => 'VN',
 			'header_cta_label'     => __( 'Find a Broker', 'fxt-core' ),

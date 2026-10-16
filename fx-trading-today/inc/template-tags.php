@@ -227,6 +227,10 @@ function fxt_tt_the_byline( array $args = array() ) {
 		</p>
 	</div>
 	<?php
+	// Content under the author line (Settings default or this page's own; FX Trading Today Core).
+	if ( function_exists( 'fxt_core_byline_note' ) ) {
+		echo fxt_core_byline_note( $post ); // phpcs:ignore WordPress.Security.EscapeOutput -- filtered with wp_kses() in the plugin.
+	}
 }
 
 /**

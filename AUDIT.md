@@ -144,3 +144,16 @@ Kept on purpose: evidence titles/excerpts written by editors may still name the 
 | Fact grid | Grey gap when a fact is hidden | Lines drawn by items; short rows end on the card colour |
 
 Migration: read-time from v1.3 rows (`availability = yes`, shared `source`) until the broker is saved; nothing is deleted. Broker cache key `fxt_core_brokers_v3`.
+
+# Audit for version 1.4.1 (content under the author line, source labels)
+
+| Item | Before (1.4) | After (1.4.1) |
+|---|---|---|
+| Text under the author line | Not available | Site default in Settings > General (`byline_note`: text + reviews/evidence/posts/pages), per page `fxt_byline_note_mode` ('' default / custom / hide) + `fxt_byline_note`; rendered by `fxt_core_byline_note()` from `fxt_tt_the_byline()` |
+| Labels in editorial text | Only on broker data fields | Rich text format `fxt/source-label` (`<a class="fxt-source-label" data-kind href target rel>`) + block `fxt/source-label`; four kinds from `Schema::label_kinds()` |
+| Label output | n/a | `the_content` filter `fxt_core_label_markup()` (priority 20): site classes `source-tag source-tag--{kind}`, `<span>` when there is no link, `rel="noopener"` with a new tab |
+| HTML in short texts | Plain text only | Field type `html`: `Fields::clean_inline()` removes script/style blocks with their content, then `wp_kses()` with `Fields::inline_html()` |
+| Posts/pages without headings | Content squeezed into the 14rem TOC column | Full-width content when the TOC is hidden |
+
+Nothing is migrated: existing content is unchanged, and the demo importer only adds the default note when the site has none saved.
+

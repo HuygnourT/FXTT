@@ -59,6 +59,10 @@ final class Fields {
 				$value = is_scalar( $raw ) ? sanitize_textarea_field( (string) $raw ) : '';
 				return '' === $value ? null : $value;
 
+			case 'html':
+				$value = is_scalar( $raw ) ? self::clean_inline( (string) $raw ) : '';
+				return '' === $value ? null : $value;
+
 			case 'url':
 				$value = is_scalar( $raw ) ? esc_url_raw( trim( (string) $raw ) ) : '';
 				return '' === $value ? null : $value;
@@ -169,6 +173,37 @@ final class Fields {
 				return $map ? $map : null;
 		}
 		return null;
+	}
+
+	/**
+	 * Inline HTML allowed in short editor texts: links, emphasis, line breaks
+	 * and source labels.
+	 *
+	 * @return array wp_kses() allowed tags.
+	 */
+	public static function clean_inline( $html ) {
+		// Drop script/style blocks with their contents, then keep the allowed inline tags.
+		$html = preg_replace( '#<(script|style)\b[^>]*>.*?</\1\s*>#is', '', (string) $html );
+		return trim( wp_kses( $html, self::inline_html() ) );
+	}
+
+	/**
+	 * Allowed inline HTML for short editable texts.
+	 *
+	 * @return array wp_kses() allowed tags.
+	 */
+	public static function inline_html() {
+		$label = array( 'class' => true, 'data-kind' => true );
+		return array(
+			'a'      => array_merge( $label, array( 'href' => true, 'target' => true, 'rel' => true, 'title' => true ) ),
+			'span'   => $label,
+			'strong' => array(),
+			'b'      => array(),
+			'em'     => array(),
+			'i'      => array(),
+			'br'     => array(),
+			'code'   => array(),
+		);
 	}
 
 	/**
@@ -338,6 +373,7 @@ final class Fields {
 	private static function render_control( array $field, $name, $value, $id ) {
 		switch ( $field['type'] ) {
 			case 'textarea':
+			case 'html':
 				printf( '<textarea class="widefat" rows="3" id="%s" name="%s">%s</textarea>', esc_attr( $id ), esc_attr( $name ), esc_textarea( (string) $value ) );
 				break;
 

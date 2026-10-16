@@ -647,6 +647,14 @@ final class Importer {
 			'header_cta_url'   => $this->url( 'directory' ),
 			'footer_tagline'   => __( 'Independent Forex broker research for traders in Southeast Asia.', 'fxt-core' ),
 			'social'           => array(),
+			// Example content under the author line (kept if the site already has its own).
+			'byline_note'      => array(
+				'text'     => __( 'Sample data. Each fact is labelled by how we got it, for example <span class="fxt-source-label" data-kind="tested">Tested</span> or <span class="fxt-source-label" data-kind="stated">Broker-stated</span>.', 'fxt-core' ),
+				'reviews'  => true,
+				'evidence' => true,
+				'posts'    => false,
+				'pages'    => false,
+			),
 			// Example result note with placeholders; only used when the site has
 			// no Broker Reviews text saved yet (saved text always wins below).
 			'directory_ui'     => array_merge(

@@ -76,6 +76,25 @@ final class Admin {
 	 * Register meta boxes.
 	 */
 	public static function add_meta_boxes() {
+		// Sidebar box: content under the author line (all content types with a byline).
+		foreach ( Schema::byline_types() as $post_type ) {
+			add_meta_box(
+				'fxt-byline-note',
+				__( 'Under the author line', 'fxt-core' ),
+				static function ( $post ) {
+					wp_nonce_field( 'fxt_byline_note', '_fxt_byline_nonce' );
+					echo '<div class="fxt-fields fxt-fields--side">';
+					foreach ( Schema::byline() as $key => $field ) {
+						Fields::render( $field, 'fxt_byline[' . $key . ']', get_post_meta( $post->ID, $key, true ), 'fxt-' . $key );
+					}
+					echo '<p class="description">' . esc_html__( 'Default content: Settings > FX Trading Today.', 'fxt-core' ) . '</p></div>';
+				},
+				$post_type,
+				'side',
+				'default'
+			);
+		}
+
 		foreach ( self::boxes() as $post_type => $boxes ) {
 			$schema = Content_Types::BROKER === $post_type ? Schema::broker() : Schema::evidence();
 			$first  = true;
@@ -145,12 +164,37 @@ final class Admin {
 	}
 
 	/**
+	 * Save the "Under the author line" sidebar box.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	private static function save_byline_note( $post_id ) {
+		if ( ! isset( $_POST['_fxt_byline_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['_fxt_byline_nonce'] ) ), 'fxt_byline_note' ) ) {
+			return;
+		}
+		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized per field below.
+		$input = isset( $_POST['fxt_byline'] ) && is_array( $_POST['fxt_byline'] ) ? wp_unslash( $_POST['fxt_byline'] ) : array();
+		foreach ( Schema::byline() as $key => $field ) {
+			$value = Fields::sanitize( $field, isset( $input[ $key ] ) ? $input[ $key ] : null );
+			if ( null === $value ) {
+				delete_post_meta( $post_id, $key );
+			} else {
+				update_post_meta( $post_id, $key, $value );
+			}
+		}
+	}
+
+	/**
 	 * Save meta from the meta box form (also used by the block editor's meta box request).
 	 *
 	 * @param int      $post_id Post ID.
 	 * @param \WP_Post $post    Post.
 	 */
 	public static function save_post( $post_id, $post ) {
+		self::save_byline_note( $post_id );
 		$boxes = self::boxes();
 		if ( ! isset( $boxes[ $post->post_type ] ) ) {
 			return;

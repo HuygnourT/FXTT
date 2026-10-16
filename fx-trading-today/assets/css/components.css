@@ -830,7 +830,8 @@
 /* Data source labels (Tested / Verified at source / Broker-stated) -------
    Same compact form as the "unverified" tag they replace. Not classified and
    "Needs review" keep the dashed sample style so they never read as checked. */
-.source-tag {
+.source-tag,
+.fxt-source-label {
   display: inline-block;
   padding: 0 5px;
   border: 1px solid var(--color-line-strong);
@@ -847,12 +848,23 @@
   vertical-align: 1px;
 }
 
-.source-tag--tested { border-color: var(--color-accent); background: var(--color-accent-tint); color: var(--color-accent); }
-.source-tag--verified { border-color: var(--color-accent); color: var(--color-accent); }
+.source-tag--tested,
+.fxt-source-label[data-kind="tested"] { border-color: var(--color-accent); background: var(--color-accent-tint); color: var(--color-accent); }
+.source-tag--verified,
+.fxt-source-label[data-kind="verified"] { border-color: var(--color-accent); color: var(--color-accent); }
 .source-tag--none,
-.source-tag--review { border-style: dashed; border-color: var(--color-sample-border); color: var(--color-sample-fg); }
-a.source-tag:hover { background: var(--color-accent-tint-2); }
+.source-tag--review,
+.fxt-source-label[data-kind="unverified"] { border-style: dashed; border-color: var(--color-sample-border); color: var(--color-sample-fg); }
+a.source-tag[href]:hover { background: var(--color-accent-tint-2); }
 a.source-tag:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+/* Linked label: a small arrow shows it can be clicked. */
+a.source-tag[href]::after { content: " \2197"; }
+
+/* Content under the author line (Settings > FX Trading Today, or per page). */
+.byline-note { font-size: var(--text-small); color: var(--color-ink-2); }
+.byline-note p + p { margin-top: var(--space-2); }
+.byline-note a:not(.source-tag) { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
+.data-source__note { margin-left: 4px; }
 
 .data-source { margin-bottom: var(--space-3); font-size: var(--text-xs); color: var(--color-ink-3); }
 .data-table--kv td .source-tag { margin-left: 4px; }

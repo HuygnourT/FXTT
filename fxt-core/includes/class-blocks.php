@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Blocks {
 
-	const BLOCKS = array( 'country-brokers', 'broker-cards', 'broker-compare', 'broker-data', 'evidence-data', 'score-weights', 'broker-directory', 'evidence-list', 'evidence-snapshot', 'post-byline', 'eligibility-section', 'trader-verdict' );
+	const BLOCKS = array( 'country-brokers', 'broker-cards', 'broker-compare', 'broker-data', 'evidence-data', 'score-weights', 'broker-directory', 'evidence-list', 'evidence-snapshot', 'post-byline', 'eligibility-section', 'trader-verdict', 'source-label' );
 
 	/** @var bool Whether the evidence viewer markup still has to be printed. */
 	private static $viewer_pending = false;
@@ -29,6 +29,9 @@ final class Blocks {
 		add_action( 'init', array( __CLASS__, 'register' ) );
 		add_filter( 'block_categories_all', array( __CLASS__, 'category' ) );
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'editor_ui_style' ) );
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'label_format' ) );
+		// Inline source labels: final markup on output (also for REST refreshes).
+		add_filter( 'the_content', 'fxt_core_label_markup', 20 );
 	}
 
 	/**
@@ -43,7 +46,7 @@ final class Blocks {
 			true
 		);
 		wp_set_script_translations( 'fxt-core-blocks', 'fxt-core', FXT_CORE_DIR . 'languages' );
-		wp_add_inline_script( 'fxt-core-blocks', 'window.fxtCoreBlocks = ' . wp_json_encode( array( 'compare' => self::compare_options() ) ) . ';', 'before' );
+		wp_add_inline_script( 'fxt-core-blocks', 'window.fxtCoreBlocks = ' . wp_json_encode( array( 'compare' => self::compare_options(), 'labelKinds' => Schema::label_kinds() ) ) . ';', 'before' );
 
 		Assets::register_frontend_scripts();
 
@@ -220,6 +223,15 @@ final class Blocks {
 		$keys  = is_array( $raw ) ? $raw : explode( ',', (string) $raw );
 		$keys  = array_values( array_intersect( array_map( 'sanitize_key', $keys ), array_keys( $known ) ) );
 		return $keys ? $keys : array_keys( $known );
+	}
+
+	/**
+	 * Editor: inline "Source label" format for every rich text.
+	 */
+	public static function label_format() {
+		wp_enqueue_script( 'fxt-core-label-format', FXT_CORE_URL . 'assets/js/source-label-format.js', array( 'wp-rich-text', 'wp-block-editor', 'wp-components', 'wp-element', 'wp-i18n' ), FXT_CORE_VERSION, true );
+		wp_add_inline_script( 'fxt-core-label-format', 'window.fxtCoreLabels = ' . wp_json_encode( array( 'kinds' => Schema::label_kinds() ) ) . ';', 'before' );
+		wp_set_script_translations( 'fxt-core-label-format', 'fxt-core', FXT_CORE_DIR . 'languages' );
 	}
 
 	/**
