@@ -34,6 +34,7 @@ The importer:
 
 | Item to change | Location | Automatically updates |
 |---|---|---|
+| **Broker name** (short brand name used on buttons, tables, headings; empty = post title without "review…") | Broker Reviews > *broker* > Broker data: research summary > **Broker name** | Affiliate and compare buttons, entity map, directory, cards, compare, menus. A custom post title becomes the H1 |
 | Broker: name, logo (featured image), description (excerpt), status, **category scores**, last reviewed, min deposit, currencies, costs, trading conditions, payments, accounts, legal entities, **conditions by country**, affiliate URL + button label | Broker Reviews > *broker*: panels **below the editor** (sidebar: "Broker data > Edit broker data") | Homepage (country hero, cards, compare), directory, compare page, review, mega menu, evidence |
 | Overall score | **Calculated** from category scores × weights; the "Overall score override" field is for exceptions only | Everywhere scores appear |
 | Broker review copy (verdict, pros/cons, notes, method) | Gutenberg in the broker post | Review page |
@@ -53,6 +54,10 @@ The importer:
 | Header menu, mega menu, footer columns | Appearance > Menus | Header, mobile drawer, footer |
 | Header button, banner, risk warning, affiliate disclosure, key pages | Settings > FX Trading Today | Header, footer, links in blocks |
 | Section copy (hero, how it works, independence…) | Gutenberg: Pages > *page* | — |
+| **Account types**: fields (add, remove, rename, reorder, type), values per account, row source label, lot size for the calculator | Broker Reviews > *broker* > **Broker data: account types** | Account types table, Quick Facts account list, Trading cost calculator |
+| Which account fields the frontend table shows, their order, first column heading | **Broker data: account types display options** (box right below) | Account types table |
+| **Trading cost calculator**: volume presets, instruments (contract size, pip size, quote currency, USD rate), default instrument, round trip / opening only, note | **Settings > FX Trading Today > Cost calculator** | Every Trading cost calculator block |
+| Position of the source label in a data table (above, below, in each row, between rows after row N) | Gutenberg: select the **Broker data** block (Account types, Deposits and withdrawals, Platforms) > sidebar **Source label position** | That block |
 | **Content under the author line** (default for the whole site) | **Settings > FX Trading Today > General > Content under the author line**: text (links, bold, italic and source labels allowed) + where it shows (broker reviews, test evidence, articles, pages) | Every page of the ticked types, directly below the author line at the top |
 | Content under the author line for **one page** | Editor sidebar box **"Under the author line"**: Use the site default / Custom text for this page / Hide on this page | That page only |
 | **Source labels inside the text** (Tested, Verified at source, Broker-stated, Not tested / Not verified) with an optional link | In any paragraph, list, heading or table cell: select text (or place the cursor), then the **Source label** button in the block toolbar (under the "More" arrow); or the **Source label** block for a "Source: [label] note" line | That page only |
@@ -87,6 +92,7 @@ On pages that use the theme's templates, consecutive blocks at the **top** of th
 | Broker directory | Search + filters + sort | — |
 | Test evidence index | Published evidence + tests in progress | All countries (with country filter) or only the selected country; headings; show/hide in progress |
 | Post byline | Author + role + date + read time (inside Query Loop) | Show role, text before the date, read-time format |
+| Trading cost calculator | Estimated cost of one trade per account type and volume: total, spread cost, commission | Instrument, round trip / opening only, show spread + commission, show assumptions, broker (optional) |
 | Source label | One line "Source: [label] note" | Label, label text, text before the label, note, link, open in a new tab |
 
 Every block is server-rendered; data is never copied into the post content.
@@ -131,6 +137,27 @@ Upgrading from 1.3: brokers keep working without re-saving. Until a broker is sa
 - A label **with a link** is a link to that URL (a small arrow marks it; new tab adds `rel="noopener"`); a label **without a link** is plain text. Labels use the site label styles; "Not tested / Not verified" has a dashed outline.
 - In the author-line text the label can also be written by hand: `<span class="fxt-source-label" data-kind="tested">Tested</span>` (kinds: `tested`, `verified`, `stated`, `unverified`), or `<a class="fxt-source-label" data-kind="verified" href="…">Verified at source</a>` for a link.
 - Article and page layout: when a page has no headings (no table of contents), the content now uses the full width instead of the narrow TOC column.
+
+## 3f. Version 1.4.2 rules
+
+- **Broker name** (new field) is used for the affiliate button ("Visit {name}", or the "Affiliate button label" with `{broker}` replaced), the compare button, the entity map heading and every list. When it is empty the post title is used without " review" and anything after ":" or " - ". When the post title differs from the broker name it is the H1; otherwise the H1 stays "{name} review". The affiliate URL and `rel="sponsored nofollow"` are unchanged.
+- **Source labels in tables**
+  - Broker data tables (Account types, Deposits and withdrawals, Platforms): block sidebar **Source label position** = above (default), below, in each row, or **between rows** after row N (a full-width row; 0 = before the first row). Trading costs keep one label per row (each fact has its own source).
+  - Account rows can have their **own source** (Broker data: account types > a row > "Row source label…"); it is shown in that row whatever the position.
+  - Core **Table** block: the Source label toolbar button works in any cell (inline). A row whose only content is a source label (other cells empty) becomes a full-width label row, so a label can sit between any two rows. Table styles are unchanged.
+- **Score card**: no clipped text at any width (320 to 1440 px checked on all reviews). The hero no longer grows wider than the screen on phones (long broker names wrap), the score value has room for its glyphs, long labels wrap, and "Score pending" uses a smaller size.
+- **Regulation and entities**: the regulatory chain (brand, legal entity, regulator, licence, jurisdiction) and the client protection note are shown only when the visitor's country is a Tested resident whose legal entity is named and **Verified at source** (or Tested with published evidence). Otherwise nothing is shown (no placeholders). Data and country links are unchanged.
+- **Entity map**: columns Entity, Regulator, Jurisdiction, **Licence number** (from the legal entity). Empty or placeholder values (TBD, N/A, Research pending…) show "Not available". The heading uses the broker name.
+- **Account types fields**
+  - Each field has a **stable internal ID** (built-in: `min_deposit`, `spread`, `commission`, `execution`, `best_for`; new fields get an ID like `f_mva6el0am6w`). Renaming a label never changes values, display options or calculations.
+  - Field types: Text, Number (with unit), **Spread (pips)** (pips for the calculator + optional display text, linked to one instrument), **Commission** (model: none / per lot per side / per lot round turn, amount in USD per lot, optional display text). Empty display text is generated from the numbers.
+  - The editing order (box "account types") and the frontend order (box "display options") are separate.
+  - Upgrading from 1.4.1: nothing to do. Brokers without field definitions use the built-in set with the same keys, so tables look the same; calculator numbers are read from the old texts ("From 1.0 pips", "$7 per lot round turn", "None") until the broker is saved. Texts that cannot be read ("Tiered", "Reduced", "TBD") stay N/A until numbers are entered.
+- **Trading cost calculator** (block, in the demo under Account types)
+  - pip value per lot (USD) = units per lot x pip size x USD per 1 unit of the quote currency; spread cost = pips x pip value x lots; commission per side x 2 (round trip) or x 1 (opening), round turn x 1 (round trip) or x 0.5 (opening); total = spread + commission. The spread is paid once in both cases.
+  - Spreads come from the account field of type Spread for the block's instrument; commission from the Commission field for that instrument, else the one for any instrument. Cent and other accounts can set "Units per lot for this account".
+  - **N/A** whenever a needed value is missing: no spread field or pips for that instrument, commission model not set, non-USD quote without a USD rate. Nothing is guessed. Swaps, slippage, deposit fees and conversion are not included (stated under the table).
+  - Values are calculated on every page view from the account data and settings, so the table always matches them.
 
 ## 4. Country, cache, privacy
 
@@ -180,6 +207,10 @@ Upgrading from 1.2: no re-import needed for the selector, evidence and button ch
 ## 6f. Acceptance checks (version 1.4.1)
 
 20/20 checks: site default under the author line (reviews, evidence, articles when enabled), placement right after the author line, per-page custom / hide / back to default, links kept and scripts removed, inline label through the toolbar (four labels, selected text, cursor insert, link + new tab), frontend markup (link vs plain text), Source label block, blocks valid after reload. All earlier suites pass (v1.4 31/31, v1.3 51/51, v1.2 63/63, journeys 47/47, v1.1 22/22), every demo item is valid in Gutenberg and the PHP log is clean.
+
+## 6g. Acceptance checks (version 1.4.2)
+
+60/60 checks through the broker edit screen, Settings and the frontend: broker name on the buttons with a long SEO post title, `{broker}` placeholder, affiliate URL and rel kept; regulatory chain hidden for broker-stated data, shown for verified data in a tested country only; entity map licence numbers and neutral "Not available"; add / rename / reorder / remove account fields with stable IDs, display options (order, hidden column, heading), values kept; calculator figures checked by hand (1.0 pip x $10 = $10.00 per lot, $7 round turn, $3.50 per side x 2, opening only, cent lot size, gold contract size, USD/JPY with and without a rate, N/A for unknown data), volume presets edited and reordered; source label above / below / in each row / between rows, row source, core Table label row and inline label, toolbar button in table cells; score card and hero without overflow on 6 reviews x 5 widths; 1.4.1 data migration; importer restore. All earlier suites pass (1.4.1 20/20, 1.4 31/31 with the chain check updated to the 1.4.2 rule, 1.3 51/51, 1.2 63/63, journeys 47/47, 1.1 22/22), every demo item is valid in Gutenberg and the PHP log is clean.
 
 ## 7. Known differences from the prototype
 

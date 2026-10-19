@@ -224,3 +224,186 @@
 		update();
 	}
 }() );
+
+/**
+ * Broker data: account types. Fields can be added, removed, renamed and
+ * reordered; each field has a stable internal ID (new ones get a random ID),
+ * so renaming never touches values. Every change is mirrored in the account
+ * rows (inputs) and in the display options box (columns).
+ */
+( function () {
+	'use strict';
+
+	const box = document.querySelector( '[data-fxt-acc]' );
+	if ( ! box ) {
+		return;
+	}
+	const defs = box.querySelector( '[data-fxt-acc-defs]' );
+	const cols = document.querySelector( '[data-fxt-acc-cols]' );
+	const esc = ( text ) => String( text ).replace( /[&<>"]/g, ( c ) => ( { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ c ] ) );
+
+	function fromTemplate( template, map ) {
+		let html = template.innerHTML;
+		Object.keys( map ).forEach( ( key ) => {
+			html = html.split( key ).join( map[ key ] );
+		} );
+		html = html.trim();
+		// Table rows must be parsed inside a table body.
+		const wrapper = document.createElement( 0 === html.indexOf( '<tr' ) ? 'tbody' : 'div' );
+		wrapper.innerHTML = html;
+		return wrapper.firstElementChild;
+	}
+
+	// Account rows on the page plus the row template (index placeholder kept).
+	function rows() {
+		const list = Array.from( box.querySelectorAll( '[data-fxt-acc-rows] > [data-fxt-acc-row]' ) ).map( ( row ) => ( { row, index: row.getAttribute( 'data-fxt-acc-row' ) } ) );
+		const template = box.querySelector( '[data-fxt-template]' );
+		const tplRow = template && template.content.querySelector( '[data-fxt-acc-row]' );
+		if ( tplRow ) {
+			list.push( { row: tplRow, index: '__INDEX__' } );
+		}
+		return list;
+	}
+
+	function groupOf( row ) {
+		return row.querySelector( ':scope > .fxt-group' );
+	}
+
+	function eachField( id, fn ) {
+		rows().forEach( ( item ) => {
+			const field = groupOf( item.row ).querySelector( ':scope > [data-fxt-acc-field="' + id + '"]' );
+			if ( field ) {
+				fn( field );
+			}
+		} );
+	}
+
+	function reorderInputs() {
+		const ids = Array.from( defs.querySelectorAll( '[data-fxt-acc-def]' ) ).map( ( tr ) => tr.getAttribute( 'data-fxt-acc-def' ) );
+		rows().forEach( ( item ) => {
+			const group = groupOf( item.row );
+			const more = group.querySelector( ':scope > [data-fxt-acc-more]' );
+			ids.forEach( ( id ) => {
+				const field = group.querySelector( ':scope > [data-fxt-acc-field="' + id + '"]' );
+				if ( field ) {
+					group.insertBefore( field, more );
+				}
+			} );
+		} );
+	}
+
+	function addField() {
+		const labelInput = box.querySelector( '[data-fxt-acc-newlabel]' );
+		const typeSelect = box.querySelector( '[data-fxt-acc-newtype]' );
+		const label = labelInput.value.trim();
+		if ( ! label ) {
+			labelInput.focus();
+			return;
+		}
+		const type = typeSelect.value;
+		let id;
+		do {
+			id = 'f_' + Date.now().toString( 36 ) + Math.random().toString( 36 ).slice( 2, 5 );
+		} while ( defs.querySelector( '[data-fxt-acc-def="' + id + '"]' ) );
+
+		const def = fromTemplate( box.querySelector( '[data-fxt-acc-def-template]' ), { __FIELD__: id, __LABEL__: esc( label ), __TYPE__: type } );
+		def.querySelector( '[data-fxt-acc-typelabel]' ).textContent = typeSelect.options[ typeSelect.selectedIndex ].text;
+		defs.appendChild( def );
+
+		const input = box.querySelector( '[data-fxt-acc-input="' + type + '"]' );
+		rows().forEach( ( item ) => {
+			const field = fromTemplate( input, { __INDEX__: item.index, __FIELD__: id, __LABEL__: esc( label ) } );
+			const group = groupOf( item.row );
+			group.insertBefore( field, group.querySelector( ':scope > [data-fxt-acc-more]' ) );
+		} );
+
+		if ( cols ) {
+			cols.appendChild( fromTemplate( document.querySelector( '[data-fxt-acc-col-template]' ), { __FIELD__: id, __LABEL__: esc( label ) } ) );
+		}
+		labelInput.value = '';
+		def.querySelector( '[data-fxt-acc-label]' ).focus();
+	}
+
+	box.addEventListener( 'click', ( event ) => {
+		const target = event.target;
+		if ( target.closest( '[data-fxt-acc-addfield]' ) ) {
+			event.preventDefault();
+			addField();
+			return;
+		}
+		const def = target.closest( '[data-fxt-acc-def]' );
+		if ( ! def ) {
+			return;
+		}
+		const id = def.getAttribute( 'data-fxt-acc-def' );
+		if ( target.closest( '[data-fxt-acc-remove]' ) ) {
+			event.preventDefault();
+			const label = def.querySelector( '[data-fxt-acc-label]' ).value;
+			// eslint-disable-next-line no-alert
+			if ( ! window.confirm( 'Remove the field "' + label + '"? Its values are deleted from every account type when the broker is saved.' ) ) {
+				return;
+			}
+			def.remove();
+			eachField( id, ( field ) => field.remove() );
+			const col = cols && cols.querySelector( '[data-fxt-acc-col="' + id + '"]' );
+			if ( col ) {
+				col.remove();
+			}
+		} else if ( target.closest( '[data-fxt-acc-up]' ) && def.previousElementSibling ) {
+			event.preventDefault();
+			def.parentNode.insertBefore( def, def.previousElementSibling );
+			reorderInputs();
+			target.focus();
+		} else if ( target.closest( '[data-fxt-acc-down]' ) && def.nextElementSibling ) {
+			event.preventDefault();
+			def.parentNode.insertBefore( def.nextElementSibling, def );
+			reorderInputs();
+			target.focus();
+		}
+	} );
+
+	// Live rename: account rows and display options follow the label.
+	box.addEventListener( 'input', ( event ) => {
+		if ( ! event.target.matches( '[data-fxt-acc-label]' ) ) {
+			return;
+		}
+		const id = event.target.closest( '[data-fxt-acc-def]' ).getAttribute( 'data-fxt-acc-def' );
+		const label = event.target.value;
+		eachField( id, ( field ) => {
+			field.querySelectorAll( '[data-fxt-acc-fieldlabel]' ).forEach( ( span ) => {
+				span.textContent = label;
+			} );
+		} );
+		const col = cols && cols.querySelector( '[data-fxt-acc-col="' + id + '"] [data-fxt-acc-collabel]' );
+		if ( col ) {
+			col.textContent = label;
+		}
+	} );
+
+	// Enter in the "new field" input adds the field instead of submitting.
+	box.addEventListener( 'keydown', ( event ) => {
+		if ( 'Enter' === event.key && event.target.matches( '[data-fxt-acc-newlabel]' ) ) {
+			event.preventDefault();
+			addField();
+		}
+	} );
+
+	// Display options: order of the frontend columns.
+	if ( cols ) {
+		cols.addEventListener( 'click', ( event ) => {
+			const item = event.target.closest( '[data-fxt-acc-col]' );
+			if ( ! item ) {
+				return;
+			}
+			if ( event.target.closest( '[data-fxt-acc-colup]' ) && item.previousElementSibling ) {
+				event.preventDefault();
+				item.parentNode.insertBefore( item, item.previousElementSibling );
+				event.target.focus();
+			} else if ( event.target.closest( '[data-fxt-acc-coldown]' ) && item.nextElementSibling ) {
+				event.preventDefault();
+				item.parentNode.insertBefore( item.nextElementSibling, item );
+				event.target.focus();
+			}
+		} );
+	}
+}() );

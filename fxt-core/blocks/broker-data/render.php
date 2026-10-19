@@ -24,5 +24,16 @@ if ( ! $fxt_broker ) {
 }
 ?>
 <div <?php echo get_block_wrapper_attributes( array( 'class' => 'broker-data broker-data--' . $fxt_section ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
-	<?php fxt_core_view( 'broker/' . $fxt_section, array( 'broker' => $fxt_broker, 'code' => Repository::current_market() ) ); ?>
+	<?php
+	fxt_core_view(
+		'broker/' . $fxt_section,
+		array(
+			'broker'          => $fxt_broker,
+			'code'            => Repository::current_market(),
+			// Source label placement in tables (Gutenberg: block sidebar).
+			'source_position' => isset( $attributes['sourcePosition'] ) ? (string) $attributes['sourcePosition'] : '',
+			'source_after'    => isset( $attributes['sourceAfter'] ) ? (int) $attributes['sourceAfter'] : 1,
+		)
+	);
+	?>
 </div>

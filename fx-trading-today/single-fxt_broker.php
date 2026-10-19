@@ -42,8 +42,10 @@ while ( have_posts() ) :
 						</div>
 						<h1 class="page-hero__title">
 							<?php
+							// A custom post title is the page heading; a plain broker name becomes "{name} review".
+							$fxt_title = isset( $fxt_broker['title'] ) ? $fxt_broker['title'] : $fxt_broker['name'];
 							/* translators: %s: broker name */
-							echo esc_html( sprintf( __( '%s review', 'fx-trading-today' ), $fxt_broker['name'] ) );
+							echo esc_html( $fxt_title !== $fxt_broker['name'] ? $fxt_title : sprintf( __( '%s review', 'fx-trading-today' ), $fxt_broker['name'] ) );
 							?>
 						</h1>
 						<?php

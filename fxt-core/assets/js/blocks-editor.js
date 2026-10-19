@@ -236,6 +236,63 @@
 				value: a.brokerId,
 				onChange: ( v ) => set( { brokerId: parseInt( v, 10 ) || 0 } ),
 			} ),
+			-1 !== [ 'accounts', 'payments', 'platforms' ].indexOf( a.section ) ? el( SelectControl, {
+				key: 'sp',
+				label: __( 'Source label position', 'fxt-core' ),
+				value: a.sourcePosition || '',
+				options: [
+					{ value: '', label: __( 'Default (above the table)', 'fxt-core' ) },
+					{ value: 'above', label: __( 'Above the table', 'fxt-core' ) },
+					{ value: 'below', label: __( 'Below the table', 'fxt-core' ) },
+					{ value: 'rows', label: __( 'In each row', 'fxt-core' ) },
+					{ value: 'after', label: __( 'Between rows (after row…)', 'fxt-core' ) },
+				],
+				help: 'accounts' === a.section
+					? __( 'Account rows with their own source (Broker data: account types > Row source label) always show it in their row.', 'fxt-core' )
+					: null,
+				onChange: ( v ) => set( { sourcePosition: v } ),
+			} ) : null,
+			'after' === a.sourcePosition && -1 !== [ 'accounts', 'payments', 'platforms' ].indexOf( a.section ) ? el( RangeControl, {
+				key: 'sa',
+				label: __( 'Insert the label after row', 'fxt-core' ),
+				help: __( '0 = before the first row. A number past the last row puts it after the last row.', 'fxt-core' ),
+				min: 0,
+				max: 20,
+				value: a.sourceAfter,
+				onChange: ( v ) => set( { sourceAfter: v || 0 } ),
+			} ) : null,
+			'costs' === a.section ? el( 'p', { key: 'sh', className: 'components-base-control__help' }, __( 'Each cost row has its own source label (Broker data: sources).', 'fxt-core' ) ) : null,
+		],
+		'fxt/cost-calculator': ( a, set ) => [
+			el( SelectControl, {
+				key: 'i',
+				label: __( 'Instrument', 'fxt-core' ),
+				value: a.instrument,
+				options: [ { value: '', label: __( 'Default (Settings)', 'fxt-core' ) } ].concat( config.instruments || [] ),
+				help: __( 'Spreads come from the account fields of type "Spread (pips)" set to this instrument.', 'fxt-core' ),
+				onChange: ( v ) => set( { instrument: v } ),
+			} ),
+			el( SelectControl, {
+				key: 'b',
+				label: __( 'Costs are calculated for', 'fxt-core' ),
+				value: a.basis,
+				options: [
+					{ value: '', label: __( 'Default (Settings)', 'fxt-core' ) },
+					{ value: 'round_trip', label: __( 'Round trip (open and close)', 'fxt-core' ) },
+					{ value: 'open', label: __( 'Opening a position only', 'fxt-core' ) },
+				],
+				onChange: ( v ) => set( { basis: v } ),
+			} ),
+			el( ToggleControl, { key: 'd', label: __( 'Show spread and commission in each cell', 'fxt-core' ), checked: !! a.showBreakdown, onChange: ( v ) => set( { showBreakdown: v } ) } ),
+			el( ToggleControl, { key: 'a', label: __( 'Show assumptions under the table', 'fxt-core' ), checked: !! a.showAssumptions, onChange: ( v ) => set( { showAssumptions: v } ) } ),
+			el( TextControl, {
+				key: 'br',
+				type: 'number',
+				label: __( 'Broker ID (optional)', 'fxt-core' ),
+				help: __( 'Leave at 0 to use the broker being edited. Volumes and instruments: Settings > FX Trading Today > Cost calculator.', 'fxt-core' ),
+				value: a.brokerId,
+				onChange: ( v ) => set( { brokerId: parseInt( v, 10 ) || 0 } ),
+			} ),
 		],
 		'fxt/evidence-data': ( a, set ) => [
 			el( SelectControl, {
@@ -328,6 +385,7 @@
 		'fxt/evidence-snapshot',
 		'fxt/post-byline',
 		'fxt/source-label',
+		'fxt/cost-calculator',
 	];
 
 	/* ---------------------------------------------------------------------

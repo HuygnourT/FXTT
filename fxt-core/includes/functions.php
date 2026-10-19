@@ -129,6 +129,22 @@ function fxt_core_page_url( $key ) {
 }
 
 /**
+ * Label of the affiliate button: the admin label with {broker} replaced by
+ * the Broker name, or "Visit {Broker name}".
+ *
+ * @param array $broker Normalized broker.
+ * @return string
+ */
+function fxt_core_cta_label( array $broker ) {
+	$label = trim( (string) $broker['cta_label'] );
+	if ( '' === $label ) {
+		/* translators: %s: broker name */
+		return sprintf( __( 'Visit %s', 'fxt-core' ), $broker['name'] );
+	}
+	return str_replace( '{broker}', $broker['name'], $label );
+}
+
+/**
  * Comparison URL for a set of brokers.
  *
  * @param string[] $slugs Broker slugs.
@@ -269,6 +285,35 @@ function fxt_core_context_vars( array $broker, $code ) {
  */
 function fxt_core_source_line( array $state ) {
 	return '<p class="data-source">' . esc_html__( 'Source:', 'fxt-core' ) . ' ' . fxt_core_source_tag( $state ) . '</p>';
+}
+
+/**
+ * Where the source label of a data table goes (block "Broker data" >
+ * Source label position): above, below, rows (in every row) or after
+ * (a full-width row after row N).
+ *
+ * @param array  $args    View args (source_position, source_after).
+ * @param string $default Section default.
+ * @return array { position: string, after: int }
+ */
+function fxt_core_source_position( array $args, $default = 'above' ) {
+	$position = isset( $args['source_position'] ) ? (string) $args['source_position'] : '';
+	$position = in_array( $position, array( 'above', 'below', 'rows', 'after' ), true ) ? $position : $default;
+	return array(
+		'position' => $position,
+		'after'    => isset( $args['source_after'] ) ? max( 0, (int) $args['source_after'] ) : 1,
+	);
+}
+
+/**
+ * Full-width table row holding a source label (between two data rows).
+ *
+ * @param array $state   See Repository::resolve_source().
+ * @param int   $colspan Number of columns.
+ * @return string HTML.
+ */
+function fxt_core_source_row( array $state, $colspan ) {
+	return '<tr class="data-table__source-row"><td colspan="' . (int) $colspan . '"><span class="data-source">' . esc_html__( 'Source:', 'fxt-core' ) . ' ' . fxt_core_source_tag( $state ) . '</span></td></tr>';
 }
 
 /**

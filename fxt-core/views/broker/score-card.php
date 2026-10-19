@@ -17,8 +17,9 @@ $has     = null !== $broker['score'] && ! empty( $broker['breakdown'] );
 <aside class="card score-card" aria-label="<?php esc_attr_e( 'Research score breakdown', 'fxt-core' ); ?>">
 	<div class="score-card__head">
 		<span class="u-label"><?php esc_html_e( 'Research score', 'fxt-core' ); ?></span>
-		<p class="score-card__value">
-			<?php if ( fxt_core_score_is_pending( $broker ) ) : ?>
+		<?php $pending = fxt_core_score_is_pending( $broker ); ?>
+		<p class="score-card__value<?php echo $pending ? ' score-card__value--text' : ''; ?>">
+			<?php if ( $pending ) : ?>
 				<?php echo esc_html( fxt_core_score_pending_text() ); ?>
 			<?php else : ?>
 				<?php echo esc_html( number_format_i18n( $broker['score'], 1 ) ); ?><span>/ 5</span>

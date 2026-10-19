@@ -25,6 +25,13 @@ final class Fields {
 	 * @return array value => label
 	 */
 	public static function options( array $field ) {
+		if ( isset( $field['options'] ) && 'instruments' === $field['options'] ) {
+			$options = array();
+			foreach ( Costs::instruments() as $instrument ) {
+				$options[ $instrument['key'] ] = $instrument['name'];
+			}
+			return $options;
+		}
 		if ( isset( $field['options'] ) && 'markets' === $field['options'] ) {
 			$options = array();
 			foreach ( Repository::markets() as $market ) {
@@ -78,7 +85,7 @@ final class Fields {
 				if ( isset( $field['max'] ) ) {
 					$value = min( (float) $field['max'], $value );
 				}
-				return ( isset( $field['step'] ) && 1.0 === (float) $field['step'] ) ? (int) round( $value ) : round( $value, 2 );
+				return ( isset( $field['step'] ) && 1.0 === (float) $field['step'] ) ? (int) round( $value ) : round( $value, isset( $field['precision'] ) ? (int) $field['precision'] : 2 );
 
 			case 'date':
 				$value = is_scalar( $raw ) ? trim( (string) $raw ) : '';
@@ -130,6 +137,15 @@ final class Fields {
 					}
 				}
 				return $rows ? $rows : null;
+
+			case 'account_fields':
+				return Accounts::sanitize_fields( $raw );
+
+			case 'account_rows':
+				return Accounts::sanitize_rows( $raw );
+
+			case 'account_display':
+				return Accounts::sanitize_display( $raw );
 
 			case 'country_checklist':
 				$valid = array();
@@ -280,6 +296,18 @@ final class Fields {
 					'type'  => array( 'array', 'null' ),
 					'items' => array( 'type' => 'object', 'properties' => self::rest_properties( $field['fields'] ) ),
 				);
+			case 'account_fields':
+				return array(
+					'type'  => array( 'array', 'null' ),
+					'items' => array( 'type' => 'object', 'additionalProperties' => true ),
+				);
+			case 'account_rows':
+				return array(
+					'type'  => array( 'array', 'null' ),
+					'items' => array( 'type' => 'object', 'additionalProperties' => true ),
+				);
+			case 'account_display':
+				return array( 'type' => array( 'object', 'null' ), 'additionalProperties' => true );
 			case 'sources':
 				$rows = array();
 				foreach ( array_keys( $field['rows'] ) as $row_key ) {
@@ -328,6 +356,9 @@ final class Fields {
 			'group'      => 'object',
 			'market_map' => 'object',
 			'sources'    => 'object',
+			'account_fields'  => 'array',
+			'account_rows'    => 'array',
+			'account_display' => 'object',
 		);
 		return isset( $map[ $field['type'] ] ) ? $map[ $field['type'] ] : 'string';
 	}

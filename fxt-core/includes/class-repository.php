@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Repository {
 
-	const CACHE_KEY     = 'fxt_core_brokers_v3'; // v3: accepting residents.
+	const CACHE_KEY     = 'fxt_core_brokers_v4'; // v4: broker name, account fields.
 	const COOKIE        = 'fxt_country';
 	const SETTINGS      = 'fxt_settings';
 
@@ -529,7 +529,8 @@ final class Repository {
 			return $out;
 		};
 
-		$name  = get_the_title( $post );
+		$title = get_the_title( $post );
+		$name  = self::broker_name( (string) $meta( 'fxt_name', '' ), $title );
 		$score = $meta( 'fxt_score' );
 
 		return array(
@@ -537,6 +538,7 @@ final class Repository {
 			'slug'            => $post->post_name,
 			'menu_order'      => (int) $post->menu_order,
 			'name'            => $name,
+			'title'           => $title,
 			'url'             => get_permalink( $post ),
 			'excerpt'         => has_excerpt( $post ) ? get_the_excerpt( $post ) : '',
 			'logo_id'         => (int) get_post_thumbnail_id( $post ),
@@ -555,7 +557,9 @@ final class Repository {
 			'trading'         => wp_parse_args( $meta( 'fxt_trading', array() ), array( 'leverage' => '', 'execution' => '', 'order_types' => '' ) ),
 			'costs'           => wp_parse_args( $meta( 'fxt_costs', array() ), array( 'spread' => '', 'commission' => '', 'swap' => '', 'other_fees' => '' ) ),
 			'payments'        => wp_parse_args( $meta( 'fxt_payments', array() ), array( 'bank' => false, 'cards' => false, 'ewallets' => false, 'crypto' => false, 'time_local' => '', 'time_cards' => '', 'time_ewallets' => '', 'time_crypto' => '' ) ),
-			'accounts'        => $meta( 'fxt_accounts', array() ),
+			'accounts'        => Accounts::rows( $post->ID ),
+			'account_fields'  => Accounts::fields( $post->ID ),
+			'account_display' => Accounts::display( $post->ID ),
 			'entities'        => array_map( array( __CLASS__, 'normalize_entity' ), (array) $meta( 'fxt_entities', array() ) ),
 			'sources'         => (array) $meta( 'fxt_sources', array() ),
 			'markets'         => $meta( 'fxt_markets', array() ),
@@ -567,6 +571,27 @@ final class Repository {
 			'platforms'       => $terms( Content_Types::PLATFORM ),
 			'account_types'   => array_keys( $terms( Content_Types::ACCOUNT_TYPE ) ),
 		);
+	}
+
+	/**
+	 * Broker name shown in buttons, tables and headings: the "Broker name"
+	 * field, or the post title without a review suffix ("Exness review 2026:
+	 * fees and accounts" -> "Exness") for brokers saved before 1.4.2.
+	 *
+	 * @param string $field Saved "Broker name".
+	 * @param string $title Post title.
+	 * @return string
+	 */
+	public static function broker_name( $field, $title ) {
+		$field = trim( wp_strip_all_tags( (string) $field ) );
+		if ( '' !== $field ) {
+			return $field;
+		}
+		$title = trim( html_entity_decode( wp_strip_all_tags( (string) $title ), ENT_QUOTES, 'UTF-8' ) );
+		$name  = preg_replace( '/\s+(?:[:|\x{2013}\x{2014}]|-\s).*$/u', '', $title );
+		$name  = preg_replace( '/\s+reviews?\b.*$/iu', '', (string) $name );
+		$name  = trim( (string) $name );
+		return '' !== $name ? $name : $title;
 	}
 
 	/**
@@ -969,6 +994,40 @@ final class Repository {
 		// Kept for views that only need verified / not verified.
 		$entity['verified'] = 'verified' === $entity['source'];
 		return $entity;
+	}
+
+	/**
+	 * Whether the regulatory chain of a country may be shown: the country is
+	 * a Tested resident, its legal entity is named and the entity data is
+	 * "Verified at source" (or "Tested" backed by published evidence).
+	 * Broker-stated or unclassified entity data is never shown there.
+	 *
+	 * @param array  $broker Normalized broker.
+	 * @param string $code   ISO code.
+	 * @return bool
+	 */
+	public static function entity_is_verified( array $broker, $code ) {
+		$code = strtoupper( (string) $code );
+		if ( '' === $code || ! self::is_tested_resident( $broker, $code ) ) {
+			return false;
+		}
+		$entity = self::entity( $broker, $code );
+		if ( '' === trim( (string) $entity['name'] ) ) {
+			return false;
+		}
+		return in_array( self::entity_source( $broker, $code )['source'], array( 'verified', 'tested' ), true );
+	}
+
+	/**
+	 * Whether a stored value is a placeholder rather than data
+	 * ("TBD", "N/A", "Research pending"...).
+	 *
+	 * @param mixed $value Value.
+	 * @return bool
+	 */
+	public static function is_placeholder( $value ) {
+		$value = strtolower( trim( wp_strip_all_tags( (string) $value ) ) );
+		return '' === $value || (bool) preg_match( '/^(tbd|tbc|n\/?a|-+|\x{2014}|unknown|pending|research pending|to be confirmed|to be determined)\.?$/u', $value );
 	}
 
 	/**

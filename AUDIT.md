@@ -157,3 +157,19 @@ Migration: read-time from v1.3 rows (`availability = yes`, shared `source`) unti
 
 Nothing is migrated: existing content is unchanged, and the demo importer only adds the default note when the site has none saved.
 
+# Audit for version 1.4.2 (broker name, tables, score card, entities, account fields, cost calculator)
+
+| Item | Before (1.4.1) | After (1.4.2) |
+|---|---|---|
+| Broker name | `name` = post title (an SEO title leaked into buttons, tables, H1 "X review") | `fxt_name` field; empty: `Repository::broker_name()` strips " review…" / ": …" from the title. `title` kept separately for the H1 |
+| Affiliate button | `cta_label` or "Visit {post title}" | `fxt_core_cta_label()`: label with `{broker}` -> broker name, or "Visit {broker name}" |
+| Source label in data tables | Fixed line above Account types / Payments / Platforms | Block attributes `sourcePosition` (above, below, rows, after) + `sourceAfter`; `fxt_core_source_row()`; per-account `source` |
+| Core Table block | Inline labels only | `render_block_core/table` filter: label-only row -> one full-width cell (`tr.fxt-source-row`) |
+| Score card | Hero grid used an auto column: long words widened it past the viewport (card clipped on phones); value line-height 1 | `minmax(0, 1fr)` columns, wrapping title and buttons, value line-height 1.15 / clamp size, text value variant |
+| Regulatory chain | Shown for every country, with "TBD" / "Research pending" placeholders | `Repository::entity_is_verified()`: tested resident + named entity + verified (or evidenced tested) source; otherwise not rendered |
+| Entity map | Serves column (ISO codes) | Licence number column; `Repository::is_placeholder()` -> "Not available" |
+| Account types | Fixed repeater (6 keys) in "accounts and legal entities" box | `Accounts`: `fxt_account_fields` (id, label, type, instrument, unit), `fxt_accounts` rows (value keys by id, `<id>__pips/__model/__amount`, `source`, `lot_units`, `_v`), `fxt_account_display` (account_label, columns [id, show]); own boxes + admin.js |
+| Trading cost calculator | Not available | Block `fxt/cost-calculator`, `Costs` (volumes, instruments, options in Settings > Cost calculator) |
+
+Migration: read-time. Missing `fxt_account_fields` = built-in set (same ids as the old keys); rows without `_v` get calculator numbers parsed from text; nothing is rewritten until the broker is saved. Broker cache key `fxt_core_brokers_v4`.
+

@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/cost-calculator",
+	"title": "Trading cost calculator",
+	"category": "fxt",
+	"icon": "calculator",
+	"description": "Estimated trading cost of each account type for the volume presets (Settings > FX Trading Today > Cost calculator), from the broker's account data: spread cost, commission and total.",
+	"textdomain": "fxt-core",
+	"usesContext": [ "postId", "postType" ],
+	"attributes": {
+		"brokerId": { "type": "number", "default": 0 },
+		"instrument": { "type": "string", "default": "" },
+		"basis": { "type": "string", "enum": [ "", "round_trip", "open" ], "default": "" },
+		"showBreakdown": { "type": "boolean", "default": true },
+		"showAssumptions": { "type": "boolean", "default": true }
+	},
+	"supports": { "html": false, "reusable": false },
+	"editorScript": "fxt-core-blocks",
+	"render": "file:./render.php"
+}

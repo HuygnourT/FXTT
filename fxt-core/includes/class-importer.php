@@ -655,6 +655,11 @@ final class Importer {
 				'posts'    => false,
 				'pages'    => false,
 			),
+			// Trading cost calculator (v1.4.2): volume presets, instruments and
+			// assumptions; an owner's saved values win below.
+			'calc_volumes'     => Costs::default_volumes(),
+			'calc_instruments' => Costs::default_instruments(),
+			'calc_options'     => Costs::default_options(),
 			// Example result note with placeholders; only used when the site has
 			// no Broker Reviews text saved yet (saved text always wins below).
 			'directory_ui'     => array_merge(

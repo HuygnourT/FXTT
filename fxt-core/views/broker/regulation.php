@@ -26,7 +26,11 @@ $chain = array(
 	array( __( 'Licence', 'fxt-core' ), $entity['licence'], __( 'Register number', 'fxt-core' ), true ),
 	array( __( 'Jurisdiction', 'fxt-core' ), $entity['jurisdiction'], __( 'Law that applies', 'fxt-core' ), false ),
 );
+// v1.4.2: the chain for the visitor's country is shown only when its entity
+// data is verified; otherwise nothing (no placeholders, no unverified data).
+$show_chain = Repository::entity_is_verified( $broker, $code );
 ?>
+<?php if ( $show_chain ) : ?>
 <ol class="entity-chain" aria-label="<?php /* translators: %s: country */ echo esc_attr( sprintf( __( 'Regulatory chain for %s', 'fxt-core' ), $country ) ); ?>">
 	<?php foreach ( $chain as $node ) : ?>
 		<li class="entity-chain__node">
@@ -40,7 +44,7 @@ $chain = array(
 	<?php endforeach; ?>
 </ol>
 
-<?php if ( $entity['protection'] ) : ?>
+<?php if ( $entity['protection'] && ! Repository::is_placeholder( $entity['protection'] ) ) : ?>
 	<p class="callout">
 		<?php echo fxt_core_icon( 'shield-check', 'icon--sm' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		<span>
@@ -51,6 +55,7 @@ $chain = array(
 		</span>
 	</p>
 <?php endif; ?>
+<?php endif; // $show_chain. ?>
 
 <?php if ( ! empty( $broker['entities'] ) ) : ?>
 	<h3 class="doc-subtitle">
@@ -65,25 +70,19 @@ $chain = array(
 				<th scope="col"><?php esc_html_e( 'Entity', 'fxt-core' ); ?></th>
 				<th scope="col"><?php esc_html_e( 'Regulator', 'fxt-core' ); ?></th>
 				<th scope="col"><?php esc_html_e( 'Jurisdiction', 'fxt-core' ); ?></th>
-				<th scope="col"><?php esc_html_e( 'Serves', 'fxt-core' ); ?></th>
+				<th scope="col"><?php esc_html_e( 'Licence number', 'fxt-core' ); ?></th>
 			</tr></thead>
 			<tbody>
 			<?php
 			foreach ( $broker['entities'] as $row ) :
-				$row    = Repository::normalize_entity( $row );
-				$serves = array();
-				foreach ( Repository::markets() as $fxt_market ) {
-					$served_by = Repository::entity( $broker, $fxt_market['code'] );
-					if ( $served_by['key'] === $row['key'] && 'yes' === Repository::availability( $broker, $fxt_market['code'] ) ) {
-						$serves[] = $fxt_market['code'];
-					}
-				}
+				$row     = Repository::normalize_entity( $row );
+				$licence = Repository::is_placeholder( $row['licence'] ) ? '' : $row['licence'];
 				?>
 				<tr>
 					<th scope="row"><?php echo fxt_core_text( $row['name'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></th>
 					<td><?php echo fxt_core_text( $row['regulator'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?> <?php echo '' !== $row['regulator'] ? fxt_core_source_tag( Repository::resolve_source( array( 'source' => $row['source'], 'ref' => $row['source_ref'], 'checked' => $row['checked'] ), $broker ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 					<td><?php echo fxt_core_text( $row['jurisdiction'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
-					<td class="u-mono"><?php echo $serves ? esc_html( implode( ', ', $serves ) ) : '<span class="muted">' . esc_html__( 'None in our markets', 'fxt-core' ) . '</span>'; ?></td>
+					<td class="u-mono"><?php echo '' !== $licence ? esc_html( $licence ) : '<span class="muted">' . esc_html__( 'Not available', 'fxt-core' ) . '</span>'; ?></td>
 				</tr>
 			<?php endforeach; ?>
 			</tbody>

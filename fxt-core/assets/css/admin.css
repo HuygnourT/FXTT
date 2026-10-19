@@ -144,3 +144,31 @@
 .fxt-checklist__list { columns: 4 14rem; column-gap: 16px; max-height: 320px; overflow: auto; margin: 0; padding: 8px 12px; border: 1px solid #c3c4c7; background: #fff; }
 .fxt-checklist__list li { break-inside: avoid; margin: 0 0 4px; }
 .fxt-checklist__code { color: #8c8f94; font-size: 11px; }
+
+/* Account types (v1.4.2): field manager, rows, display options ------------ */
+.fxt-acc-defs { margin: 6px 0 10px; }
+.fxt-acc-defs th, .fxt-acc-defs td { vertical-align: middle; }
+.fxt-acc-defs td:first-child { width: 32%; }
+.fxt-acc-defs code { font-size: 11px; }
+.fxt-acc-def__instrument,
+.fxt-acc-def__unit { display: none; }
+.fxt-acc-defs tr[data-type="spread"] .fxt-acc-def__instrument,
+.fxt-acc-defs tr[data-type="commission"] .fxt-acc-def__instrument,
+.fxt-acc-defs tr[data-type="number"] .fxt-acc-def__unit { display: inline-block; }
+.fxt-acc-defs tr[data-type="spread"] .fxt-acc-def__none,
+.fxt-acc-defs tr[data-type="commission"] .fxt-acc-def__none,
+.fxt-acc-defs tr[data-type="number"] .fxt-acc-def__none { display: none; }
+.fxt-acc-def__actions { white-space: nowrap; }
+.fxt-acc-def__actions .button-link { margin-right: 8px; }
+.fxt-acc-add { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.fxt-acc-value__parts { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.fxt-acc-value__parts label { display: inline-flex; gap: 6px; align-items: center; }
+.fxt-acc-row .fxt-acc-value--spread,
+.fxt-acc-row .fxt-acc-value--commission,
+.fxt-acc-row__more { grid-column: 1 / -1; }
+.fxt-acc-row__more summary { cursor: pointer; font-weight: 600; }
+.fxt-acc-row__more > .fxt-group { margin-top: 8px; }
+.fxt-acc-cols { margin: 6px 0 0 1.4em; }
+.fxt-acc-cols li { display: flex; gap: 12px; align-items: center; padding: 4px 0; border-bottom: 1px solid #f0f0f1; }
+.fxt-acc-cols__actions { margin-left: auto; }
+.fxt-acc-cols__actions .button-link { margin-left: 8px; }

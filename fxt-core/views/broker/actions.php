@@ -33,8 +33,7 @@ $compare = fxt_core_compare_url( array_merge( array( $broker['slug'] ), $others 
 			<?php
 			// Only the label set in Admin (Affiliate button label); the affiliate
 			// disclosure is shown elsewhere on the page and rel="sponsored" stays.
-			/* translators: %s: broker name */
-			echo esc_html( $broker['cta_label'] ? $broker['cta_label'] : sprintf( __( 'Visit %s', 'fxt-core' ), $broker['name'] ) );
+			echo esc_html( fxt_core_cta_label( $broker ) );
 			?>
 			<?php echo fxt_core_icon( 'external', 'icon--sm' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<span class="u-visually-hidden"><?php esc_html_e( '(opens in a new tab)', 'fxt-core' ); ?></span>

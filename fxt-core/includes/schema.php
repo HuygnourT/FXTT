@@ -214,6 +214,7 @@ final class Schema {
 		}
 
 		return array(
+			'fxt_name'            => array( 'type' => 'text', 'label' => __( 'Broker name', 'fxt-core' ), 'help' => __( 'Short brand name used on buttons, in tables and in headings, e.g. "Exness". Empty: the post title without "review" and anything after it.', 'fxt-core' ) ),
 			'fxt_monogram'        => array( 'type' => 'text', 'label' => __( 'Monogram', 'fxt-core' ), 'help' => __( 'Two or three letters shown when no logo is set.', 'fxt-core' ) ),
 			'fxt_status'          => array( 'type' => 'select', 'label' => __( 'Review status', 'fxt-core' ), 'options' => self::review_status(), 'default' => 'published' ),
 			'fxt_score'           => array( 'type' => 'number', 'label' => __( 'Overall score override (0 to 5)', 'fxt-core' ), 'min' => 0, 'max' => 5, 'step' => 0.1, 'help' => __( 'Leave empty: the score is calculated from the category scores and the weights in Settings. Shown as "Pending" until every category has a score.', 'fxt-core' ) ),
@@ -256,18 +257,11 @@ final class Schema {
 					'time_crypto'   => array( 'type' => 'text', 'label' => __( 'Processing time: crypto', 'fxt-core' ) ),
 				),
 			),
-			'fxt_accounts'        => array(
-				'type'   => 'repeater',
-				'label'  => __( 'Account types', 'fxt-core' ),
-				'fields' => array(
-					'name'        => array( 'type' => 'text', 'label' => __( 'Account', 'fxt-core' ) ),
-					'min_deposit' => array( 'type' => 'text', 'label' => __( 'Min deposit', 'fxt-core' ) ),
-					'spread'      => array( 'type' => 'text', 'label' => __( 'Spread from', 'fxt-core' ) ),
-					'commission'  => array( 'type' => 'text', 'label' => __( 'Commission', 'fxt-core' ) ),
-					'execution'   => array( 'type' => 'text', 'label' => __( 'Execution', 'fxt-core' ) ),
-					'best_for'    => array( 'type' => 'text', 'label' => __( 'Most relevant for', 'fxt-core' ) ),
-				),
-			),
+			// Account types (v1.4.2): field definitions, rows and display options,
+			// edited in their own boxes (see Accounts).
+			'fxt_account_fields'  => array( 'type' => 'account_fields', 'label' => __( 'Account type fields', 'fxt-core' ) ),
+			'fxt_accounts'        => array( 'type' => 'account_rows', 'label' => __( 'Account types', 'fxt-core' ) ),
+			'fxt_account_display' => array( 'type' => 'account_display', 'label' => __( 'Account types display', 'fxt-core' ) ),
 			'fxt_entities'        => array(
 				'type'   => 'repeater',
 				'label'  => __( 'Legal entities', 'fxt-core' ),
@@ -313,7 +307,7 @@ final class Schema {
 				),
 			),
 			'fxt_affiliate_url'   => array( 'type' => 'url', 'label' => __( 'Affiliate URL', 'fxt-core' ), 'help' => __( 'Rendered with rel="sponsored nofollow" and an "affiliate link" label. The button is hidden while this is empty.', 'fxt-core' ) ),
-			'fxt_cta_label'       => array( 'type' => 'text', 'label' => __( 'Affiliate button label', 'fxt-core' ), 'help' => __( 'Shown as is on the review button. Default: "Visit {broker}". The link keeps rel="sponsored nofollow"; the affiliate disclosure is shown elsewhere on the page.', 'fxt-core' ) ),
+			'fxt_cta_label'       => array( 'type' => 'text', 'label' => __( 'Affiliate button label', 'fxt-core' ), 'help' => __( 'Default: "Visit {broker}". {broker} is replaced with the Broker name (never the post title). The link keeps rel="sponsored nofollow"; the affiliate disclosure is shown elsewhere on the page.', 'fxt-core' ) ),
 			'fxt_sources'         => array(
 				'type'   => 'sources',
 				'label'  => __( 'Data sources', 'fxt-core' ),
@@ -561,6 +555,44 @@ final class Schema {
 				),
 			),
 
+			// Tab "Cost calculator": volume presets, instruments, assumptions.
+			'calc_volumes'         => array(
+				'type'   => 'repeater',
+				'tab'    => 'calculator',
+				'label'  => __( 'Trading volumes', 'fxt-core' ),
+				'help'   => __( 'One column of the Trading cost calculator per row, in this order. Label is optional (default "0.01 lot", "100 lots").', 'fxt-core' ),
+				'fields' => array(
+					'lots'  => array( 'type' => 'number', 'label' => __( 'Volume (lots)', 'fxt-core' ), 'min' => 0, 'step' => 'any', 'precision' => 4 ),
+					'label' => array( 'type' => 'text', 'label' => __( 'Column label (optional)', 'fxt-core' ) ),
+				),
+			),
+			'calc_instruments'     => array(
+				'type'   => 'repeater',
+				'tab'    => 'calculator',
+				'label'  => __( 'Instruments', 'fxt-core' ),
+				'help'   => __( 'Contract specifications used to turn pips into money: pip value per lot (USD) = units per lot x pip size x USD per 1 unit of the quote currency. For a USD quote (EUR/USD, XAU/USD) the rate is 1; for other quotes (e.g. USD/JPY) enter the rate, or the calculator shows N/A. Key: internal ID used by account fields, keep it unchanged once used.', 'fxt-core' ),
+				'fields' => array(
+					'key'      => array( 'type' => 'text', 'label' => __( 'Key', 'fxt-core' ) ),
+					'name'     => array( 'type' => 'text', 'label' => __( 'Name', 'fxt-core' ) ),
+					'units'    => array( 'type' => 'number', 'label' => __( 'Units per lot (contract size)', 'fxt-core' ), 'min' => 0, 'step' => 'any', 'precision' => 4 ),
+					'pip_size' => array( 'type' => 'number', 'label' => __( 'Pip size', 'fxt-core' ), 'min' => 0, 'step' => 'any', 'precision' => 8 ),
+					'quote'    => array( 'type' => 'text', 'label' => __( 'Quote currency', 'fxt-core' ) ),
+					'usd_rate' => array( 'type' => 'number', 'label' => __( 'USD per 1 unit of the quote currency', 'fxt-core' ), 'min' => 0, 'step' => 'any', 'precision' => 8 ),
+					'note'     => array( 'type' => 'text', 'label' => __( 'Note (shown under the calculator)', 'fxt-core' ) ),
+				),
+			),
+			'calc_options'         => array(
+				'type'   => 'group',
+				'tab'    => 'calculator',
+				'label'  => __( 'Calculation assumptions', 'fxt-core' ),
+				'help'   => __( 'Defaults for every Trading cost calculator block; each block can choose another instrument or basis.', 'fxt-core' ),
+				'fields' => array(
+					'instrument' => array( 'type' => 'select', 'label' => __( 'Default instrument', 'fxt-core' ), 'options' => 'instruments' ),
+					'basis'      => array( 'type' => 'select', 'label' => __( 'Costs are calculated for', 'fxt-core' ), 'options' => array( 'round_trip' => __( 'Round trip (open and close)', 'fxt-core' ), 'open' => __( 'Opening a position only', 'fxt-core' ) ) ),
+					'note'       => array( 'type' => 'textarea', 'label' => __( 'Note under the calculator', 'fxt-core' ) ),
+				),
+			),
+
 			// Tab "Broker Reviews filters": display text only. Internal filter keys,
 			// query parameters and broker data never change with these labels.
 			'directory_filters'    => array(
@@ -757,6 +789,9 @@ final class Schema {
 			'directory_filters'    => self::default_directory_filters(),
 			'directory_options'    => self::default_directory_options(),
 			'directory_ui'         => self::default_directory_ui(),
+			'calc_volumes'         => Costs::default_volumes(),
+			'calc_instruments'     => Costs::default_instruments(),
+			'calc_options'         => Costs::default_options(),
 		);
 	}
 }

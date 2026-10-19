@@ -25,9 +25,11 @@ final class Admin {
 	private static function boxes() {
 		return array(
 			Content_Types::BROKER   => array(
-				'fxt-research'  => array( __( 'Broker data: research summary', 'fxt-core' ), array( 'fxt_status', 'fxt_score', 'fxt_score_breakdown', 'fxt_reviewed', 'fxt_monogram', 'fxt_founded', 'fxt_min_deposit', 'fxt_currencies', 'fxt_other_platforms', 'fxt_affiliate_url', 'fxt_cta_label' ) ),
+				'fxt-research'  => array( __( 'Broker data: research summary', 'fxt-core' ), array( 'fxt_name', 'fxt_status', 'fxt_score', 'fxt_score_breakdown', 'fxt_reviewed', 'fxt_monogram', 'fxt_founded', 'fxt_min_deposit', 'fxt_currencies', 'fxt_other_platforms', 'fxt_affiliate_url', 'fxt_cta_label' ) ),
 				'fxt-trading'   => array( __( 'Broker data: trading conditions and costs', 'fxt-core' ), array( 'fxt_trading', 'fxt_costs', 'fxt_payments' ) ),
-				'fxt-entities'  => array( __( 'Broker data: accounts and legal entities', 'fxt-core' ), array( 'fxt_accounts', 'fxt_entities' ) ),
+				'fxt-accounts'  => array( __( 'Broker data: account types', 'fxt-core' ), 'render' => array( Accounts::class, 'render_fields_box' ) ),
+				'fxt-accounts-display' => array( __( 'Broker data: account types display options', 'fxt-core' ), 'render' => array( Accounts::class, 'render_display_box' ) ),
+				'fxt-entities'  => array( __( 'Broker data: legal entities', 'fxt-core' ), array( 'fxt_entities' ) ),
 				'fxt-accepting' => array( __( 'Broker data: accepting residents', 'fxt-core' ), array( 'fxt_accepting' ) ),
 				'fxt-markets'   => array( __( 'Broker data: tested residents', 'fxt-core' ), array( 'fxt_markets' ) ),
 				'fxt-sources'   => array( __( 'Broker data: sources', 'fxt-core' ), array( 'fxt_sources' ) ),
@@ -105,6 +107,10 @@ final class Admin {
 					static function ( $post ) use ( $schema, $box, $first ) {
 						if ( $first ) {
 							wp_nonce_field( self::NONCE, '_fxt_nonce' );
+						}
+						if ( isset( $box['render'] ) ) {
+							call_user_func( $box['render'], $post );
+							return;
 						}
 						echo '<div class="fxt-fields">';
 						foreach ( $box[1] as $key ) {
@@ -210,7 +216,14 @@ final class Admin {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized per field below.
 		$input = isset( $_POST['fxt_meta'] ) && is_array( $_POST['fxt_meta'] ) ? wp_unslash( $_POST['fxt_meta'] ) : array();
 
+		if ( Content_Types::BROKER === $post->post_type && isset( $_POST['fxt_acc'] ) && is_array( $_POST['fxt_acc'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized in Accounts::save().
+			Accounts::save( $post_id, wp_unslash( $_POST['fxt_acc'] ) );
+		}
 		foreach ( $boxes[ $post->post_type ] as $box ) {
+			if ( ! isset( $box[1] ) ) {
+				continue;
+			}
 			foreach ( $box[1] as $key ) {
 				$value = Fields::sanitize( $schema[ $key ], isset( $input[ $key ] ) ? $input[ $key ] : null );
 				if ( null === $value || false === $value ) {
@@ -412,6 +425,9 @@ final class Admin {
 		if ( ! $tab || 'directory' === $tab ) {
 			$clean['directory_filters'] = self::validate_directory_filters( $clean['directory_filters'] );
 		}
+		if ( ! $tab || 'calculator' === $tab ) {
+			$clean = Costs::validate_settings( $clean );
+		}
 		return $clean;
 	}
 
@@ -530,6 +546,7 @@ final class Admin {
 			'general'   => __( 'General', 'fxt-core' ),
 			'review'    => __( 'Review page', 'fxt-core' ),
 			'directory' => __( 'Broker Reviews filters', 'fxt-core' ),
+			'calculator' => __( 'Cost calculator', 'fxt-core' ),
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- tab navigation only.
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
@@ -549,6 +566,8 @@ final class Admin {
 		echo '</nav>';
 		if ( 'directory' === $tab ) {
 			echo '<p>' . esc_html__( 'Text of the filter panel and results on the Broker Reviews page. This only changes what visitors read: broker data, filter keys and filtering logic stay the same.', 'fxt-core' ) . '</p>';
+		} elseif ( 'calculator' === $tab ) {
+			echo '<p>' . esc_html__( 'Settings of the "Trading cost calculator" block. Spreads and commissions come from each broker\'s account types (Broker data: account types): "Spread (pips)" fields for an instrument and "Commission" fields. Changing a volume, an instrument or an account value updates every calculator on save.', 'fxt-core' ) . '</p>';
 		} elseif ( 'review' === $tab ) {
 			echo '<p>' . esc_html__( 'Default texts of broker reviews that depend on the visitor\'s country. Per country: Broker Reviews > Countries. Per broker and country: Broker data: conditions by country on each review. When a broker does not accept residents of a country, review sections wrapped in a "Country eligibility section" block are hidden and the Trader verdict block shows the verdict below (or the country row\'s own verdict).', 'fxt-core' ) . '</p>';
 		} else {

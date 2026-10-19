@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Blocks {
 
-	const BLOCKS = array( 'country-brokers', 'broker-cards', 'broker-compare', 'broker-data', 'evidence-data', 'score-weights', 'broker-directory', 'evidence-list', 'evidence-snapshot', 'post-byline', 'eligibility-section', 'trader-verdict', 'source-label' );
+	const BLOCKS = array( 'country-brokers', 'broker-cards', 'broker-compare', 'broker-data', 'evidence-data', 'score-weights', 'broker-directory', 'evidence-list', 'evidence-snapshot', 'post-byline', 'eligibility-section', 'trader-verdict', 'source-label', 'cost-calculator' );
 
 	/** @var bool Whether the evidence viewer markup still has to be printed. */
 	private static $viewer_pending = false;
@@ -32,6 +32,46 @@ final class Blocks {
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'label_format' ) );
 		// Inline source labels: final markup on output (also for REST refreshes).
 		add_filter( 'the_content', 'fxt_core_label_markup', 20 );
+		// Table blocks: a row whose only content is a source label spans the table.
+		add_filter( 'render_block_core/table', array( __CLASS__, 'table_label_rows' ) );
+	}
+
+	/**
+	 * Source labels between table rows (core Table block). A row with one
+	 * filled cell that contains a source label, all other cells empty, is
+	 * rendered as one full-width cell, so editors can put a label between
+	 * any two rows from Gutenberg. Other rows and the table styles are
+	 * unchanged.
+	 *
+	 * @param string $html Block HTML.
+	 * @return string
+	 */
+	public static function table_label_rows( $html ) {
+		if ( false === strpos( (string) $html, 'fxt-source-label' ) ) {
+			return $html;
+		}
+		return preg_replace_callback(
+			'#<tr(\s[^>]*)?>(.*?)</tr>#s',
+			static function ( $row ) {
+				if ( ! preg_match_all( '#<(td|th)\b([^>]*)>(.*?)</\1>#s', $row[2], $cells, PREG_SET_ORDER ) || count( $cells ) < 2 ) {
+					return $row[0];
+				}
+				$span   = 0;
+				$filled = array();
+				foreach ( $cells as $cell ) {
+					$span += preg_match( '/colspan="(\d+)"/', $cell[2], $c ) ? max( 1, (int) $c[1] ) : 1;
+					$text  = trim( str_replace( array( '&nbsp;', "\xc2\xa0" ), ' ', wp_strip_all_tags( $cell[3] ) ) );
+					if ( '' !== $text ) {
+						$filled[] = $cell;
+					}
+				}
+				if ( 1 !== count( $filled ) || false === strpos( $filled[0][3], 'fxt-source-label' ) ) {
+					return $row[0];
+				}
+				return '<tr class="fxt-source-row"><td colspan="' . (int) $span . '">' . $filled[0][3] . '</td></tr>';
+			},
+			$html
+		);
 	}
 
 	/**
@@ -46,7 +86,7 @@ final class Blocks {
 			true
 		);
 		wp_set_script_translations( 'fxt-core-blocks', 'fxt-core', FXT_CORE_DIR . 'languages' );
-		wp_add_inline_script( 'fxt-core-blocks', 'window.fxtCoreBlocks = ' . wp_json_encode( array( 'compare' => self::compare_options(), 'labelKinds' => Schema::label_kinds() ) ) . ';', 'before' );
+		wp_add_inline_script( 'fxt-core-blocks', 'window.fxtCoreBlocks = ' . wp_json_encode( array( 'compare' => self::compare_options(), 'labelKinds' => Schema::label_kinds(), 'instruments' => array_values( array_map( static function ( $i ) { return array( 'value' => $i['key'], 'label' => $i['name'] ); }, Costs::instruments() ) ) ) ) . ';', 'before' );
 
 		Assets::register_frontend_scripts();
 

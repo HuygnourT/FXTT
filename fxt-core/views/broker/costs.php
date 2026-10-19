@@ -18,6 +18,8 @@ $rows   = array(
 	'order_types' => array( __( 'Order types', 'fxt-core' ), $broker['trading']['order_types'] ),
 	'other_fees'  => array( __( 'Other fees', 'fxt-core' ), $broker['costs']['other_fees'] ),
 );
+// Each fact has its own source, so its label always stays in its row
+// (Source label position does not apply to this section).
 ?>
 <div class="table-scroll">
 	<table class="data-table data-table--kv">

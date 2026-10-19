@@ -55,9 +55,13 @@ if ( $pay['bank'] && ! $local ) {
 	<button class="link-button" type="button" data-open-country><?php esc_html_e( 'Change country', 'fxt-core' ); ?></button>
 </p>
 
-<?php if ( $rows ) : ?>
-	<?php echo fxt_core_source_line( Repository::source( $broker, 'payment_methods' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-<?php endif; ?>
+<?php
+$source = Repository::source( $broker, 'payment_methods' );
+$place  = fxt_core_source_position( $args, 'above' );
+if ( $rows && 'above' === $place['position'] ) {
+	echo fxt_core_source_line( $source ); // phpcs:ignore WordPress.Security.EscapeOutput
+}
+?>
 
 <?php if ( $rows ) : ?>
 	<div class="table-scroll">
@@ -70,18 +74,33 @@ if ( $pay['bank'] && ! $local ) {
 				<th scope="col"><?php esc_html_e( 'Test status', 'fxt-core' ); ?></th>
 			</tr></thead>
 			<tbody>
-			<?php foreach ( $rows as $r ) : ?>
+			<?php foreach ( array_values( $rows ) as $i => $r ) : ?>
+				<?php
+				if ( 'after' === $place['position'] && $i === $place['after'] ) {
+					echo fxt_core_source_row( $source, 5 ); // phpcs:ignore WordPress.Security.EscapeOutput
+				}
+				?>
 				<tr>
-					<th scope="row"><?php echo esc_html( $r[0] ); ?></th>
+					<th scope="row"><?php echo esc_html( $r[0] ); ?><?php echo 'rows' === $place['position'] ? ' ' . fxt_core_source_tag( $source ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?></th>
 					<td><?php echo esc_html( $r[1] ); ?></td>
 					<td class="u-mono"><?php echo fxt_core_text( $r[2] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 					<td class="u-mono"><?php echo fxt_core_text( $r[3] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 					<td><?php echo fxt_core_badge( 'test', $r[4] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 				</tr>
 			<?php endforeach; ?>
+			<?php
+			if ( 'after' === $place['position'] && $place['after'] >= count( $rows ) ) {
+				echo fxt_core_source_row( $source, 5 ); // phpcs:ignore WordPress.Security.EscapeOutput
+			}
+			?>
 			</tbody>
 		</table>
 	</div>
+	<?php
+	if ( 'below' === $place['position'] ) {
+		echo fxt_core_source_line( $source ); // phpcs:ignore WordPress.Security.EscapeOutput
+	}
+	?>
 <?php else : ?>
 	<p class="empty-state">
 		<?php
