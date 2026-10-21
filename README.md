@@ -54,9 +54,8 @@ The importer:
 | Header menu, mega menu, footer columns | Appearance > Menus | Header, mobile drawer, footer |
 | Header button, banner, risk warning, affiliate disclosure, key pages | Settings > FX Trading Today | Header, footer, links in blocks |
 | Section copy (hero, how it works, independence…) | Gutenberg: Pages > *page* | — |
-| **Account types**: fields (add, remove, rename, reorder, type), values per account, row source label, lot size for the calculator | Broker Reviews > *broker* > **Broker data: account types** | Account types table, Quick Facts account list, Trading cost calculator |
+| **Account types**: fields (add, remove, rename, reorder, type), values per account, row source label, **cost per 1.00 lot for the calculator (EUR/USD, XAU/USD, Unit)** | Broker Reviews > *broker* > **Broker data: account types** (box "Trading cost calculator: spread cost per 1.00 lot" in each account type) | Account types table, Quick Facts account list, Trading cost calculator |
 | Which account fields the frontend table shows, their order, first column heading | **Broker data: account types display options** (box right below) | Account types table |
-| **Trading cost calculator**: volume presets, instruments (contract size, pip size, quote currency, USD rate), default instrument, round trip / opening only, note | **Settings > FX Trading Today > Cost calculator** | Every Trading cost calculator block |
 | Position of the source label in a data table (above, below, in each row, between rows after row N) | Gutenberg: select the **Broker data** block (Account types, Deposits and withdrawals, Platforms) > sidebar **Source label position** | That block |
 | **Content under the author line** (default for the whole site) | **Settings > FX Trading Today > General > Content under the author line**: text (links, bold, italic and source labels allowed) + where it shows (broker reviews, test evidence, articles, pages) | Every page of the ticked types, directly below the author line at the top |
 | Content under the author line for **one page** | Editor sidebar box **"Under the author line"**: Use the site default / Custom text for this page / Hide on this page | That page only |
@@ -85,14 +84,14 @@ On pages that use the theme's templates, consecutive blocks at the **top** of th
 | Brokers in your country | Brokers available in the selected country | Number shown; order by score or manual |
 | Broker cards | Broker review cards | **Choose brokers + reorder** (empty = automatic by score) |
 | Broker comparison | Comparison widget | Layout, slots, **default brokers + order**, **rows/groups to show**, sync to URL |
-| Broker data | One data section of a review | Section |
+| Broker data | One data section of a review (incl. **Score card**, 1.4.3) | Section; source label position for tables |
 | Evidence data | One section of a test | Section |
 | Evidence snapshot | Key results for one broker in one country (homepage audience card) | Broker, country |
 | Score weights | Score categories (bars or table) | Display style |
 | Broker directory | Search + filters + sort | — |
 | Test evidence index | Published evidence + tests in progress | All countries (with country filter) or only the selected country; headings; show/hide in progress |
 | Post byline | Author + role + date + read time (inside Query Loop) | Show role, text before the date, read-time format |
-| Trading cost calculator | Estimated cost of one trade per account type and volume: total, spread cost, commission | Instrument, round trip / opening only, show spread + commission, show assumptions, broker (optional) |
+| Trading cost calculator | LOT input (default 1.00, min 0.01, steps of 0.01) + EUR/USD and XAU/USD spread cost of every account type, recalculated as the visitor types | Title, broker (optional) |
 | Source label | One line "Source: [label] note" | Label, label text, text before the label, note, link, open in a new tab |
 
 Every block is server-rendered; data is never copied into the post content.
@@ -153,11 +152,23 @@ Upgrading from 1.3: brokers keep working without re-saving. Until a broker is sa
   - Field types: Text, Number (with unit), **Spread (pips)** (pips for the calculator + optional display text, linked to one instrument), **Commission** (model: none / per lot per side / per lot round turn, amount in USD per lot, optional display text). Empty display text is generated from the numbers.
   - The editing order (box "account types") and the frontend order (box "display options") are separate.
   - Upgrading from 1.4.1: nothing to do. Brokers without field definitions use the built-in set with the same keys, so tables look the same; calculator numbers are read from the old texts ("From 1.0 pips", "$7 per lot round turn", "None") until the broker is saved. Texts that cannot be read ("Tiered", "Reduced", "TBD") stay N/A until numbers are entered.
-- **Trading cost calculator** (block, in the demo under Account types)
+- **Trading cost calculator**: replaced in 1.4.3 (see 3g). The 1.4.2 volume / instrument settings are no longer used.
+- *(1.4.2 calculator, for reference)*
   - pip value per lot (USD) = units per lot x pip size x USD per 1 unit of the quote currency; spread cost = pips x pip value x lots; commission per side x 2 (round trip) or x 1 (opening), round turn x 1 (round trip) or x 0.5 (opening); total = spread + commission. The spread is paid once in both cases.
   - Spreads come from the account field of type Spread for the block's instrument; commission from the Commission field for that instrument, else the one for any instrument. Cent and other accounts can set "Units per lot for this account".
   - **N/A** whenever a needed value is missing: no spread field or pips for that instrument, commission model not set, non-USD quote without a USD rate. Nothing is guessed. Swaps, slippage, deposit fees and conversion are not included (stated under the table).
   - Values are calculated on every page view from the account data and settings, so the table always matches them.
+
+## 3g. Version 1.4.3 rules
+
+- **Score card in the Broker data block**: Broker data > Section **Score card** shows the same card as the review header anywhere in the review body. It uses the same data and calculation (category scores in Broker data: research summary x weights in Settings > Score categories), so both cards always match. Styling and responsive behaviour are the same (max width 32rem in the text column).
+- **Cost per lot fields**: each account type (Broker data: account types) has **EUR/USD spread cost per 1.00 lot**, **XAU/USD spread cost per 1.00 lot** (numbers, decimals allowed, stored as numbers) and **Unit** (text, default `$`). Empty = N/A; **0 is a valid cost**.
+- **Trading cost calculator** (block): one **LOT** input (default 1.00, minimum 0.01, steps of 0.01, positive only) and one row per account type of the broker, in the order of Broker data: account types.
+  - **Total cost = cost per lot x LOT**, the same LOT for every account type, recalculated as the visitor types (no reload). Calculated in hundredths of a lot and rounded to cents (no float errors).
+  - Invalid input (0, negative, more than two decimals) is marked and the last results stay; leaving the field rounds it to 0.01 steps (minimum 0.01).
+  - The unit is shown before symbols (`$8.00`) and after letter codes (`8.00 USD`).
+  - Without JavaScript the table shows the costs for 1.00 lot.
+- **Upgrading from 1.4.2**: existing account data is unchanged. Rows saved before 1.4.3 are pre-filled once with the EUR/USD cost the 1.4.2 calculator showed for 1 lot round trip (spread pips x $10, or the account's own lot size, + commission); XAU/USD stays empty (N/A) because there was no gold data. Check the values in Broker data: account types and save. The Settings tab "Cost calculator" is gone (its saved values are left in the database, unused).
 
 ## 4. Country, cache, privacy
 
@@ -211,6 +222,10 @@ Upgrading from 1.2: no re-import needed for the selector, evidence and button ch
 ## 6g. Acceptance checks (version 1.4.2)
 
 60/60 checks through the broker edit screen, Settings and the frontend: broker name on the buttons with a long SEO post title, `{broker}` placeholder, affiliate URL and rel kept; regulatory chain hidden for broker-stated data, shown for verified data in a tested country only; entity map licence numbers and neutral "Not available"; add / rename / reorder / remove account fields with stable IDs, display options (order, hidden column, heading), values kept; calculator figures checked by hand (1.0 pip x $10 = $10.00 per lot, $7 round turn, $3.50 per side x 2, opening only, cent lot size, gold contract size, USD/JPY with and without a rate, N/A for unknown data), volume presets edited and reordered; source label above / below / in each row / between rows, row source, core Table label row and inline label, toolbar button in table cells; score card and hero without overflow on 6 reviews x 5 widths; 1.4.1 data migration; importer restore. All earlier suites pass (1.4.1 20/20, 1.4 31/31 with the chain check updated to the 1.4.2 rule, 1.3 51/51, 1.2 63/63, journeys 47/47, 1.1 22/22), every demo item is valid in Gutenberg and the PHP log is clean.
+
+## 6h. Acceptance checks (version 1.4.3)
+
+46/46 checks: cost fields in every account type (numbers stored as numbers, 0 kept, empty = N/A, unit separate, other data preserved); LOT input position, default, min and step; brief example (Standard 8 / 24: 0.01 = $0.08 / $0.24, 0.10 = $0.80 / $2.40, 1.00 = $8.00 / $24.00, 10.00 = $80.00 / $240.00) plus 2.37, 1000 and 0.3 x 6.125; same LOT for all accounts; no page reload; invalid lots (0, -1, 0.005, 1.234) and normalisation; unit after letter codes; responsive at 360 px; still working after the review body is refreshed; new account type and edited costs appear without code changes; score card section with the same score as the header, updated by a category edit, responsive; 1.4.2 migration; demo import; version. All earlier suites pass (1.4.2 40/40 without its old calculator checks, 1.4.1 20/20, 1.4 31/31, 1.3 51/51, 1.2 63/63, journeys 47/47, 1.1 22/22), every demo item is valid in Gutenberg and the PHP log is clean.
 
 ## 7. Known differences from the prototype
 

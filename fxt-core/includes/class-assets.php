@@ -52,6 +52,7 @@ final class Assets {
 		wp_register_script( 'fxt-core-compare', $js . 'compare.js', array( 'fxt-core-country' ), FXT_CORE_VERSION, $args );
 		wp_register_script( 'fxt-core-directory', $js . 'directory.js', array( 'fxt-core-country' ), FXT_CORE_VERSION, $args );
 		wp_register_script( 'fxt-core-evidence', $js . 'evidence.js', array(), FXT_CORE_VERSION, $args );
+		wp_register_script( 'fxt-core-cost-calc', $js . 'cost-calc.js', array(), FXT_CORE_VERSION, $args );
 	}
 
 	/**

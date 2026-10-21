@@ -425,9 +425,7 @@ final class Admin {
 		if ( ! $tab || 'directory' === $tab ) {
 			$clean['directory_filters'] = self::validate_directory_filters( $clean['directory_filters'] );
 		}
-		if ( ! $tab || 'calculator' === $tab ) {
-			$clean = Costs::validate_settings( $clean );
-		}
+
 		return $clean;
 	}
 
@@ -546,7 +544,6 @@ final class Admin {
 			'general'   => __( 'General', 'fxt-core' ),
 			'review'    => __( 'Review page', 'fxt-core' ),
 			'directory' => __( 'Broker Reviews filters', 'fxt-core' ),
-			'calculator' => __( 'Cost calculator', 'fxt-core' ),
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- tab navigation only.
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
@@ -566,8 +563,6 @@ final class Admin {
 		echo '</nav>';
 		if ( 'directory' === $tab ) {
 			echo '<p>' . esc_html__( 'Text of the filter panel and results on the Broker Reviews page. This only changes what visitors read: broker data, filter keys and filtering logic stay the same.', 'fxt-core' ) . '</p>';
-		} elseif ( 'calculator' === $tab ) {
-			echo '<p>' . esc_html__( 'Settings of the "Trading cost calculator" block. Spreads and commissions come from each broker\'s account types (Broker data: account types): "Spread (pips)" fields for an instrument and "Commission" fields. Changing a volume, an instrument or an account value updates every calculator on save.', 'fxt-core' ) . '</p>';
 		} elseif ( 'review' === $tab ) {
 			echo '<p>' . esc_html__( 'Default texts of broker reviews that depend on the visitor\'s country. Per country: Broker Reviews > Countries. Per broker and country: Broker data: conditions by country on each review. When a broker does not accept residents of a country, review sections wrapped in a "Country eligibility section" block are hidden and the Trader verdict block shows the verdict below (or the country row\'s own verdict).', 'fxt-core' ) . '</p>';
 		} else {

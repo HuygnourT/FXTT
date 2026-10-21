@@ -5,17 +5,15 @@
 	"title": "Trading cost calculator",
 	"category": "fxt",
 	"icon": "calculator",
-	"description": "Estimated trading cost of each account type for the volume presets (Settings > FX Trading Today > Cost calculator), from the broker's account data: spread cost, commission and total.",
+	"description": "Spread cost of EUR/USD and XAU/USD for every account type of the broker, for the lot size the visitor enters (cost per 1.00 lot from Broker data: account types x LOT).",
 	"textdomain": "fxt-core",
 	"usesContext": [ "postId", "postType" ],
 	"attributes": {
 		"brokerId": { "type": "number", "default": 0 },
-		"instrument": { "type": "string", "default": "" },
-		"basis": { "type": "string", "enum": [ "", "round_trip", "open" ], "default": "" },
-		"showBreakdown": { "type": "boolean", "default": true },
-		"showAssumptions": { "type": "boolean", "default": true }
+		"title": { "type": "string", "default": "Trading Cost Calculator" }
 	},
 	"supports": { "html": false, "reusable": false },
 	"editorScript": "fxt-core-blocks",
+	"viewScript": "fxt-core-cost-calc",
 	"render": "file:./render.php"
 }

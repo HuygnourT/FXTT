@@ -150,19 +150,15 @@
 .fxt-acc-defs th, .fxt-acc-defs td { vertical-align: middle; }
 .fxt-acc-defs td:first-child { width: 32%; }
 .fxt-acc-defs code { font-size: 11px; }
-.fxt-acc-def__instrument,
 .fxt-acc-def__unit { display: none; }
-.fxt-acc-defs tr[data-type="spread"] .fxt-acc-def__instrument,
-.fxt-acc-defs tr[data-type="commission"] .fxt-acc-def__instrument,
 .fxt-acc-defs tr[data-type="number"] .fxt-acc-def__unit { display: inline-block; }
-.fxt-acc-defs tr[data-type="spread"] .fxt-acc-def__none,
-.fxt-acc-defs tr[data-type="commission"] .fxt-acc-def__none,
 .fxt-acc-defs tr[data-type="number"] .fxt-acc-def__none { display: none; }
 .fxt-acc-def__actions { white-space: nowrap; }
 .fxt-acc-def__actions .button-link { margin-right: 8px; }
 .fxt-acc-add { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .fxt-acc-value__parts { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
 .fxt-acc-value__parts label { display: inline-flex; gap: 6px; align-items: center; }
+.fxt-acc-row .fxt-acc-costs,
 .fxt-acc-row .fxt-acc-value--spread,
 .fxt-acc-row .fxt-acc-value--commission,
 .fxt-acc-row__more { grid-column: 1 / -1; }
@@ -172,3 +168,5 @@
 .fxt-acc-cols li { display: flex; gap: 12px; align-items: center; padding: 4px 0; border-bottom: 1px solid #f0f0f1; }
 .fxt-acc-cols__actions { margin-left: auto; }
 .fxt-acc-cols__actions .button-link { margin-left: 8px; }
+
+.fxt-acc-costs { padding: 10px 12px; border: 1px solid #c3c4c7; border-radius: 4px; background: #fff; }

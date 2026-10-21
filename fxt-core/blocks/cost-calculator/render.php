@@ -26,11 +26,8 @@ if ( ! $fxt_broker ) {
 	fxt_core_view(
 		'broker/cost-calculator',
 		array(
-			'broker'          => $fxt_broker,
-			'instrument'      => isset( $attributes['instrument'] ) ? (string) $attributes['instrument'] : '',
-			'basis'           => isset( $attributes['basis'] ) ? (string) $attributes['basis'] : '',
-			'show_breakdown'  => ! isset( $attributes['showBreakdown'] ) || $attributes['showBreakdown'],
-			'show_assumptions' => ! isset( $attributes['showAssumptions'] ) || $attributes['showAssumptions'],
+			'broker' => $fxt_broker,
+			'title'  => isset( $attributes['title'] ) ? (string) $attributes['title'] : '',
 		)
 	);
 	?>

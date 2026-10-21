@@ -25,13 +25,6 @@ final class Fields {
 	 * @return array value => label
 	 */
 	public static function options( array $field ) {
-		if ( isset( $field['options'] ) && 'instruments' === $field['options'] ) {
-			$options = array();
-			foreach ( Costs::instruments() as $instrument ) {
-				$options[ $instrument['key'] ] = $instrument['name'];
-			}
-			return $options;
-		}
 		if ( isset( $field['options'] ) && 'markets' === $field['options'] ) {
 			$options = array();
 			foreach ( Repository::markets() as $market ) {

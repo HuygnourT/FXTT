@@ -555,44 +555,6 @@ final class Schema {
 				),
 			),
 
-			// Tab "Cost calculator": volume presets, instruments, assumptions.
-			'calc_volumes'         => array(
-				'type'   => 'repeater',
-				'tab'    => 'calculator',
-				'label'  => __( 'Trading volumes', 'fxt-core' ),
-				'help'   => __( 'One column of the Trading cost calculator per row, in this order. Label is optional (default "0.01 lot", "100 lots").', 'fxt-core' ),
-				'fields' => array(
-					'lots'  => array( 'type' => 'number', 'label' => __( 'Volume (lots)', 'fxt-core' ), 'min' => 0, 'step' => 'any', 'precision' => 4 ),
-					'label' => array( 'type' => 'text', 'label' => __( 'Column label (optional)', 'fxt-core' ) ),
-				),
-			),
-			'calc_instruments'     => array(
-				'type'   => 'repeater',
-				'tab'    => 'calculator',
-				'label'  => __( 'Instruments', 'fxt-core' ),
-				'help'   => __( 'Contract specifications used to turn pips into money: pip value per lot (USD) = units per lot x pip size x USD per 1 unit of the quote currency. For a USD quote (EUR/USD, XAU/USD) the rate is 1; for other quotes (e.g. USD/JPY) enter the rate, or the calculator shows N/A. Key: internal ID used by account fields, keep it unchanged once used.', 'fxt-core' ),
-				'fields' => array(
-					'key'      => array( 'type' => 'text', 'label' => __( 'Key', 'fxt-core' ) ),
-					'name'     => array( 'type' => 'text', 'label' => __( 'Name', 'fxt-core' ) ),
-					'units'    => array( 'type' => 'number', 'label' => __( 'Units per lot (contract size)', 'fxt-core' ), 'min' => 0, 'step' => 'any', 'precision' => 4 ),
-					'pip_size' => array( 'type' => 'number', 'label' => __( 'Pip size', 'fxt-core' ), 'min' => 0, 'step' => 'any', 'precision' => 8 ),
-					'quote'    => array( 'type' => 'text', 'label' => __( 'Quote currency', 'fxt-core' ) ),
-					'usd_rate' => array( 'type' => 'number', 'label' => __( 'USD per 1 unit of the quote currency', 'fxt-core' ), 'min' => 0, 'step' => 'any', 'precision' => 8 ),
-					'note'     => array( 'type' => 'text', 'label' => __( 'Note (shown under the calculator)', 'fxt-core' ) ),
-				),
-			),
-			'calc_options'         => array(
-				'type'   => 'group',
-				'tab'    => 'calculator',
-				'label'  => __( 'Calculation assumptions', 'fxt-core' ),
-				'help'   => __( 'Defaults for every Trading cost calculator block; each block can choose another instrument or basis.', 'fxt-core' ),
-				'fields' => array(
-					'instrument' => array( 'type' => 'select', 'label' => __( 'Default instrument', 'fxt-core' ), 'options' => 'instruments' ),
-					'basis'      => array( 'type' => 'select', 'label' => __( 'Costs are calculated for', 'fxt-core' ), 'options' => array( 'round_trip' => __( 'Round trip (open and close)', 'fxt-core' ), 'open' => __( 'Opening a position only', 'fxt-core' ) ) ),
-					'note'       => array( 'type' => 'textarea', 'label' => __( 'Note under the calculator', 'fxt-core' ) ),
-				),
-			),
-
 			// Tab "Broker Reviews filters": display text only. Internal filter keys,
 			// query parameters and broker data never change with these labels.
 			'directory_filters'    => array(
@@ -789,9 +751,6 @@ final class Schema {
 			'directory_filters'    => self::default_directory_filters(),
 			'directory_options'    => self::default_directory_options(),
 			'directory_ui'         => self::default_directory_ui(),
-			'calc_volumes'         => Costs::default_volumes(),
-			'calc_instruments'     => Costs::default_instruments(),
-			'calc_options'         => Costs::default_options(),
 		);
 	}
 }

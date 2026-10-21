@@ -173,3 +173,16 @@ Nothing is migrated: existing content is unchanged, and the demo importer only a
 
 Migration: read-time. Missing `fxt_account_fields` = built-in set (same ids as the old keys); rows without `_v` get calculator numbers parsed from text; nothing is rewritten until the broker is saved. Broker cache key `fxt_core_brokers_v4`.
 
+# Audit for version 1.4.3 (score card in Broker data, lot-based cost calculator)
+
+| Item | Before (1.4.2) | After (1.4.3) |
+|---|---|---|
+| Score card | Review header only | Also Broker data block section `score-card` (same view `broker/score-card`, same data) |
+| Calculator data | Spread (pips) / Commission fields x instrument settings (volumes, contract size, pip size, rates) | Per account row: `cost_eurusd`, `cost_xauusd` (float or null), `cost_unit` (text, default `$`) |
+| Calculator | Fixed volume columns, spread + commission breakdown, assumptions | LOT input (1.00, min 0.01, step 0.01) and one row per account type; total = cost per lot x LOT in `assets/js/cost-calc.js` (hundredths of a lot, cents); server render for 1.00 lot |
+| Settings | Tab "Cost calculator" (`calc_volumes`, `calc_instruments`, `calc_options`) | Removed from the UI; saved values left unused. Class `Costs` removed |
+| Block attributes | `instrument`, `basis`, `showBreakdown`, `showAssumptions` | `title`, `brokerId` (old attributes are ignored) |
+| Account rows | `_v` 2, `lot_units` used by the calculator | `_v` 3; `lot_units` kept as a hidden value (migration only) |
+
+Migration: read-time `Accounts::migrate_costs()` for rows without `cost_eurusd`: EUR/USD = pips x units x 0.0001 + round-trip commission (null when any part is unknown), XAU/USD = null, unit `$`. Saved on the next broker save.
+

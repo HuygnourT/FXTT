@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       FX Trading Today Core
  * Description:       Broker reviews, test evidence, country data, blocks and demo import for the FX Trading Today theme. Content and data live here so they survive a theme change.
- * Version:           1.4.2
+ * Version:           1.4.3
  * Requires at least: 6.5
  * Requires PHP:      7.4
  * Author:            FX Trading Today
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FXT_CORE_VERSION', '1.4.2' );
+define( 'FXT_CORE_VERSION', '1.4.3' );
 define( 'FXT_CORE_FILE', __FILE__ );
 define( 'FXT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FXT_CORE_URL', plugin_dir_url( __FILE__ ) );
@@ -27,7 +27,6 @@ require_once FXT_CORE_DIR . 'includes/class-block-templates.php';
 require_once FXT_CORE_DIR . 'includes/class-content-types.php';
 require_once FXT_CORE_DIR . 'includes/class-repository.php';
 require_once FXT_CORE_DIR . 'includes/class-accounts.php';
-require_once FXT_CORE_DIR . 'includes/class-costs.php';
 require_once FXT_CORE_DIR . 'includes/class-countries.php';
 require_once FXT_CORE_DIR . 'includes/functions.php';
 require_once FXT_CORE_DIR . 'includes/class-blocks.php';

@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 $fxt_post_id = ! empty( $attributes['brokerId'] ) ? (int) $attributes['brokerId'] : ( isset( $block->context['postId'] ) ? (int) $block->context['postId'] : get_the_ID() );
 $fxt_broker  = Repository::broker( $fxt_post_id );
-$fxt_allowed = array( 'quick-facts', 'regulation', 'costs', 'platforms', 'payments', 'accounts', 'evidence', 'final-score' );
+$fxt_allowed = array( 'quick-facts', 'score-card', 'regulation', 'costs', 'platforms', 'payments', 'accounts', 'evidence', 'final-score' );
 $fxt_section = in_array( $attributes['section'], $fxt_allowed, true ) ? $attributes['section'] : 'quick-facts';
 
 if ( ! $fxt_broker ) {

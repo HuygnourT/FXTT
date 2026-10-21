@@ -9,8 +9,10 @@
  *                       label never changes it, so values and calculations
  *                       keep working.
  *   fxt_accounts        One row per account type:
- *                       { name, source, source_ref, source_checked, lot_units,
- *                         <id>: value, <id>__pips, <id>__model, <id>__amount, _v }
+ *                       { name, source, source_ref, source_checked,
+ *                         cost_eurusd, cost_xauusd, cost_unit (calculator, 1.4.3),
+ *                         <id>: value, <id>__pips, <id>__model, <id>__amount,
+ *                         lot_units (1.4.2, kept for migration), _v }
  *   fxt_account_display Frontend table: { account_label, columns: [ { id, show } ] }
  *                       in display order (independent from the editing order).
  *
@@ -33,10 +35,10 @@ defined( 'ABSPATH' ) || exit;
 final class Accounts {
 
 	/** Row keys that are not field values. */
-	const SYSTEM_KEYS = array( 'name', 'source', 'source_ref', 'source_checked', 'lot_units', '_v' );
+	const SYSTEM_KEYS = array( 'name', 'source', 'source_ref', 'source_checked', 'lot_units', 'cost_eurusd', 'cost_xauusd', 'cost_unit', '_v' );
 
 	/** Storage version written on every save (no text parsing after that). */
-	const VERSION = 2;
+	const VERSION = 3;
 
 	/**
 	 * Field types.
@@ -59,7 +61,7 @@ final class Accounts {
 	 */
 	public static function models() {
 		return array(
-			''      => __( 'Not set (calculator shows N/A)', 'fxt-core' ),
+			''      => __( 'Not set', 'fxt-core' ),
 			'none'  => __( 'No commission', 'fxt-core' ),
 			'side'  => __( 'Per lot, per side (charged on open and on close)', 'fxt-core' ),
 			'round' => __( 'Per lot, round turn (open + close together)', 'fxt-core' ),
@@ -184,9 +186,66 @@ final class Accounts {
 			if ( empty( $row['_v'] ) ) {
 				$row = self::fill_from_text( $row, $fields );
 			}
-			$out[] = $row;
+			if ( ! array_key_exists( 'cost_eurusd', $row ) ) {
+				// Saved before 1.4.3: pre-fill the cost per lot from the spread and commission data.
+				$row = self::migrate_costs( $row, $fields );
+			}
+			$row['cost_unit'] = isset( $row['cost_unit'] ) && '' !== trim( (string) $row['cost_unit'] ) ? (string) $row['cost_unit'] : '$';
+			$out[]            = $row;
 		}
 		return $out;
+	}
+
+	/**
+	 * Cost per 1.00 lot for rows saved before 1.4.3, from the same data the
+	 * 1.4.2 calculator used: EUR/USD spread (pips) x $10 per pip per lot
+	 * (100,000 units x 0.0001, or the account's own lot size) + commission
+	 * for a round trip (per side x 2, round turn x 1, none = 0). When any of
+	 * these is unknown the cost stays empty (N/A). There is no XAU/USD data
+	 * before 1.4.3, so that cost stays empty.
+	 *
+	 * @param array $row    Row.
+	 * @param array $fields Field definitions.
+	 * @return array
+	 */
+	public static function migrate_costs( array $row, array $fields ) {
+		$spread     = null;
+		$commission = null;
+		foreach ( $fields as $field ) {
+			if ( null === $spread && 'spread' === $field['type'] && in_array( $field['instrument'], array( 'eurusd', '' ), true ) ) {
+				$spread = $field['id'];
+			}
+			if ( null === $commission && 'commission' === $field['type'] && in_array( $field['instrument'], array( 'eurusd', '' ), true ) ) {
+				$commission = $field['id'];
+			}
+		}
+		$pips  = null !== $spread && isset( $row[ $spread . '__pips' ] ) && '' !== $row[ $spread . '__pips' ] ? (float) $row[ $spread . '__pips' ] : null;
+		$model = null !== $commission && isset( $row[ $commission . '__model' ] ) ? (string) $row[ $commission . '__model' ] : '';
+		$fee   = null !== $commission && isset( $row[ $commission . '__amount' ] ) && '' !== $row[ $commission . '__amount' ] && null !== $row[ $commission . '__amount' ] ? (float) $row[ $commission . '__amount' ] : null;
+		$units = ! empty( $row['lot_units'] ) ? (float) $row['lot_units'] : 100000.0;
+		$comm  = 'none' === $model ? 0.0 : ( null !== $fee && 'side' === $model ? $fee * 2 : ( null !== $fee && 'round' === $model ? $fee : null ) );
+
+		$row['cost_eurusd'] = null !== $pips && null !== $comm ? round( $pips * $units * 0.0001 + $comm, 4 ) : null;
+		$row['cost_xauusd'] = null;
+		$row['cost_unit']   = isset( $row['cost_unit'] ) && '' !== (string) $row['cost_unit'] ? (string) $row['cost_unit'] : '$';
+		return $row;
+	}
+
+	/**
+	 * A cost with its unit: "$8.00", "8.00 USD" (letters go after the number),
+	 * or "N/A" when the cost is missing. 0 is a valid cost.
+	 *
+	 * @param float|null $value Cost.
+	 * @param string     $unit  Unit.
+	 * @return string
+	 */
+	public static function money( $value, $unit = '$' ) {
+		if ( null === $value || '' === $value ) {
+			return __( 'N/A', 'fxt-core' );
+		}
+		$unit   = '' === trim( (string) $unit ) ? '$' : trim( (string) $unit );
+		$number = number_format( round( (float) $value, 2 ), 2, '.', ',' );
+		return preg_match( '/^\p{L}{2,}$/u', $unit ) ? $number . ' ' . $unit : $unit . $number;
 	}
 
 	/**
@@ -380,6 +439,10 @@ final class Accounts {
 				'source_ref'     => isset( $row['source_ref'] ) ? sanitize_text_field( (string) $row['source_ref'] ) : '',
 				'source_checked' => isset( $row['source_checked'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $row['source_checked'] ) ? (string) $row['source_checked'] : '',
 				'lot_units'      => self::number( isset( $row['lot_units'] ) ? $row['lot_units'] : null, 0 ),
+				// Calculator (1.4.3): numbers, not formatted strings; 0 is a valid cost.
+				'cost_eurusd'    => self::number( isset( $row['cost_eurusd'] ) ? $row['cost_eurusd'] : null, 0 ),
+				'cost_xauusd'    => self::number( isset( $row['cost_xauusd'] ) ? $row['cost_xauusd'] : null, 0 ),
+				'cost_unit'      => isset( $row['cost_unit'] ) && '' !== trim( sanitize_text_field( (string) $row['cost_unit'] ) ) ? trim( sanitize_text_field( (string) $row['cost_unit'] ) ) : '$',
 			);
 			$has = '' !== $clean['name'];
 			foreach ( $row as $key => $value ) {
@@ -420,8 +483,11 @@ final class Accounts {
 				}
 			}
 			if ( empty( $row['_v'] ) && null === $known ) {
-				// Imported or legacy text: derive calculator values once.
+				// Imported or legacy text: derive the numbers once.
 				$clean = self::fill_from_text( $clean, self::guess_fields( $clean ) );
+			}
+			if ( ( empty( $row['_v'] ) || (int) $row['_v'] < 3 ) && null === $known && ! array_key_exists( 'cost_eurusd', $row ) ) {
+				$clean = self::migrate_costs( $clean, self::default_fields() );
 			}
 			$clean['_v'] = self::VERSION;
 			$out[]       = $clean;
@@ -527,19 +593,6 @@ final class Accounts {
 	}
 
 	/**
-	 * Instruments for the spread / commission field selects.
-	 *
-	 * @return array key => name
-	 */
-	private static function instrument_options() {
-		$out = array();
-		foreach ( Costs::instruments() as $instrument ) {
-			$out[ $instrument['key'] ] = $instrument['name'];
-		}
-		return $out;
-	}
-
-	/**
 	 * Box "Broker data: account types": fields (add, remove, rename,
 	 * reorder) and the account rows.
 	 *
@@ -554,9 +607,9 @@ final class Accounts {
 		echo '<input type="hidden" name="fxt_acc[present]" value="1">';
 
 		echo '<div class="fxt-field"><p class="fxt-field__label">' . esc_html__( 'Fields', 'fxt-core' ) . '</p>';
-		echo '<p class="description">' . esc_html__( 'Rename a label at any time: values, display options and the cost calculator use the internal ID, which never changes. Removing a field deletes its values when the broker is saved. "Spread (pips)" and "Commission" fields feed the Trading cost calculator; choose the instrument their values refer to.', 'fxt-core' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Rename a label at any time: values and display options use the internal ID, which never changes. Removing a field deletes its values when the broker is saved. The Trading cost calculator uses the cost per 1.00 lot of each account type (below each account).', 'fxt-core' ) . '</p>';
 		echo '<table class="widefat fxt-acc-defs"><thead><tr>';
-		foreach ( array( __( 'Label', 'fxt-core' ), __( 'Type', 'fxt-core' ), __( 'Instrument / unit', 'fxt-core' ), __( 'Internal ID', 'fxt-core' ), '' ) as $head ) {
+		foreach ( array( __( 'Label', 'fxt-core' ), __( 'Type', 'fxt-core' ), __( 'Unit', 'fxt-core' ), __( 'Internal ID', 'fxt-core' ), '' ) as $head ) {
 			echo '<th scope="col">' . esc_html( $head ) . '</th>';
 		}
 		echo '</tr></thead><tbody data-fxt-acc-defs>';
@@ -620,13 +673,9 @@ final class Accounts {
 			esc_attr( $type )
 		);
 		echo '<td data-fxt-acc-typelabel>' . esc_html( isset( $types[ $type ] ) ? $types[ $type ] : '' ) . '</td><td>';
-		// Both controls are rendered; admin.css shows the one that fits the type.
-		echo '<span class="fxt-acc-def__instrument"><label class="screen-reader-text" for="fxt-acc-ins-' . esc_attr( $id ) . '">' . esc_html__( 'Instrument', 'fxt-core' ) . '</label><select id="fxt-acc-ins-' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '[instrument]">';
-		echo '<option value="">' . esc_html__( 'Any instrument (commission)', 'fxt-core' ) . '</option>';
-		foreach ( self::instrument_options() as $key => $label ) {
-			echo '<option value="' . esc_attr( $key ) . '"' . selected( $field['instrument'], $key, false ) . '>' . esc_html( $label ) . '</option>';
-		}
-		echo '</select></span>';
+		// Unit for number fields (admin.css shows it only for that type). The
+		// 1.4.2 instrument link is kept as stored.
+		echo '<input type="hidden" name="' . esc_attr( $name ) . '[instrument]" value="' . esc_attr( $field['instrument'] ) . '">';
 		echo '<span class="fxt-acc-def__unit"><label class="screen-reader-text" for="fxt-acc-unit-' . esc_attr( $id ) . '">' . esc_html__( 'Unit', 'fxt-core' ) . '</label><input type="text" class="small-text" id="fxt-acc-unit-' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '[unit]" value="' . esc_attr( $field['unit'] ) . '" placeholder="' . esc_attr__( 'Unit', 'fxt-core' ) . '"></span>';
 		echo '<span class="fxt-acc-def__none" aria-hidden="true">&ndash;</span>';
 		echo '</td><td><code>' . esc_html( $id ) . '</code></td><td class="fxt-acc-def__actions">';
@@ -657,8 +706,20 @@ final class Accounts {
 		foreach ( $fields as $field ) {
 			self::render_value( $field, $row, $index );
 		}
-		$open = ! empty( $row['source'] ) || ! empty( $row['lot_units'] );
-		echo '<details class="fxt-acc-row__more"' . ( $open ? ' open' : '' ) . ' data-fxt-acc-more><summary>' . esc_html__( 'Row source label and calculator lot size', 'fxt-core' ) . '</summary><div class="fxt-group">';
+		// Trading cost calculator (1.4.3): cost of 1.00 lot, per instrument.
+		$cost = static function ( $key ) use ( $row ) {
+			return array_key_exists( $key, $row ) && null !== $row[ $key ] && '' !== $row[ $key ] ? (string) ( 0 + $row[ $key ] ) : '';
+		};
+		echo '<div class="fxt-field fxt-acc-costs" data-fxt-acc-costs><p class="fxt-field__label">' . esc_html__( 'Trading cost calculator: spread cost per 1.00 lot', 'fxt-core' ) . '</p><div class="fxt-acc-value__parts">';
+		printf( '<label>%1$s <input type="number" step="any" min="0" class="small-text" id="%2$s-cost-eurusd" name="%3$s[cost_eurusd]" value="%4$s"></label>', esc_html__( 'EUR/USD', 'fxt-core' ), esc_attr( $uid ), esc_attr( $base ), esc_attr( $cost( 'cost_eurusd' ) ) );
+		printf( '<label>%1$s <input type="number" step="any" min="0" class="small-text" id="%2$s-cost-xauusd" name="%3$s[cost_xauusd]" value="%4$s"></label>', esc_html__( 'XAU/USD', 'fxt-core' ), esc_attr( $uid ), esc_attr( $base ), esc_attr( $cost( 'cost_xauusd' ) ) );
+		printf( '<label>%1$s <input type="text" class="small-text" id="%2$s-cost-unit" name="%3$s[cost_unit]" value="%4$s" placeholder="$"></label>', esc_html__( 'Unit', 'fxt-core' ), esc_attr( $uid ), esc_attr( $base ), esc_attr( isset( $row['cost_unit'] ) ? $row['cost_unit'] : '$' ) );
+		echo '</div><p class="description">' . esc_html__( 'Cost of one trade of 1.00 lot. The calculator multiplies it by the lot size the visitor enters. Empty = N/A; 0 is a valid cost.', 'fxt-core' ) . '</p></div>';
+		// Kept as stored (1.4.2 calculator lot size; used only to migrate older rows).
+		printf( '<input type="hidden" name="%s[lot_units]" value="%s">', esc_attr( $base ), esc_attr( isset( $row['lot_units'] ) && null !== $row['lot_units'] ? (string) $row['lot_units'] : '' ) );
+
+		$open = ! empty( $row['source'] );
+		echo '<details class="fxt-acc-row__more"' . ( $open ? ' open' : '' ) . ' data-fxt-acc-more><summary>' . esc_html__( 'Row source label', 'fxt-core' ) . '</summary><div class="fxt-group">';
 		Fields::render(
 			array( 'type' => 'select', 'label' => __( 'Source of this row', 'fxt-core' ), 'options' => Schema::sources(), 'help' => __( 'Optional. Shown in this row of the table; empty rows use the table source (Broker data: sources > Account types).', 'fxt-core' ) ),
 			$base . '[source]',
@@ -667,12 +728,6 @@ final class Accounts {
 		);
 		Fields::render( array( 'type' => 'text', 'label' => __( 'Reference (URL or note)', 'fxt-core' ) ), $base . '[source_ref]', isset( $row['source_ref'] ) ? $row['source_ref'] : '', $uid . '-ref' );
 		Fields::render( array( 'type' => 'date', 'label' => __( 'Checked on', 'fxt-core' ) ), $base . '[source_checked]', isset( $row['source_checked'] ) ? $row['source_checked'] : '', $uid . '-checked' );
-		Fields::render(
-			array( 'type' => 'number', 'label' => __( 'Units per lot for this account (calculator)', 'fxt-core' ), 'min' => 0, 'step' => 'any', 'help' => __( 'Only when one lot of this account is not the instrument\'s contract size, e.g. a cent account. Empty: the instrument setting is used.', 'fxt-core' ) ),
-			$base . '[lot_units]',
-			isset( $row['lot_units'] ) ? $row['lot_units'] : null,
-			$uid . '-lot'
-		);
 		echo '</div></details>';
 		echo '</div><div class="fxt-repeater__actions">';
 		printf( '<button type="button" class="button-link" data-fxt-up>%s</button>', esc_html__( 'Move up', 'fxt-core' ) );
@@ -704,7 +759,7 @@ final class Accounts {
 			case 'spread':
 				$pips = isset( $row[ $id . '__pips' ] ) && null !== $row[ $id . '__pips' ] ? (string) $row[ $id . '__pips' ] : '';
 				echo '<p class="fxt-field__label">' . $label . '</p><div class="fxt-acc-value__parts">'; // phpcs:ignore WordPress.Security.EscapeOutput
-				printf( '<label>%1$s <input type="number" step="any" min="0" class="small-text" id="%2$s-pips" name="%3$s" value="%4$s"></label>', esc_html__( 'Pips (calculator)', 'fxt-core' ), esc_attr( $uid ), esc_attr( $base . '[' . $id . '__pips]' ), esc_attr( $pips ) );
+				printf( '<label>%1$s <input type="number" step="any" min="0" class="small-text" id="%2$s-pips" name="%3$s" value="%4$s"></label>', esc_html__( 'Pips', 'fxt-core' ), esc_attr( $uid ), esc_attr( $base . '[' . $id . '__pips]' ), esc_attr( $pips ) );
 				printf( '<label>%1$s <input type="text" class="regular-text" id="%2$s" name="%3$s" value="%4$s" placeholder="%5$s"></label>', esc_html__( 'Display text', 'fxt-core' ), esc_attr( $uid ), esc_attr( $name ), esc_attr( $text ), esc_attr__( 'e.g. From 1.0 pips (empty: the pips)', 'fxt-core' ) );
 				echo '</div>';
 				break;

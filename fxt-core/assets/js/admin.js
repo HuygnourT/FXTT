@@ -282,7 +282,8 @@
 		const ids = Array.from( defs.querySelectorAll( '[data-fxt-acc-def]' ) ).map( ( tr ) => tr.getAttribute( 'data-fxt-acc-def' ) );
 		rows().forEach( ( item ) => {
 			const group = groupOf( item.row );
-			const more = group.querySelector( ':scope > [data-fxt-acc-more]' );
+			// Field inputs come before the calculator costs and the row source.
+			const more = group.querySelector( ':scope > [data-fxt-acc-costs]' ) || group.querySelector( ':scope > [data-fxt-acc-more]' );
 			ids.forEach( ( id ) => {
 				const field = group.querySelector( ':scope > [data-fxt-acc-field="' + id + '"]' );
 				if ( field ) {
@@ -314,7 +315,7 @@
 		rows().forEach( ( item ) => {
 			const field = fromTemplate( input, { __INDEX__: item.index, __FIELD__: id, __LABEL__: esc( label ) } );
 			const group = groupOf( item.row );
-			group.insertBefore( field, group.querySelector( ':scope > [data-fxt-acc-more]' ) );
+			group.insertBefore( field, group.querySelector( ':scope > [data-fxt-acc-costs]' ) || group.querySelector( ':scope > [data-fxt-acc-more]' ) );
 		} );
 
 		if ( cols ) {

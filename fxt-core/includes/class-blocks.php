@@ -86,7 +86,7 @@ final class Blocks {
 			true
 		);
 		wp_set_script_translations( 'fxt-core-blocks', 'fxt-core', FXT_CORE_DIR . 'languages' );
-		wp_add_inline_script( 'fxt-core-blocks', 'window.fxtCoreBlocks = ' . wp_json_encode( array( 'compare' => self::compare_options(), 'labelKinds' => Schema::label_kinds(), 'instruments' => array_values( array_map( static function ( $i ) { return array( 'value' => $i['key'], 'label' => $i['name'] ); }, Costs::instruments() ) ) ) ) . ';', 'before' );
+		wp_add_inline_script( 'fxt-core-blocks', 'window.fxtCoreBlocks = ' . wp_json_encode( array( 'compare' => self::compare_options(), 'labelKinds' => Schema::label_kinds() ) ) . ';', 'before' );
 
 		Assets::register_frontend_scripts();
 
