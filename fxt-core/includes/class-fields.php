@@ -118,6 +118,16 @@ final class Fields {
 				$id = absint( $raw );
 				return ( $id && 'attachment' === get_post_type( $id ) ) ? $id : null;
 
+			case 'gallery':
+				$ids = array();
+				foreach ( is_array( $raw ) ? $raw : preg_split( '/[\s,]+/', (string) $raw ) as $id ) {
+					$id = absint( $id );
+					if ( $id && 'attachment' === get_post_type( $id ) && ! in_array( $id, $ids, true ) ) {
+						$ids[] = $id;
+					}
+				}
+				return $ids ? $ids : null;
+
 			case 'group':
 				return self::sanitize_group( $field['fields'], is_array( $raw ) ? $raw : array() );
 
@@ -282,6 +292,8 @@ final class Fields {
 			case 'list':
 			case 'country_checklist':
 				return array( 'type' => array( 'array', 'null' ), 'items' => array( 'type' => 'string' ) );
+			case 'gallery':
+				return array( 'type' => array( 'array', 'null' ), 'items' => array( 'type' => 'integer' ) );
 			case 'group':
 				return array( 'type' => array( 'object', 'null' ), 'properties' => self::rest_properties( $field['fields'] ) );
 			case 'repeater':
@@ -345,6 +357,7 @@ final class Fields {
 			'media'      => 'integer',
 			'list'       => 'array',
 			'country_checklist' => 'array',
+			'gallery'    => 'array',
 			'repeater'   => 'array',
 			'group'      => 'object',
 			'market_map' => 'object',
@@ -372,7 +385,7 @@ final class Fields {
 		$type = $field['type'];
 		echo '<div class="fxt-field fxt-field--' . esc_attr( $type ) . '">';
 
-		if ( in_array( $type, array( 'group', 'repeater', 'market_map', 'sources', 'country_checklist' ), true ) ) {
+		if ( in_array( $type, array( 'group', 'repeater', 'market_map', 'sources', 'country_checklist', 'gallery' ), true ) ) {
 			echo '<p class="fxt-field__label">' . esc_html( $field['label'] ) . '</p>';
 		} elseif ( 'checkbox' !== $type ) {
 			echo '<label class="fxt-field__label" for="' . esc_attr( $id ) . '">' . esc_html( $field['label'] ) . '</label>';
@@ -469,6 +482,30 @@ final class Fields {
 					esc_html__( 'Choose image', 'fxt-core' ),
 					esc_html__( 'Remove', 'fxt-core' )
 				);
+				break;
+
+			case 'gallery':
+				$ids = array_filter( array_map( 'absint', is_array( $value ) ? $value : array() ) );
+				printf( '<div class="fxt-gallery" data-fxt-gallery data-name="%s">', esc_attr( $name . '[]' ) );
+				// Empty marker: removing every image saves an empty gallery.
+				printf( '<input type="hidden" name="%s" value="">', esc_attr( $name . '[]' ) );
+				echo '<ul class="fxt-gallery__items" data-fxt-gallery-items>';
+				foreach ( $ids as $att ) {
+					$src = wp_get_attachment_image_url( $att, 'thumbnail' );
+					if ( ! $src ) {
+						continue;
+					}
+					printf(
+						'<li class="fxt-gallery__item" data-id="%1$d"><img src="%2$s" alt=""><input type="hidden" name="%3$s" value="%1$d"><button type="button" class="button-link button-link-delete" data-fxt-gallery-remove>%4$s</button></li>',
+						(int) $att,
+						esc_url( $src ),
+						esc_attr( $name . '[]' ),
+						esc_html__( 'Remove', 'fxt-core' )
+					);
+				}
+				echo '</ul>';
+				printf( '<button type="button" class="button" id="%s" data-fxt-gallery-add>%s</button>', esc_attr( $id ), esc_html__( 'Add images', 'fxt-core' ) );
+				echo '</div>';
 				break;
 
 			case 'group':

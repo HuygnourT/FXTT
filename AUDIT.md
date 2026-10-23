@@ -186,3 +186,18 @@ Migration: read-time. Missing `fxt_account_fields` = built-in set (same ids as t
 
 Migration: read-time `Accounts::migrate_costs()` for rows without `cost_eurusd`: EUR/USD = pips x units x 0.0001 + round-trip commission (null when any part is unknown), XAU/USD = null, unit `$`. Saved on the next broker save.
 
+# Audit for version 1.4.4 (commission, list styles, ISO entity keys, entity map, evidence)
+
+| Item | Before (1.4.3) | After (1.4.4) |
+|---|---|---|
+| Calculator data | `cost_eurusd`, `cost_xauusd`, `cost_unit` | + `comm_eurusd`, `comm_xauusd` (round turn, float or null); row `_v` 4 |
+| Calculator view | 3 columns, one cost per instrument | Spread / Commission / Total per instrument; phone cards (`data-label`); JS sums parts in cents |
+| List styles | check, lock, pros, cons (li = flex: inline labels stretched) | + `is-style-risk`, `is-style-numbered` (CSS counters, nested `2.1`); all icon lists use a positioned marker and inline content |
+| Entity lookup | Tested residents row `entity_key` = entity key, else first entity | `Repository::entity_codes()` + exact ISO match on the entity key list; then the row link; single-entity brokers without ISO keys as before |
+| Regulation section | Chain (brand, entity, regulator, licence, jurisdiction) for verified data + broker-wide entity map | One table "Entity map for {Country}" (serving entity) + protection note, verified tested residents only |
+| Evidence intro | `.page-hero__lead` 44rem | 64rem on evidence pages, `text-wrap: pretty`, shrinkable hero grid |
+| Media | `wp_enqueue_media()` on profile pages only | Also broker and evidence edit screens; field type `gallery` (attachment IDs) |
+| Evidence data | Summary, timeline, deposits, withdrawals | + `fxt_spread_tests`, `fxt_execution_tests`, `fxt_support_tests` (repeaters, metrics lines, gallery) and block sections `spreads`, `execution`, `support` |
+
+Migration: read-time `Accounts::split_commission()` for 1.4.3 rows. Demo: legal entity keys now list ISO codes, Tested residents rows no longer need an Entity key. Broker cache key `fxt_core_brokers_v5`.
+

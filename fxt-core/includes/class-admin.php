@@ -38,6 +38,7 @@ final class Admin {
 				'fxt-test'      => array( __( 'Evidence: test details', 'fxt-core' ), array( 'fxt_broker_id', 'fxt_market', 'fxt_status', 'fxt_period', 'fxt_account_label' ) ),
 				'fxt-summary'   => array( __( 'Evidence: summary and timeline', 'fxt-core' ), array( 'fxt_summary', 'fxt_timeline' ) ),
 				'fxt-payments'  => array( __( 'Evidence: deposit and withdrawal tests (masked on save)', 'fxt-core' ), array( 'fxt_deposits', 'fxt_withdrawals' ) ),
+				'fxt-more-tests' => array( __( 'Evidence: spread, execution and customer support tests', 'fxt-core' ), array( 'fxt_spread_tests', 'fxt_execution_tests', 'fxt_support_tests' ) ),
 			),
 		);
 	}
@@ -642,9 +643,24 @@ final class Admin {
 			return;
 		}
 		wp_enqueue_style( 'fxt-core-admin', FXT_CORE_URL . 'assets/css/admin.css', array(), FXT_CORE_VERSION );
-		wp_enqueue_script( 'fxt-core-admin', FXT_CORE_URL . 'assets/js/admin.js', array(), FXT_CORE_VERSION, true );
-		if ( in_array( $hook, array( 'profile.php', 'user-edit.php' ), true ) ) {
+		// Native media library for image fields (evidence screenshots and
+		// galleries, author photo). The block editor does not always load it.
+		$media = in_array( $hook, array( 'profile.php', 'user-edit.php' ), true ) || ( $screen && in_array( $screen->post_type, array( Content_Types::BROKER, Content_Types::EVIDENCE ), true ) && in_array( $hook, array( 'post.php', 'post-new.php' ), true ) );
+		if ( $media ) {
 			wp_enqueue_media();
 		}
+		wp_enqueue_script( 'fxt-core-admin', FXT_CORE_URL . 'assets/js/admin.js', $media ? array( 'media-editor' ) : array(), FXT_CORE_VERSION, true );
+		wp_localize_script(
+			'fxt-core-admin',
+			'fxtCoreAdmin',
+			array(
+				'chooseImage'  => __( 'Choose image', 'fxt-core' ),
+				'chooseImages' => __( 'Choose images', 'fxt-core' ),
+				'useImage'     => __( 'Use this image', 'fxt-core' ),
+				'useImages'    => __( 'Add to the evidence', 'fxt-core' ),
+				'noMedia'      => __( 'The media library could not be loaded on this screen. Reload the page and try again.', 'fxt-core' ),
+				'remove'       => __( 'Remove', 'fxt-core' ),
+			)
+		);
 	}
 }

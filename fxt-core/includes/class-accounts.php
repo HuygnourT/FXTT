@@ -11,6 +11,7 @@
  *   fxt_accounts        One row per account type:
  *                       { name, source, source_ref, source_checked,
  *                         cost_eurusd, cost_xauusd, cost_unit (calculator, 1.4.3),
+ *                         comm_eurusd, comm_xauusd (round-turn commission, 1.4.4),
  *                         <id>: value, <id>__pips, <id>__model, <id>__amount,
  *                         lot_units (1.4.2, kept for migration), _v }
  *   fxt_account_display Frontend table: { account_label, columns: [ { id, show } ] }
@@ -35,10 +36,10 @@ defined( 'ABSPATH' ) || exit;
 final class Accounts {
 
 	/** Row keys that are not field values. */
-	const SYSTEM_KEYS = array( 'name', 'source', 'source_ref', 'source_checked', 'lot_units', 'cost_eurusd', 'cost_xauusd', 'cost_unit', '_v' );
+	const SYSTEM_KEYS = array( 'name', 'source', 'source_ref', 'source_checked', 'lot_units', 'cost_eurusd', 'cost_xauusd', 'cost_unit', 'comm_eurusd', 'comm_xauusd', '_v' );
 
 	/** Storage version written on every save (no text parsing after that). */
-	const VERSION = 3;
+	const VERSION = 4;
 
 	/**
 	 * Field types.
@@ -187,8 +188,11 @@ final class Accounts {
 				$row = self::fill_from_text( $row, $fields );
 			}
 			if ( ! array_key_exists( 'cost_eurusd', $row ) ) {
-				// Saved before 1.4.3: pre-fill the cost per lot from the spread and commission data.
+				// Saved before 1.4.3: pre-fill spread cost and commission per lot.
 				$row = self::migrate_costs( $row, $fields );
+			} elseif ( ! array_key_exists( 'comm_eurusd', $row ) ) {
+				// Saved in 1.4.3 (no commission fields yet).
+				$row = self::split_commission( $row, $fields );
 			}
 			$row['cost_unit'] = isset( $row['cost_unit'] ) && '' !== trim( (string) $row['cost_unit'] ) ? (string) $row['cost_unit'] : '$';
 			$out[]            = $row;
@@ -197,18 +201,16 @@ final class Accounts {
 	}
 
 	/**
-	 * Cost per 1.00 lot for rows saved before 1.4.3, from the same data the
-	 * 1.4.2 calculator used: EUR/USD spread (pips) x $10 per pip per lot
-	 * (100,000 units x 0.0001, or the account's own lot size) + commission
-	 * for a round trip (per side x 2, round turn x 1, none = 0). When any of
-	 * these is unknown the cost stays empty (N/A). There is no XAU/USD data
-	 * before 1.4.3, so that cost stays empty.
+	 * Spread cost and round-turn commission per 1.00 lot of EUR/USD from the
+	 * data the 1.4.2 calculator used: spread (pips) x $10 per pip per lot
+	 * (100,000 units x 0.0001, or the account's own lot size); commission
+	 * per side x 2, round turn x 1, none = 0. Unknown parts are null.
 	 *
 	 * @param array $row    Row.
 	 * @param array $fields Field definitions.
-	 * @return array
+	 * @return array { spread: float|null, commission: float|null, none: bool }
 	 */
-	public static function migrate_costs( array $row, array $fields ) {
+	private static function legacy_parts( array $row, array $fields ) {
 		$spread     = null;
 		$commission = null;
 		foreach ( $fields as $field ) {
@@ -223,11 +225,56 @@ final class Accounts {
 		$model = null !== $commission && isset( $row[ $commission . '__model' ] ) ? (string) $row[ $commission . '__model' ] : '';
 		$fee   = null !== $commission && isset( $row[ $commission . '__amount' ] ) && '' !== $row[ $commission . '__amount' ] && null !== $row[ $commission . '__amount' ] ? (float) $row[ $commission . '__amount' ] : null;
 		$units = ! empty( $row['lot_units'] ) ? (float) $row['lot_units'] : 100000.0;
-		$comm  = 'none' === $model ? 0.0 : ( null !== $fee && 'side' === $model ? $fee * 2 : ( null !== $fee && 'round' === $model ? $fee : null ) );
+		return array(
+			'spread'     => null !== $pips ? round( $pips * $units * 0.0001, 4 ) : null,
+			'commission' => 'none' === $model ? 0.0 : ( null !== $fee && 'side' === $model ? $fee * 2 : ( null !== $fee && 'round' === $model ? $fee : null ) ),
+			'none'       => 'none' === $model,
+		);
+	}
 
-		$row['cost_eurusd'] = null !== $pips && null !== $comm ? round( $pips * $units * 0.0001 + $comm, 4 ) : null;
+	/**
+	 * Rows saved before 1.4.3: spread cost and commission per 1.00 lot of
+	 * EUR/USD from the spread and commission data; XAU/USD has no older data
+	 * (spread cost empty = N/A, commission 0 only when the account has no
+	 * commission).
+	 *
+	 * @param array $row    Row.
+	 * @param array $fields Field definitions.
+	 * @return array
+	 */
+	public static function migrate_costs( array $row, array $fields ) {
+		$parts              = self::legacy_parts( $row, $fields );
+		$row['cost_eurusd'] = $parts['spread'];
+		$row['comm_eurusd'] = $parts['commission'];
 		$row['cost_xauusd'] = null;
+		$row['comm_xauusd'] = $parts['none'] ? 0.0 : null;
 		$row['cost_unit']   = isset( $row['cost_unit'] ) && '' !== (string) $row['cost_unit'] ? (string) $row['cost_unit'] : '$';
+		return $row;
+	}
+
+	/**
+	 * Rows saved in 1.4.3 had one "cost per lot" per instrument. When it is
+	 * exactly the value 1.4.3 pre-filled (spread + commission), it is split
+	 * into spread cost and commission. Otherwise it is kept as the spread cost
+	 * and the commission is 0 for accounts without commission, else empty
+	 * (N/A) until it is entered.
+	 *
+	 * @param array $row    Row.
+	 * @param array $fields Field definitions.
+	 * @return array
+	 */
+	public static function split_commission( array $row, array $fields ) {
+		$parts = self::legacy_parts( $row, $fields );
+		$cost  = isset( $row['cost_eurusd'] ) && null !== $row['cost_eurusd'] && '' !== $row['cost_eurusd'] ? (float) $row['cost_eurusd'] : null;
+		$comm  = null;
+		if ( $parts['none'] ) {
+			$comm = 0.0;
+		} elseif ( null !== $cost && null !== $parts['spread'] && null !== $parts['commission'] && abs( $cost - round( $parts['spread'] + $parts['commission'], 4 ) ) < 0.00001 ) {
+			$row['cost_eurusd'] = $parts['spread'];
+			$comm               = $parts['commission'];
+		}
+		$row['comm_eurusd'] = $comm;
+		$row['comm_xauusd'] = $parts['none'] ? 0.0 : null;
 		return $row;
 	}
 
@@ -442,6 +489,8 @@ final class Accounts {
 				// Calculator (1.4.3): numbers, not formatted strings; 0 is a valid cost.
 				'cost_eurusd'    => self::number( isset( $row['cost_eurusd'] ) ? $row['cost_eurusd'] : null, 0 ),
 				'cost_xauusd'    => self::number( isset( $row['cost_xauusd'] ) ? $row['cost_xauusd'] : null, 0 ),
+				'comm_eurusd'    => self::number( isset( $row['comm_eurusd'] ) ? $row['comm_eurusd'] : null, 0 ),
+				'comm_xauusd'    => self::number( isset( $row['comm_xauusd'] ) ? $row['comm_xauusd'] : null, 0 ),
 				'cost_unit'      => isset( $row['cost_unit'] ) && '' !== trim( sanitize_text_field( (string) $row['cost_unit'] ) ) ? trim( sanitize_text_field( (string) $row['cost_unit'] ) ) : '$',
 			);
 			$has = '' !== $clean['name'];
@@ -488,6 +537,8 @@ final class Accounts {
 			}
 			if ( ( empty( $row['_v'] ) || (int) $row['_v'] < 3 ) && null === $known && ! array_key_exists( 'cost_eurusd', $row ) ) {
 				$clean = self::migrate_costs( $clean, self::default_fields() );
+			} elseif ( ( empty( $row['_v'] ) || (int) $row['_v'] < 4 ) && null === $known && ! array_key_exists( 'comm_eurusd', $row ) ) {
+				$clean = self::split_commission( $clean, self::default_fields() );
 			}
 			$clean['_v'] = self::VERSION;
 			$out[]       = $clean;
@@ -710,11 +761,24 @@ final class Accounts {
 		$cost = static function ( $key ) use ( $row ) {
 			return array_key_exists( $key, $row ) && null !== $row[ $key ] && '' !== $row[ $key ] ? (string) ( 0 + $row[ $key ] ) : '';
 		};
-		echo '<div class="fxt-field fxt-acc-costs" data-fxt-acc-costs><p class="fxt-field__label">' . esc_html__( 'Trading cost calculator: spread cost per 1.00 lot', 'fxt-core' ) . '</p><div class="fxt-acc-value__parts">';
-		printf( '<label>%1$s <input type="number" step="any" min="0" class="small-text" id="%2$s-cost-eurusd" name="%3$s[cost_eurusd]" value="%4$s"></label>', esc_html__( 'EUR/USD', 'fxt-core' ), esc_attr( $uid ), esc_attr( $base ), esc_attr( $cost( 'cost_eurusd' ) ) );
-		printf( '<label>%1$s <input type="number" step="any" min="0" class="small-text" id="%2$s-cost-xauusd" name="%3$s[cost_xauusd]" value="%4$s"></label>', esc_html__( 'XAU/USD', 'fxt-core' ), esc_attr( $uid ), esc_attr( $base ), esc_attr( $cost( 'cost_xauusd' ) ) );
-		printf( '<label>%1$s <input type="text" class="small-text" id="%2$s-cost-unit" name="%3$s[cost_unit]" value="%4$s" placeholder="$"></label>', esc_html__( 'Unit', 'fxt-core' ), esc_attr( $uid ), esc_attr( $base ), esc_attr( isset( $row['cost_unit'] ) ? $row['cost_unit'] : '$' ) );
-		echo '</div><p class="description">' . esc_html__( 'Cost of one trade of 1.00 lot. The calculator multiplies it by the lot size the visitor enters. Empty = N/A; 0 is a valid cost.', 'fxt-core' ) . '</p></div>';
+		echo '<div class="fxt-field fxt-acc-costs" data-fxt-acc-costs><p class="fxt-field__label">' . esc_html__( 'Trading cost calculator: cost per 1.00 lot', 'fxt-core' ) . '</p>';
+		echo '<table class="fxt-acc-costs__grid"><thead><tr><td></td><th scope="col">' . esc_html__( 'Spread cost', 'fxt-core' ) . '</th><th scope="col">' . esc_html__( 'Commission (round turn)', 'fxt-core' ) . '</th></tr></thead><tbody>';
+		foreach ( array( 'eurusd' => 'EUR/USD', 'xauusd' => 'XAU/USD' ) as $inst => $inst_label ) {
+			printf(
+				'<tr><th scope="row">%1$s</th><td><label class="screen-reader-text" for="%2$s-cost-%3$s">%1$s %4$s</label><input type="number" step="any" min="0" class="small-text" id="%2$s-cost-%3$s" name="%5$s[cost_%3$s]" value="%6$s"></td><td><label class="screen-reader-text" for="%2$s-comm-%3$s">%1$s %7$s</label><input type="number" step="any" min="0" class="small-text" id="%2$s-comm-%3$s" name="%5$s[comm_%3$s]" value="%8$s"></td></tr>',
+				esc_html( $inst_label ),
+				esc_attr( $uid ),
+				esc_attr( $inst ),
+				esc_html__( 'spread cost per lot', 'fxt-core' ),
+				esc_attr( $base ),
+				esc_attr( $cost( 'cost_' . $inst ) ),
+				esc_html__( 'commission per lot', 'fxt-core' ),
+				esc_attr( $cost( 'comm_' . $inst ) )
+			);
+		}
+		echo '</tbody></table>';
+		printf( '<p><label>%1$s <input type="text" class="small-text" id="%2$s-cost-unit" name="%3$s[cost_unit]" value="%4$s" placeholder="$"></label></p>', esc_html__( 'Unit', 'fxt-core' ), esc_attr( $uid ), esc_attr( $base ), esc_attr( isset( $row['cost_unit'] ) ? $row['cost_unit'] : '$' ) );
+		echo '<p class="description">' . esc_html__( 'For one trade of 1.00 lot. Commission is round turn (opening and closing together): for a commission charged per side, enter twice the per-side amount. The calculator multiplies both by the lot size the visitor enters; total = spread cost + commission. Empty = N/A; 0 is a valid value.', 'fxt-core' ) . '</p></div>';
 		// Kept as stored (1.4.2 calculator lot size; used only to migrate older rows).
 		printf( '<input type="hidden" name="%s[lot_units]" value="%s">', esc_attr( $base ), esc_attr( isset( $row['lot_units'] ) && null !== $row['lot_units'] ? (string) $row['lot_units'] : '' ) );
 

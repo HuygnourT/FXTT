@@ -170,3 +170,14 @@
 .fxt-acc-cols__actions .button-link { margin-left: 8px; }
 
 .fxt-acc-costs { padding: 10px 12px; border: 1px solid #c3c4c7; border-radius: 4px; background: #fff; }
+.fxt-acc-costs__grid { border-collapse: collapse; margin: 4px 0 6px; }
+.fxt-acc-costs__grid th, .fxt-acc-costs__grid td { padding: 3px 12px 3px 0; text-align: left; font-weight: 600; }
+.fxt-acc-costs__grid thead th { font-weight: 400; color: #50575e; }
+.fxt-acc-costs__grid input.small-text { width: 7em; }
+
+/* Evidence image galleries (1.4.4) */
+.fxt-group > .fxt-field--gallery { grid-column: 1 / -1; }
+.fxt-gallery__items { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 8px; padding: 0; list-style: none; }
+.fxt-gallery__item { display: grid; gap: 4px; justify-items: start; margin: 0; }
+.fxt-gallery__item img { width: 96px; height: 96px; object-fit: cover; border: 1px solid #dcdcde; border-radius: 4px; background: #fff; }
+.fxt-media__preview { max-width: 150px; height: auto; display: block; margin-bottom: 6px; }

@@ -30,6 +30,8 @@ function fxt_tt_block_styles() {
 			'cons'  => __( 'Cons', 'fx-trading-today' ),
 			'notes' => __( 'Researcher notes', 'fx-trading-today' ),
 			'chips' => __( 'Chips', 'fx-trading-today' ),
+			'risk'     => __( 'Risk list', 'fx-trading-today' ),
+			'numbered' => __( 'Numbered list', 'fx-trading-today' ),
 		),
 		'core/table'     => array(
 			'data' => __( 'Data table', 'fx-trading-today' ),

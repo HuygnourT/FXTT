@@ -265,9 +265,9 @@ final class Schema {
 			'fxt_entities'        => array(
 				'type'   => 'repeater',
 				'label'  => __( 'Legal entities', 'fxt-core' ),
-				'help'   => __( 'Every company the brand uses to onboard clients. "Key" is referenced from the market table below.', 'fxt-core' ),
+				'help'   => __( 'Every company the brand uses to onboard clients. List in "Countries served" the ISO codes of the Tested residents it onboards (VN,TH,ID); legal entity details are shown only for those countries.', 'fxt-core' ),
 				'fields' => array(
-					'key'          => array( 'type' => 'text', 'label' => __( 'Key', 'fxt-core' ) ),
+					'key'          => array( 'type' => 'text', 'label' => __( 'Countries served (ISO codes) or key', 'fxt-core' ), 'help' => __( 'ISO codes of the Tested residents this entity serves, separated by commas, e.g. VN,TH,ID (spaces and lower case are fine). A plain key such as "global" still works with the Entity key of a Tested residents row.', 'fxt-core' ) ),
 					'name'         => array( 'type' => 'text', 'label' => __( 'Entity name', 'fxt-core' ) ),
 					'regulator'    => array( 'type' => 'text', 'label' => __( 'Regulator', 'fxt-core' ) ),
 					'licence'      => array( 'type' => 'text', 'label' => __( 'Licence number', 'fxt-core' ) ),
@@ -295,7 +295,7 @@ final class Schema {
 				'label'  => __( 'Tested residents', 'fxt-core' ),
 				'help'   => __( 'Only countries where this broker was tested or researched in detail: legal entity, local payments, test status and optional texts. Independent from Accepting residents: an accepted country is not tested until it is added here.', 'fxt-core' ),
 				'fields' => array(
-					'entity_key'     => array( 'type' => 'text', 'label' => __( 'Entity key', 'fxt-core' ) ),
+					'entity_key'     => array( 'type' => 'text', 'label' => __( 'Entity key (optional)', 'fxt-core' ), 'help' => __( 'Only needed when no legal entity lists this country\'s ISO code. Links the row to the entity with this key.', 'fxt-core' ) ),
 					'local_payments' => array( 'type' => 'text', 'label' => __( 'Local payment methods', 'fxt-core' ) ),
 					'deposit'        => array( 'type' => 'select', 'label' => __( 'Deposit tests', 'fxt-core' ), 'options' => self::test_status() ),
 					'withdrawal'     => array( 'type' => 'select', 'label' => __( 'Withdrawal tests', 'fxt-core' ), 'options' => self::test_status() ),
@@ -369,6 +369,112 @@ final class Schema {
 				'help'   => __( 'One row per test. Sensitive values are masked automatically when saved.', 'fxt-core' ),
 				'fields' => self::test_fields( true ),
 			),
+			// 1.4.4: more evidence categories. Empty categories are not shown.
+			'fxt_spread_tests'    => array(
+				'type'   => 'repeater',
+				'label'  => __( 'Spread tests', 'fxt-core' ),
+				'help'   => __( 'One row per measurement session. Leave empty to hide "Spread tests" on the evidence page.', 'fxt-core' ),
+				'fields' => array(
+					'date'        => array( 'type' => 'datetime', 'label' => __( 'Date and time', 'fxt-core' ) ),
+					'instrument'  => array( 'type' => 'text', 'label' => __( 'Instrument', 'fxt-core' ) ),
+					'account'     => array( 'type' => 'text', 'label' => __( 'Account type', 'fxt-core' ) ),
+					'session'     => array( 'type' => 'text', 'label' => __( 'Session / market conditions', 'fxt-core' ) ),
+					'min'         => array( 'type' => 'text', 'label' => __( 'Lowest spread', 'fxt-core' ) ),
+					'avg'         => array( 'type' => 'text', 'label' => __( 'Average spread', 'fxt-core' ) ),
+					'max'         => array( 'type' => 'text', 'label' => __( 'Highest spread', 'fxt-core' ) ),
+					'samples'     => array( 'type' => 'text', 'label' => __( 'Samples / duration', 'fxt-core' ) ),
+					'status'      => array( 'type' => 'select', 'label' => __( 'Status', 'fxt-core' ), 'options' => self::test_status() ),
+					'metrics'     => self::metrics_field(),
+					'description' => array( 'type' => 'textarea', 'label' => __( 'Description', 'fxt-core' ) ),
+					'images'      => self::images_field(),
+				),
+			),
+			'fxt_execution_tests' => array(
+				'type'   => 'repeater',
+				'label'  => __( 'Execution tests', 'fxt-core' ),
+				'help'   => __( 'One row per test order or batch. Leave empty to hide "Execution tests".', 'fxt-core' ),
+				'fields' => array(
+					'date'        => array( 'type' => 'datetime', 'label' => __( 'Date and time', 'fxt-core' ) ),
+					'instrument'  => array( 'type' => 'text', 'label' => __( 'Instrument', 'fxt-core' ) ),
+					'order_type'  => array( 'type' => 'text', 'label' => __( 'Order type', 'fxt-core' ) ),
+					'volume'      => array( 'type' => 'text', 'label' => __( 'Volume', 'fxt-core' ) ),
+					'conditions'  => array( 'type' => 'text', 'label' => __( 'Test conditions', 'fxt-core' ) ),
+					'speed'       => array( 'type' => 'text', 'label' => __( 'Execution time', 'fxt-core' ) ),
+					'slippage'    => array( 'type' => 'text', 'label' => __( 'Slippage', 'fxt-core' ) ),
+					'status'      => array( 'type' => 'select', 'label' => __( 'Status', 'fxt-core' ), 'options' => self::test_status() ),
+					'metrics'     => self::metrics_field(),
+					'description' => array( 'type' => 'textarea', 'label' => __( 'Description', 'fxt-core' ) ),
+					'images'      => self::images_field(),
+				),
+			),
+			'fxt_support_tests'   => array(
+				'type'   => 'repeater',
+				'label'  => __( 'Customer support tests', 'fxt-core' ),
+				'help'   => __( 'One row per contact. Names and ticket numbers are masked on save. Leave empty to hide "Customer support tests".', 'fxt-core' ),
+				'fields' => array(
+					'date'        => array( 'type' => 'datetime', 'label' => __( 'Date and time', 'fxt-core' ) ),
+					'channel'     => array( 'type' => 'select', 'label' => __( 'Channel', 'fxt-core' ), 'options' => self::support_channels() ),
+					'language'    => array( 'type' => 'text', 'label' => __( 'Language', 'fxt-core' ) ),
+					'question'    => array( 'type' => 'text', 'label' => __( 'Question asked', 'fxt-core' ) ),
+					'response'    => array( 'type' => 'text', 'label' => __( 'First response time', 'fxt-core' ) ),
+					'resolution'  => array( 'type' => 'text', 'label' => __( 'Resolution time', 'fxt-core' ) ),
+					'result'      => array( 'type' => 'select', 'label' => __( 'Result', 'fxt-core' ), 'options' => self::support_results() ),
+					'agent'       => array( 'type' => 'text', 'label' => __( 'Agent name (masked)', 'fxt-core' ), 'mask' => 'name' ),
+					'ticket'      => array( 'type' => 'text', 'label' => __( 'Ticket / chat ID (masked)', 'fxt-core' ), 'mask' => 'digits' ),
+					'metrics'     => self::metrics_field(),
+					'description' => array( 'type' => 'textarea', 'label' => __( 'Description', 'fxt-core' ) ),
+					'images'      => self::images_field(),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Extra measurements of an evidence row: "Label | value" per line.
+	 *
+	 * @return array
+	 */
+	public static function metrics_field() {
+		return array( 'type' => 'list', 'lines' => true, 'label' => __( 'Other measurements', 'fxt-core' ), 'help' => __( 'Optional. One per line as "Label | value", e.g. "Requote | none".', 'fxt-core' ) );
+	}
+
+	/**
+	 * Evidence images of a row.
+	 *
+	 * @return array
+	 */
+	public static function images_field() {
+		return array( 'type' => 'gallery', 'label' => __( 'Evidence images', 'fxt-core' ), 'help' => __( 'Screenshots with personal data already blurred. Add several, remove or replace them.', 'fxt-core' ) );
+	}
+
+	/**
+	 * Customer support channels.
+	 *
+	 * @return array
+	 */
+	public static function support_channels() {
+		return array(
+			''        => __( 'Choose', 'fxt-core' ),
+			'chat'    => __( 'Live chat', 'fxt-core' ),
+			'email'   => __( 'Email', 'fxt-core' ),
+			'phone'   => __( 'Phone', 'fxt-core' ),
+			'message' => __( 'Messaging app', 'fxt-core' ),
+			'ticket'  => __( 'Ticket / form', 'fxt-core' ),
+			'other'   => __( 'Other', 'fxt-core' ),
+		);
+	}
+
+	/**
+	 * Customer support results.
+	 *
+	 * @return array
+	 */
+	public static function support_results() {
+		return array(
+			''           => __( 'Not rated', 'fxt-core' ),
+			'resolved'   => __( 'Answered correctly', 'fxt-core' ),
+			'partial'    => __( 'Partly answered', 'fxt-core' ),
+			'unresolved' => __( 'Not answered or incorrect', 'fxt-core' ),
 		);
 	}
 

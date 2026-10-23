@@ -473,7 +473,9 @@
   border-bottom: 1px solid var(--color-line-soft);
 }
 
-.page-hero__inner { display: grid; gap: var(--space-4); }
+.page-hero__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+/* Grid items may shrink: long words or URLs wrap instead of widening the hero. */
+.page-hero__inner > * { min-width: 0; }
 
 .page-hero__title {
   font-family: var(--font-display);
@@ -483,7 +485,12 @@
   letter-spacing: var(--tracking-display);
 }
 
-.page-hero__lead { max-width: 44rem; font-size: var(--text-lead); color: var(--color-ink-2); }
+.page-hero__lead { max-width: 44rem; font-size: var(--text-lead); color: var(--color-ink-2); overflow-wrap: break-word; text-wrap: pretty; }
+/* Test evidence (1.4.4): on large screens the intro used the narrow 44rem
+   measure of article leads and broke into a short second line next to the
+   wide meta grid; it now follows the hero width up to a readable measure. */
+.evidence-hero .page-hero__lead { max-width: min(100%, 64rem); }
+.evidence-hero .byline-note { max-width: 64rem; text-wrap: pretty; }
 
 /* Document layout with sticky table of contents ----------------------------- */
 .doc-layout {

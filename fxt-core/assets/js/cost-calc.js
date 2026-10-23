@@ -1,6 +1,7 @@
 /**
- * Trading cost calculator: total = cost per 1.00 lot x LOT, for every
- * account type, recalculated as the visitor types (no reload).
+ * Trading cost calculator: spread cost and commission = value per 1.00 lot
+ * x LOT, total = spread cost + commission, for every account type and
+ * instrument, recalculated as the visitor types (no reload).
  *
  * LOT: positive, minimum 0.01, steps of 0.01. Work is done in hundredths of
  * a lot so 0.1 + 0.2 style float errors never reach the result. Listeners
@@ -32,17 +33,36 @@
 		return hundredths;
 	}
 
+	// Cents for value-per-lot x hundredths of a lot, or null.
+	function cents( value, hundredths ) {
+		if ( null === value || '' === value ) {
+			return null;
+		}
+		return Math.round( Number( ( Number( value ) * hundredths ).toFixed( 6 ) ) );
+	}
+
 	function render( box, hundredths ) {
 		const na = box.getAttribute( 'data-na' ) || 'N/A';
-		box.querySelectorAll( '[data-cost]' ).forEach( ( cell ) => {
-			const cost = cell.getAttribute( 'data-cost' );
-			if ( '' === cost ) {
-				cell.textContent = na;
-				return;
-			}
-			// cost x hundredths = total in cents.
-			const cents = Math.round( Number( ( Number( cost ) * hundredths ).toFixed( 6 ) ) );
-			cell.textContent = money( cents / 100, cell.getAttribute( 'data-unit' ) );
+		box.querySelectorAll( '[data-fxt-cost-row]' ).forEach( ( row ) => {
+			const insts = {};
+			row.querySelectorAll( '[data-inst]' ).forEach( ( cell ) => {
+				const inst = cell.getAttribute( 'data-inst' );
+				insts[ inst ] = insts[ inst ] || {};
+				insts[ inst ][ cell.getAttribute( 'data-part' ) ] = cell;
+			} );
+			Object.keys( insts ).forEach( ( inst ) => {
+				const cells = insts[ inst ];
+				const spread = cells.spread ? cents( cells.spread.getAttribute( 'data-value' ), hundredths ) : null;
+				const comm = cells.comm ? cents( cells.comm.getAttribute( 'data-value' ), hundredths ) : null;
+				// Total = spread cost + commission, each rounded to cents first.
+				const values = { spread, comm, total: null !== spread && null !== comm ? spread + comm : null };
+				Object.keys( values ).forEach( ( part ) => {
+					const cell = cells[ part ];
+					if ( cell ) {
+						cell.textContent = null === values[ part ] ? na : money( values[ part ] / 100, cell.getAttribute( 'data-unit' ) );
+					}
+				} );
+			} );
 		} );
 		box.querySelectorAll( '[data-fxt-lot-value]' ).forEach( ( el ) => {
 			el.textContent = format.format( hundredths / 100 );

@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Repository {
 
-	const CACHE_KEY     = 'fxt_core_brokers_v4'; // v4: broker name, account fields.
+	const CACHE_KEY     = 'fxt_core_brokers_v5'; // v5 (1.4.4): commission per lot, ISO entity keys, evidence categories.
 	const COOKIE        = 'fxt_country';
 	const SETTINGS      = 'fxt_settings';
 
@@ -969,25 +969,61 @@ final class Repository {
 	}
 
 	/**
-	 * The legal entity that serves a market: the entity of its Tested residents
-	 * row (Entity key), or the first entity when that row names none. Empty for
-	 * countries outside Tested residents.
+	 * ISO country codes listed in a legal entity's key ("VN, th,ID" ->
+	 * VN, TH, ID): trimmed, upper case, two letters only.
+	 *
+	 * @param string $key Entity key field.
+	 * @return string[]
+	 */
+	public static function entity_codes( $key ) {
+		$codes = array();
+		foreach ( explode( ',', (string) $key ) as $part ) {
+			$part = strtoupper( trim( $part ) );
+			if ( preg_match( '/^[A-Z]{2}$/', $part ) ) {
+				$codes[ $part ] = $part;
+			}
+		}
+		return array_values( $codes );
+	}
+
+	/**
+	 * The legal entity that serves a country (1.4.4). Only for Tested
+	 * residents (keyed by ISO code); empty elsewhere.
+	 *
+	 *   1. the entity whose key lists the country's ISO code (exact match,
+	 *      e.g. key "VN,TH,ID" serves VN, TH and ID, never "V" or "VNM");
+	 *   2. otherwise the entity named in the Tested residents row (Entity key,
+	 *      the link used before 1.4.4);
+	 *   3. otherwise, for brokers with a single entity and no ISO keys at all,
+	 *      that entity (how such brokers were shown before 1.4.4).
 	 *
 	 * @param array  $broker Normalized broker.
 	 * @param string $code   ISO code.
 	 * @return array Entity fields; empty strings when unknown.
 	 */
 	public static function entity( array $broker, $code ) {
+		$code  = strtoupper( trim( (string) $code ) );
 		$found = null;
-		// Country-specific entity data exists only for Tested residents.
-		if ( ! empty( $broker['entities'] ) && self::is_tested_resident( $broker, $code ) ) {
-			$key   = ! empty( $broker['markets'][ $code ]['entity_key'] ) ? $broker['markets'][ $code ]['entity_key'] : '';
-			$found = $broker['entities'][0];
+		if ( '' !== $code && ! empty( $broker['entities'] ) && self::is_tested_resident( $broker, $code ) ) {
+			$any_codes = false;
 			foreach ( $broker['entities'] as $entity ) {
-				if ( $key && isset( $entity['key'] ) && $entity['key'] === $key ) {
+				$codes     = self::entity_codes( isset( $entity['key'] ) ? $entity['key'] : '' );
+				$any_codes = $any_codes || (bool) $codes;
+				if ( null === $found && in_array( $code, $codes, true ) ) {
 					$found = $entity;
-					break;
 				}
+			}
+			$link = isset( $broker['markets'][ $code ]['entity_key'] ) ? strtolower( trim( (string) $broker['markets'][ $code ]['entity_key'] ) ) : '';
+			if ( null === $found && '' !== $link ) {
+				foreach ( $broker['entities'] as $entity ) {
+					if ( isset( $entity['key'] ) && strtolower( trim( (string) $entity['key'] ) ) === $link ) {
+						$found = $entity;
+						break;
+					}
+				}
+			}
+			if ( null === $found && '' === $link && ! $any_codes && 1 === count( $broker['entities'] ) ) {
+				$found = $broker['entities'][0];
 			}
 		}
 		$entity = self::normalize_entity( $found ? $found : array() );
@@ -1197,6 +1233,10 @@ final class Repository {
 			'deposits'    => $deposits,
 			'withdrawals' => $withdrawals,
 			'records'     => $records,
+			// 1.4.4 categories (rows with at least one value).
+			'spreads'     => array_values( array_filter( (array) $get( 'fxt_spread_tests' ), 'is_array' ) ),
+			'executions'  => array_values( array_filter( (array) $get( 'fxt_execution_tests' ), 'is_array' ) ),
+			'support'     => array_values( array_filter( (array) $get( 'fxt_support_tests' ), 'is_array' ) ),
 			'author_id'   => (int) $post->post_author,
 			'modified'    => get_post_modified_time( 'Y-m-d', false, $post ),
 		);

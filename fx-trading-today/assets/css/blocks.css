@@ -16,6 +16,7 @@
   --icon-map-pin: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E");
   --icon-book: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'/%3E%3Cpath d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'/%3E%3C/svg%3E");
   --icon-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v16a2 2 0 0 0 2 2h16'/%3E%3Cpath d='M18 17V9M13 17V5M8 17v-3'/%3E%3C/svg%3E");
+  --icon-risk: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/%3E%3Cpath d='M12 9v4'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E");
   --icon-search: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
 }
 
@@ -25,6 +26,7 @@
 .is-style-lock li::before,
 .is-style-pros li::before,
 .is-style-cons li::before,
+.is-style-risk li::before,
 .is-style-link-arrow a::after,
 .wp-block-button.has-arrow .wp-block-button__link::after,
 .is-style-link-card a::before,
@@ -212,32 +214,52 @@ p.is-style-sample {
    List styles
    ------------------------------------------------------------------------ */
 .is-style-check,
-.is-style-lock { display: grid; gap: 14px; }
+.is-style-lock,
+.is-style-risk { display: grid; gap: 14px; }
 
+.is-style-pros,
+.is-style-cons,
+.is-style-numbered { display: grid; gap: var(--space-3); }
+
+/* Icon and number lists: the marker sits in the left padding and the item
+   content flows as normal inline text, so inline elements (source labels,
+   links, code) keep their own size whatever the item or list length.
+   (Until 1.4.3 the items were flex containers and inline labels stretched.) */
 .is-style-check li,
-.is-style-lock li {
-  display: flex;
-  gap: var(--space-3);
+.is-style-lock li,
+.is-style-risk li,
+.is-style-pros li,
+.is-style-cons li,
+.is-style-numbered li {
+  position: relative;
+  display: block;
+  min-height: 1.5rem;
+  padding-left: 2.125rem;
   font-size: 0.9375rem;
   line-height: 1.6;
 }
 
-.is-style-check li::before { --icon: var(--icon-check); margin-top: 3px; color: var(--color-accent); }
-.is-style-lock li::before { --icon: var(--icon-lock); margin-top: 3px; color: var(--color-ink-3); }
+.is-style-check li::before,
+.is-style-lock li::before,
+.is-style-risk li::before {
+  position: absolute;
+  top: 0.2rem;
+  left: 0.125rem;
+}
 
-.is-style-pros,
-.is-style-cons { display: grid; gap: var(--space-3); }
+.is-style-check li { padding-left: 1.875rem; }
+.is-style-lock li { padding-left: 1.875rem; }
+.is-style-check li::before { --icon: var(--icon-check); color: var(--color-accent); }
+.is-style-lock li::before { --icon: var(--icon-lock); color: var(--color-ink-3); }
 
 .is-style-pros li,
-.is-style-cons li {
-  display: flex;
-  gap: var(--space-3);
-  font-size: 0.9375rem;
-  line-height: 1.55;
-}
+.is-style-cons li { line-height: 1.55; }
 
 .is-style-pros li::before,
 .is-style-cons li::before {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -256,6 +278,69 @@ p.is-style-sample {
 .is-style-cons li::before {
   background-color: #f3e3df;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a2f1c' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M5 12h14'/%3E%3C/svg%3E");
+}
+
+/* Risk list (1.4.4): warning icon for each item. */
+.is-style-risk li::before {
+  --icon: var(--icon-risk);
+  top: 0.15rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #a2471f;
+}
+
+/* Numbered list (1.4.4): styled sequential numbers; nested lists continue
+   the scheme as 1.1, 1.2... Works on ordered (ol) and unordered lists. */
+.is-style-numbered { counter-reset: fxt-num; }
+.is-style-numbered li { counter-increment: fxt-num; padding-left: 2.5rem; }
+.is-style-numbered li::before {
+  content: counters(fxt-num, ".");
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.625rem;
+  height: 1.625rem;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Nested lists inside these styles. */
+.is-style-check :is(ul, ol),
+.is-style-lock :is(ul, ol),
+.is-style-risk :is(ul, ol),
+.is-style-pros :is(ul, ol),
+.is-style-cons :is(ul, ol),
+.is-style-numbered :is(ul, ol) {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+.is-style-numbered :is(ul, ol) { counter-reset: fxt-num; }
+.is-style-numbered li li { padding-left: 3rem; }
+.is-style-numbered li li::before { min-width: 2.25rem; height: 1.375rem; font-size: 0.6875rem; background: var(--color-surface-muted); color: var(--color-ink-2); }
+.is-style-risk li li::before { width: 1rem; height: 1rem; top: 0.25rem; }
+.is-style-risk li li { padding-left: 1.75rem; }
+.is-style-pros li li::before,
+.is-style-cons li li::before { width: 18px; height: 18px; background-size: 11px; }
+
+/* Source labels in any list keep their own size and align with the text. */
+li > .source-tag,
+li > .fxt-source-label { align-self: auto; height: auto; vertical-align: 1px; }
+
+@media (max-width: 599px) {
+  .is-style-numbered li { padding-left: 2.25rem; }
+  .is-style-numbered li li { padding-left: 2.75rem; }
 }
 
 .is-style-notes { display: grid; gap: var(--space-3); }

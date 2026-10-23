@@ -47,6 +47,11 @@ svg {
   max-width: 100%;
 }
 
+/* Form controls never exceed their container (e.g. the comment form on phones). */
+input,
+select,
+textarea { max-width: 100%; }
+
 button,
 input {
   font: inherit;

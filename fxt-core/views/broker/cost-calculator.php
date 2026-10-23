@@ -1,13 +1,15 @@
 <?php
 /**
- * Trading cost calculator (v1.4.3): spread cost of EUR/USD and XAU/USD for
- * every account type at the lot size the visitor enters.
+ * Trading cost calculator (1.4.4): spread cost, commission and total for
+ * EUR/USD and XAU/USD, for every account type, at the lot size the visitor
+ * enters.
  *
- *   Total cost = cost per 1.00 lot (Broker data: account types) x LOT
+ *   Spread cost = spread cost per 1.00 lot x LOT
+ *   Commission  = commission per 1.00 lot (round turn) x LOT
+ *   Total       = spread cost + commission (N/A when either is missing)
  *
- * The table is rendered for 1.00 lot (works without JavaScript);
- * cost-calc.js recalculates every row when LOT changes. An empty cost is
- * N/A; 0 is a valid cost.
+ * Rendered for 1.00 lot (works without JavaScript); cost-calc.js
+ * recalculates when LOT changes. 0 is a valid value; empty is N/A.
  *
  * @var array $args { broker: array, title?: string }
  * @package FXT\Core
@@ -24,14 +26,21 @@ if ( ! $broker['accounts'] ) {
 	return;
 }
 
-$uid     = wp_unique_id( 'fxt-cost-calc-' );
-$columns = array(
-	'cost_eurusd' => __( 'EUR/USD Spread Cost', 'fxt-core' ),
-	'cost_xauusd' => __( 'XAU/USD Spread Cost', 'fxt-core' ),
+$uid         = wp_unique_id( 'fxt-cost-calc-' );
+$instruments = array(
+	'eurusd' => 'EUR/USD',
+	'xauusd' => 'XAU/USD',
 );
-$na      = __( 'N/A', 'fxt-core' );
+$parts       = array(
+	'spread' => __( 'Spread cost', 'fxt-core' ),
+	'comm'   => __( 'Commission', 'fxt-core' ),
+	'total'  => __( 'Total cost', 'fxt-core' ),
+);
+$value       = static function ( array $account, $key ) {
+	return array_key_exists( $key, $account ) && null !== $account[ $key ] && '' !== $account[ $key ] ? (float) $account[ $key ] : null;
+};
 ?>
-<div class="cost-calc__box" data-fxt-cost-calc data-na="<?php echo esc_attr( $na ); ?>">
+<div class="cost-calc__box" data-fxt-cost-calc data-na="<?php esc_attr_e( 'N/A', 'fxt-core' ); ?>">
 	<?php if ( '' !== $title ) : ?>
 		<p class="cost-calc__title"><?php echo esc_html( $title ); ?></p>
 	<?php endif; ?>
@@ -45,30 +54,50 @@ $na      = __( 'N/A', 'fxt-core' );
 			<caption class="u-visually-hidden" aria-live="polite">
 				<?php
 				/* translators: 1: broker name, 2: lot size */
-				printf( esc_html__( 'Spread cost per trade for %1$s account types at %2$s lot', 'fxt-core' ), esc_html( $broker['name'] ), '<span data-fxt-lot-value>1.00</span>' );
+				printf( esc_html__( 'Spread cost, round-turn commission and total cost per trade for %1$s account types at %2$s lot', 'fxt-core' ), esc_html( $broker['name'] ), '<span data-fxt-lot-value>1.00</span>' );
 				?>
 			</caption>
-			<thead><tr>
-				<th scope="col"><?php echo esc_html( $broker['account_display']['account_label'] ); ?></th>
-				<?php foreach ( $columns as $label ) : ?>
-					<th scope="col" class="cost-calc__num"><?php echo esc_html( $label ); ?></th>
-				<?php endforeach; ?>
-			</tr></thead>
+			<thead>
+				<tr>
+					<th scope="col" rowspan="2" class="cost-calc__account"><?php echo esc_html( $broker['account_display']['account_label'] ); ?></th>
+					<?php foreach ( $instruments as $label ) : ?>
+						<th scope="colgroup" colspan="3" class="cost-calc__inst"><?php echo esc_html( $label ); ?></th>
+					<?php endforeach; ?>
+				</tr>
+				<tr>
+					<?php foreach ( $instruments as $label ) : ?>
+						<th scope="col" class="cost-calc__num"><?php esc_html_e( 'Spread', 'fxt-core' ); ?></th>
+						<th scope="col" class="cost-calc__num"><?php esc_html_e( 'Commission', 'fxt-core' ); ?> <span class="cost-calc__basis"><?php esc_html_e( 'round turn', 'fxt-core' ); ?></span></th>
+						<th scope="col" class="cost-calc__num cost-calc__total-head"><?php esc_html_e( 'Total', 'fxt-core' ); ?></th>
+					<?php endforeach; ?>
+				</tr>
+			</thead>
 			<tbody>
 			<?php foreach ( $broker['accounts'] as $account ) : ?>
 				<?php $unit = isset( $account['cost_unit'] ) && '' !== $account['cost_unit'] ? $account['cost_unit'] : '$'; ?>
-				<tr>
+				<tr data-fxt-cost-row>
 					<th scope="row"><?php echo fxt_core_text( $account['name'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></th>
 					<?php
-					foreach ( array_keys( $columns ) as $key ) :
-						$cost = array_key_exists( $key, $account ) && null !== $account[ $key ] && '' !== $account[ $key ] ? (float) $account[ $key ] : null;
-						?>
-						<td class="cost-calc__num<?php echo null === $cost ? ' cost-calc__na' : ''; ?>" data-cost="<?php echo null === $cost ? '' : esc_attr( (string) $cost ); ?>" data-unit="<?php echo esc_attr( $unit ); ?>"><?php echo esc_html( Accounts::money( $cost, $unit ) ); ?></td>
+					foreach ( $instruments as $inst => $inst_label ) :
+						$spread = $value( $account, 'cost_' . $inst );
+						$comm   = $value( $account, 'comm_' . $inst );
+						// Each part rounded to cents first, as in cost-calc.js.
+						$total  = null !== $spread && null !== $comm ? round( $spread, 2 ) + round( $comm, 2 ) : null;
+						$cells  = array(
+							'spread' => $spread,
+							'comm'   => $comm,
+							'total'  => $total,
+						);
+						foreach ( $cells as $part => $amount ) :
+							$classes = 'cost-calc__num cost-calc__' . $part . ( 'spread' === $part ? ' cost-calc__first' : '' ) . ( null === $amount ? ' cost-calc__na' : '' );
+							?>
+							<td class="<?php echo esc_attr( $classes ); ?>" data-inst="<?php echo esc_attr( $inst ); ?>" data-part="<?php echo esc_attr( $part ); ?>"<?php echo 'total' !== $part ? ' data-value="' . esc_attr( null === $amount ? '' : (string) $amount ) . '"' : ''; ?> data-unit="<?php echo esc_attr( $unit ); ?>" data-label="<?php echo esc_attr( $inst_label . ' ' . strtolower( $parts[ $part ] ) ); ?>"><?php echo esc_html( Accounts::money( $amount, $unit ) ); ?></td>
+						<?php endforeach; ?>
 					<?php endforeach; ?>
 				</tr>
 			<?php endforeach; ?>
 			</tbody>
 		</table>
 	</div>
-	<p class="cost-calc__note"><?php esc_html_e( 'Cost = cost per 1.00 lot x LOT, from the spread cost entered for each account type. N/A: no cost entered for that instrument. Swaps, commissions charged separately and other fees are not included unless they are part of the cost entered.', 'fxt-core' ); ?></p>
+	<p class="cost-calc__note"><?php esc_html_e( 'Spread cost and commission = value per 1.00 lot x LOT, from the account type data; total = spread cost + commission. Commission is round turn: opening and closing the position together. N/A: a value has not been entered. Swaps and other fees are not included.', 'fxt-core' ); ?></p>
 </div>

@@ -5,13 +5,35 @@
 	"title": "Evidence data",
 	"category": "fxt",
 	"icon": "media-spreadsheet",
-	"description": "Structured section of a test evidence page.",
+	"description": "Structured section of a test evidence page. Spread, execution and customer support sections print their own heading and are hidden when the evidence has no rows for them.",
 	"textdomain": "fxt-core",
-	"usesContext": [ "postId", "postType" ],
+	"usesContext": [
+		"postId",
+		"postType"
+	],
 	"attributes": {
-		"section": { "type": "string", "enum": [ "summary", "timeline", "deposits", "withdrawals" ], "default": "summary" }
+		"section": {
+			"type": "string",
+			"enum": [
+				"summary",
+				"timeline",
+				"deposits",
+				"withdrawals",
+				"spreads",
+				"execution",
+				"support"
+			],
+			"default": "summary"
+		},
+		"heading": {
+			"type": "string",
+			"default": ""
+		}
 	},
-	"supports": { "html": false, "reusable": false },
+	"supports": {
+		"html": false,
+		"reusable": false
+	},
 	"editorScript": "fxt-core-blocks",
 	"render": "file:./render.php"
 }

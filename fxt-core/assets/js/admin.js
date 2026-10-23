@@ -78,14 +78,35 @@
 			return;
 		}
 
-		if ( target.closest( '[data-fxt-media-select]' ) && window.wp && window.wp.media ) {
+		if ( target.closest( '[data-fxt-media-select]' ) ) {
 			event.preventDefault();
-			const frame = window.wp.media( { library: { type: 'image' }, multiple: false } );
+			const i18n = window.fxtCoreAdmin || {};
+			if ( ! window.wp || ! window.wp.media ) {
+				// eslint-disable-next-line no-alert
+				window.alert( i18n.noMedia || 'The media library could not be loaded.' );
+				return;
+			}
+			// Native media uploader: upload a new file or pick one from the library.
+			const frame = window.wp.media( {
+				title: i18n.chooseImage || 'Choose image',
+				button: { text: i18n.useImage || 'Use this image' },
+				library: { type: 'image' },
+				multiple: false,
+			} );
+			frame.on( 'open', () => {
+				// Pre-select the current image when replacing it.
+				if ( input.value && window.wp.media.attachment ) {
+					const current = window.wp.media.attachment( input.value );
+					current.fetch();
+					frame.state().get( 'selection' ).reset( [ current ] );
+				}
+			} );
 			frame.on( 'select', () => {
 				const attachment = frame.state().get( 'selection' ).first().toJSON();
 				input.value = attachment.id;
+				input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
 				const sizes = attachment.sizes || {};
-				preview.src = ( sizes.thumbnail || sizes.full || attachment ).url;
+				preview.src = ( sizes.thumbnail || sizes.medium || sizes.full || attachment ).url;
 				preview.hidden = false;
 			} );
 			frame.open();
@@ -407,4 +428,58 @@
 			}
 		} );
 	}
+}() );
+
+/**
+ * Image galleries (evidence images): add several images with the native
+ * media uploader, remove any of them. Order = order of selection.
+ */
+( function () {
+	'use strict';
+
+	const i18n = window.fxtCoreAdmin || {};
+	const esc = ( text ) => String( text ).replace( /[&<>"]/g, ( c ) => ( { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ c ] ) );
+
+	document.addEventListener( 'click', ( event ) => {
+		const remove = event.target.closest( '[data-fxt-gallery-remove]' );
+		if ( remove ) {
+			event.preventDefault();
+			remove.closest( '.fxt-gallery__item' ).remove();
+			return;
+		}
+		const add = event.target.closest( '[data-fxt-gallery-add]' );
+		if ( ! add ) {
+			return;
+		}
+		event.preventDefault();
+		if ( ! window.wp || ! window.wp.media ) {
+			// eslint-disable-next-line no-alert
+			window.alert( i18n.noMedia || 'The media library could not be loaded.' );
+			return;
+		}
+		const gallery = add.closest( '[data-fxt-gallery]' );
+		const list = gallery.querySelector( '[data-fxt-gallery-items]' );
+		const frame = window.wp.media( {
+			title: i18n.chooseImages || 'Choose images',
+			button: { text: i18n.useImages || 'Add' },
+			library: { type: 'image' },
+			multiple: 'add',
+		} );
+		frame.on( 'select', () => {
+			const have = Array.from( list.querySelectorAll( '[data-id]' ) ).map( ( li ) => li.getAttribute( 'data-id' ) );
+			frame.state().get( 'selection' ).toJSON().forEach( ( attachment ) => {
+				if ( have.indexOf( String( attachment.id ) ) !== -1 ) {
+					return;
+				}
+				const sizes = attachment.sizes || {};
+				const src = ( sizes.thumbnail || sizes.medium || sizes.full || attachment ).url;
+				const li = document.createElement( 'li' );
+				li.className = 'fxt-gallery__item';
+				li.setAttribute( 'data-id', attachment.id );
+				li.innerHTML = '<img src="' + esc( src ) + '" alt=""><input type="hidden" name="' + esc( gallery.getAttribute( 'data-name' ) ) + '" value="' + esc( attachment.id ) + '"><button type="button" class="button-link button-link-delete" data-fxt-gallery-remove>' + esc( i18n.remove || 'Remove' ) + '</button>';
+				list.appendChild( li );
+			} );
+		} );
+		frame.open();
+	} );
 }() );

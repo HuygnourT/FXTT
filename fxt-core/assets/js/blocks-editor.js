@@ -286,9 +286,19 @@
 					{ value: 'timeline', label: __( 'Timeline', 'fxt-core' ) },
 					{ value: 'deposits', label: __( 'Deposit tests', 'fxt-core' ) },
 					{ value: 'withdrawals', label: __( 'Withdrawal tests', 'fxt-core' ) },
+					{ value: 'spreads', label: __( 'Spread tests', 'fxt-core' ) },
+					{ value: 'execution', label: __( 'Execution tests', 'fxt-core' ) },
+					{ value: 'support', label: __( 'Customer support tests', 'fxt-core' ) },
 				],
 				onChange: ( v ) => set( { section: v } ),
 			} ),
+			-1 !== [ 'spreads', 'execution', 'support' ].indexOf( a.section ) ? el( TextControl, {
+				key: 'h',
+				label: __( 'Heading', 'fxt-core' ),
+				help: __( 'Printed with the section (H2). Empty: the default name. The whole section is hidden when the evidence has no rows for it.', 'fxt-core' ),
+				value: a.heading,
+				onChange: ( v ) => set( { heading: v } ),
+			} ) : null,
 		],
 		'fxt/score-weights': ( a, set ) => [
 			el( SelectControl, {
