@@ -68,3 +68,21 @@ function fxt_tt_block_styles() {
 	}
 }
 add_action( 'init', 'fxt_tt_block_styles' );
+
+/**
+ * "Numbered list" style: always an ordered list on the frontend (1.4.5).
+ * Lists saved as <ul> with this style (before 1.4.5) are output as <ol>,
+ * nested lists included; <li> items are unchanged.
+ *
+ * @param string $html  Block HTML.
+ * @param array  $block Parsed block.
+ * @return string
+ */
+function fxt_tt_numbered_list_markup( $html, $block ) {
+	$class = isset( $block['attrs']['className'] ) ? (string) $block['attrs']['className'] : '';
+	if ( ! preg_match( '/(^|\s)is-style-numbered(\s|$)/', $class ) || false === strpos( $html, '<ul' ) ) {
+		return $html;
+	}
+	return preg_replace( array( '#<ul(\s|>)#', '#</ul>#' ), array( '<ol$1', '</ol>' ), $html );
+}
+add_filter( 'render_block_core/list', 'fxt_tt_numbered_list_markup', 10, 2 );

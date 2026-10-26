@@ -979,3 +979,27 @@ a.source-tag[href]::after { content: " \2197"; }
 .evidence-detail__images a { display: block; overflow: hidden; border: 1px solid var(--color-line); border-radius: var(--radius-md); background: var(--color-paper); }
 .evidence-detail__images img { display: block; width: 100%; height: 8rem; object-fit: cover; }
 .evidence-detail__images a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* Spread tests: account type > session > instruments + images (1.4.5) ----- */
+.spread-tests { display: grid; gap: var(--space-7); }
+.spread-account { display: grid; gap: var(--space-4); }
+.prose .spread-account__title { font-family: var(--font-sans); font-size: 1.0625rem; font-weight: 600; line-height: 1.4; color: var(--color-ink); }
+.spread-account__note { font-size: var(--text-small); color: var(--color-ink-2); }
+.spread-session { display: grid; gap: var(--space-4); padding: var(--space-5); }
+.spread-session__head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-1) var(--space-3); }
+.prose .spread-session__title { font-family: var(--font-sans); font-size: 1rem; font-weight: 600; line-height: 1.4; color: var(--color-ink); }
+.spread-session__date { font-size: var(--text-xs); color: var(--color-ink-3); }
+.spread-session__text p { font-size: var(--text-small); }
+.spread-session__text p + p { margin-top: var(--space-2); }
+.spread-session .table-scroll { margin: 0; }
+.spread-session__images { display: grid; gap: var(--space-2); }
+.spread-metric { display: block; font-size: var(--text-xs); }
+.spread-metric__label { color: var(--color-ink-3); }
+@media (max-width: 599px) {
+  .spread-session { padding: var(--space-4); }
+}
+.prose .spread-session > *,
+.prose .spread-account > *,
+.prose .spread-session__head > * { margin: 0; }
+.prose .spread-session__text > p { margin: 0; }
+.prose .spread-session__text > p + p { margin-top: var(--space-2); }

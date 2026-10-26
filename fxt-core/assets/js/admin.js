@@ -16,7 +16,9 @@
 			return;
 		}
 		const index = 'n' + ( counter++ );
-		const html = template.innerHTML.split( '__INDEX__' ).join( index );
+		// Each nesting level has its own placeholder (__INDEX__, __INDEX1__...).
+		const placeholder = template.getAttribute( 'data-fxt-placeholder' ) || '__INDEX__';
+		const html = template.innerHTML.split( placeholder ).join( index );
 		const wrapper = document.createElement( 'div' );
 		wrapper.innerHTML = html.trim();
 		const row = wrapper.firstElementChild;
@@ -447,6 +449,41 @@
 			remove.closest( '.fxt-gallery__item' ).remove();
 			return;
 		}
+		// Reorder: the saved order is the order of the items.
+		const prev = event.target.closest( '[data-fxt-gallery-prev]' );
+		const next = event.target.closest( '[data-fxt-gallery-next]' );
+		if ( prev || next ) {
+			event.preventDefault();
+			const item = ( prev || next ).closest( '.fxt-gallery__item' );
+			if ( prev && item.previousElementSibling ) {
+				item.parentNode.insertBefore( item, item.previousElementSibling );
+			} else if ( next && item.nextElementSibling ) {
+				item.parentNode.insertBefore( item.nextElementSibling, item );
+			}
+			( prev || next ).focus();
+			return;
+		}
+		// Replace one image, keeping its place.
+		const replace = event.target.closest( '[data-fxt-gallery-replace]' );
+		if ( replace ) {
+			event.preventDefault();
+			if ( ! window.wp || ! window.wp.media ) {
+				// eslint-disable-next-line no-alert
+				window.alert( i18n.noMedia || 'The media library could not be loaded.' );
+				return;
+			}
+			const item = replace.closest( '.fxt-gallery__item' );
+			const frame = window.wp.media( { title: i18n.chooseImage || 'Choose image', button: { text: i18n.useImage || 'Use this image' }, library: { type: 'image' }, multiple: false } );
+			frame.on( 'select', () => {
+				const attachment = frame.state().get( 'selection' ).first().toJSON();
+				const sizes = attachment.sizes || {};
+				item.setAttribute( 'data-id', attachment.id );
+				item.querySelector( 'img' ).src = ( sizes.thumbnail || sizes.medium || sizes.full || attachment ).url;
+				item.querySelector( 'input' ).value = attachment.id;
+			} );
+			frame.open();
+			return;
+		}
 		const add = event.target.closest( '[data-fxt-gallery-add]' );
 		if ( ! add ) {
 			return;
@@ -476,7 +513,7 @@
 				const li = document.createElement( 'li' );
 				li.className = 'fxt-gallery__item';
 				li.setAttribute( 'data-id', attachment.id );
-				li.innerHTML = '<img src="' + esc( src ) + '" alt=""><input type="hidden" name="' + esc( gallery.getAttribute( 'data-name' ) ) + '" value="' + esc( attachment.id ) + '"><button type="button" class="button-link button-link-delete" data-fxt-gallery-remove>' + esc( i18n.remove || 'Remove' ) + '</button>';
+				li.innerHTML = '<img src="' + esc( src ) + '" alt=""><input type="hidden" name="' + esc( gallery.getAttribute( 'data-name' ) ) + '" value="' + esc( attachment.id ) + '"><span class="fxt-gallery__tools"><button type="button" class="button-link" data-fxt-gallery-prev aria-label="' + esc( i18n.moveEarlier || 'Move earlier' ) + '">&larr;</button><button type="button" class="button-link" data-fxt-gallery-next aria-label="' + esc( i18n.moveLater || 'Move later' ) + '">&rarr;</button><button type="button" class="button-link" data-fxt-gallery-replace>' + esc( i18n.replace || 'Replace' ) + '</button><button type="button" class="button-link button-link-delete" data-fxt-gallery-remove>' + esc( i18n.remove || 'Remove' ) + '</button></span>';
 				list.appendChild( li );
 			} );
 		} );

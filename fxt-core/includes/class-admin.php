@@ -120,6 +120,10 @@ final class Admin {
 								// Pre-1.4 brokers: start from the countries their rows marked "Available".
 								$value = Repository::accepting_config( $post->ID );
 							}
+							if ( 'fxt_spread_tests' === $key && is_array( $value ) ) {
+								// 1.4.4 flat rows -> account type / session / instrument (saved on update).
+								$value = Repository::spread_tests( $value );
+							}
 							if ( 'fxt_entities' === $key && is_array( $value ) ) {
 								// Version 1.1 "verified" checkbox -> source select.
 								$value = array_map( array( Repository::class, 'normalize_entity' ), $value );
@@ -660,6 +664,9 @@ final class Admin {
 				'useImages'    => __( 'Add to the evidence', 'fxt-core' ),
 				'noMedia'      => __( 'The media library could not be loaded on this screen. Reload the page and try again.', 'fxt-core' ),
 				'remove'       => __( 'Remove', 'fxt-core' ),
+				'replace'      => __( 'Replace', 'fxt-core' ),
+				'moveEarlier'  => __( 'Move earlier', 'fxt-core' ),
+				'moveLater'    => __( 'Move later', 'fxt-core' ),
 			)
 		);
 	}

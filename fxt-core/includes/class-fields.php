@@ -14,6 +14,9 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Fields {
 
+	/** @var int Current repeater nesting level while rendering. */
+	private static $depth = 0;
+
 	/* ---------------------------------------------------------------------
 	 * Options
 	 * ------------------------------------------------------------------ */
@@ -495,13 +498,7 @@ final class Fields {
 					if ( ! $src ) {
 						continue;
 					}
-					printf(
-						'<li class="fxt-gallery__item" data-id="%1$d"><img src="%2$s" alt=""><input type="hidden" name="%3$s" value="%1$d"><button type="button" class="button-link button-link-delete" data-fxt-gallery-remove>%4$s</button></li>',
-						(int) $att,
-						esc_url( $src ),
-						esc_attr( $name . '[]' ),
-						esc_html__( 'Remove', 'fxt-core' )
-					);
+					echo self::gallery_item( (int) $att, $src, $name . '[]' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in gallery_item().
 				}
 				echo '</ul>';
 				printf( '<button type="button" class="button" id="%s" data-fxt-gallery-add>%s</button>', esc_attr( $id ), esc_html__( 'Add images', 'fxt-core' ) );
@@ -694,6 +691,27 @@ final class Fields {
 	}
 
 	/**
+	 * One image of a gallery field: thumbnail, hidden ID, replace, move, remove.
+	 *
+	 * @param int    $att  Attachment ID.
+	 * @param string $src  Thumbnail URL.
+	 * @param string $name Input name (with []).
+	 * @return string HTML.
+	 */
+	public static function gallery_item( $att, $src, $name ) {
+		return sprintf(
+			'<li class="fxt-gallery__item" data-id="%1$d"><img src="%2$s" alt=""><input type="hidden" name="%3$s" value="%1$d"><span class="fxt-gallery__tools"><button type="button" class="button-link" data-fxt-gallery-prev aria-label="%5$s">&larr;</button><button type="button" class="button-link" data-fxt-gallery-next aria-label="%6$s">&rarr;</button><button type="button" class="button-link" data-fxt-gallery-replace>%7$s</button><button type="button" class="button-link button-link-delete" data-fxt-gallery-remove>%4$s</button></span></li>',
+			(int) $att,
+			esc_url( $src ),
+			esc_attr( $name ),
+			esc_html__( 'Remove', 'fxt-core' ),
+			esc_attr__( 'Move earlier', 'fxt-core' ),
+			esc_attr__( 'Move later', 'fxt-core' ),
+			esc_html__( 'Replace', 'fxt-core' )
+		);
+	}
+
+	/**
 	 * Repeater: existing rows + a <template> row; admin.js adds/removes/reorders.
 	 *
 	 * @param array  $field Field definition.
@@ -702,16 +720,21 @@ final class Fields {
 	 * @param string $id    DOM id.
 	 */
 	private static function render_repeater( array $field, $name, array $rows, $id ) {
-		echo '<div class="fxt-repeater" data-fxt-repeater>';
+		// Nested repeaters (1.4.5) need their own index placeholder per level, so
+		// adding an inner row never reuses the outer row's placeholder.
+		$placeholder = 0 === self::$depth ? '__INDEX__' : '__INDEX' . self::$depth . '__';
+		++self::$depth;
+		printf( '<div class="fxt-repeater fxt-repeater--depth-%d" data-fxt-repeater>', (int) self::$depth );
 		echo '<div class="fxt-repeater__rows" data-fxt-rows>';
 		foreach ( array_values( $rows ) as $index => $row ) {
-			self::render_repeater_row( $field, $name, $row, $id, (string) $index );
+			self::render_repeater_row( $field, $name, is_array( $row ) ? $row : array(), $id, (string) $index );
 		}
-		echo '</div><template data-fxt-template>';
-		self::render_repeater_row( $field, $name, array(), $id, '__INDEX__' );
+		printf( '</div><template data-fxt-template data-fxt-placeholder="%s">', esc_attr( $placeholder ) );
+		self::render_repeater_row( $field, $name, array(), $id, $placeholder );
 		echo '</template>';
-		printf( '<button type="button" class="button" data-fxt-add>%s</button>', esc_html__( 'Add row', 'fxt-core' ) );
+		printf( '<button type="button" class="button" data-fxt-add>%s</button>', esc_html( isset( $field['add_label'] ) ? $field['add_label'] : __( 'Add row', 'fxt-core' ) ) );
 		echo '</div>';
+		--self::$depth;
 	}
 
 	/**
@@ -724,7 +747,11 @@ final class Fields {
 	 * @param string $index Row index or placeholder.
 	 */
 	private static function render_repeater_row( array $field, $name, array $row, $id, $index ) {
-		echo '<div class="fxt-repeater__row" data-fxt-row><div class="fxt-group">';
+		echo '<div class="fxt-repeater__row" data-fxt-row>';
+		if ( ! empty( $field['item'] ) ) {
+			echo '<p class="fxt-repeater__item">' . esc_html( $field['item'] ) . '</p>';
+		}
+		echo '<div class="fxt-group">';
 		foreach ( $field['fields'] as $key => $sub ) {
 			self::render( $sub, $name . '[' . $index . '][' . $key . ']', isset( $row[ $key ] ) ? $row[ $key ] : null, $id . '-' . $index . '-' . $key );
 		}

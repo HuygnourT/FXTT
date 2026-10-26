@@ -38,7 +38,7 @@ if ( isset( $fxt_more[ $fxt_section ] ) ) {
 	$fxt_heading = isset( $attributes['heading'] ) && '' !== trim( $attributes['heading'] ) ? trim( $attributes['heading'] ) : $fxt_more[ $fxt_section ][1];
 	printf( '<h2 class="wp-block-heading" id="%s">%s</h2>', esc_attr( $fxt_more[ $fxt_section ][2] ), esc_html( $fxt_heading ) );
 	printf( '<div %s>', get_block_wrapper_attributes( array( 'class' => 'evidence-data evidence-data--' . $fxt_section ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput
-	fxt_core_view( 'evidence/category', array( 'evidence' => $fxt_evidence, 'kind' => $fxt_section ) );
+	fxt_core_view( 'spreads' === $fxt_section ? 'evidence/spreads' : 'evidence/category', array( 'evidence' => $fxt_evidence, 'kind' => $fxt_section ) );
 	echo '</div>';
 	return;
 }

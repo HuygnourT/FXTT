@@ -2117,32 +2117,78 @@
 				],
 				"fxt_spread_tests": [
 					{
-						"date": "2026-09-02T08:00",
-						"instrument": "EUR/USD",
 						"account": "Standard",
-						"session": "London open, 08:00 to 09:00 UTC",
-						"min": "0.9 pips",
-						"avg": "1.1 pips",
-						"max": "1.6 pips",
-						"samples": "60 quotes",
-						"status": "complete",
-						"metrics": [],
-						"description": "Sample data. Bid and ask recorded once a minute on MT5 during the London open."
+						"note": "",
+						"sessions": [
+							{
+								"session": "London open, 08:00 to 09:00 UTC",
+								"date": "2026-09-02T08:00",
+								"description": "Sample data. Bid and ask recorded once a minute on MT5 during the London open.",
+								"instruments": [
+									{
+										"instrument": "EUR/USD",
+										"min": "0.9 pips",
+										"avg": "1.1 pips",
+										"max": "1.6 pips",
+										"samples": "60 quotes",
+										"status": "complete",
+										"metrics": []
+									},
+									{
+										"instrument": "GBP/USD",
+										"min": "1.1 pips",
+										"avg": "1.4 pips",
+										"max": "2.0 pips",
+										"samples": "60 quotes",
+										"status": "complete",
+										"metrics": []
+									}
+								],
+								"images": []
+							},
+							{
+								"session": "Daily rollover, 21:00 to 22:00 UTC",
+								"date": "2026-09-03T21:00",
+								"description": "Sample data. Spreads widen around the daily rollover, as at most brokers.",
+								"instruments": [
+									{
+										"instrument": "EUR/USD",
+										"min": "1.0 pips",
+										"avg": "1.9 pips",
+										"max": "4.2 pips",
+										"samples": "60 quotes",
+										"status": "complete",
+										"metrics": [
+											"Widest spread at | 21:59 UTC"
+										]
+									}
+								],
+								"images": []
+							}
+						]
 					},
 					{
-						"date": "2026-09-03T21:00",
-						"instrument": "EUR/USD",
-						"account": "Standard",
-						"session": "Daily rollover, 21:00 to 22:00 UTC",
-						"min": "1.0 pips",
-						"avg": "1.9 pips",
-						"max": "4.2 pips",
-						"samples": "60 quotes",
-						"status": "complete",
-						"metrics": [
-							"Widest spread at | 21:59 UTC"
-						],
-						"description": "Sample data. Spreads widen around the daily rollover, as at most brokers."
+						"account": "Raw Spread",
+						"note": "Commission of $7 per lot round turn is charged separately.",
+						"sessions": [
+							{
+								"session": "London open, 08:00 to 09:00 UTC",
+								"date": "2026-09-02T08:00",
+								"description": "Sample data. Same method as the Standard account.",
+								"instruments": [
+									{
+										"instrument": "EUR/USD",
+										"min": "0.0 pips",
+										"avg": "0.1 pips",
+										"max": "0.3 pips",
+										"samples": "60 quotes",
+										"status": "complete",
+										"metrics": []
+									}
+								],
+								"images": []
+							}
+						]
 					}
 				],
 				"fxt_execution_tests": [

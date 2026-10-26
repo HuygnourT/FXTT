@@ -105,3 +105,11 @@ function fxt_tt_editor_assets() {
 	);
 }
 add_action( 'enqueue_block_editor_assets', 'fxt_tt_editor_assets' );
+
+/**
+ * Block editor: the "Numbered list" style always saves an ordered list.
+ */
+function fxt_tt_editor_lists() {
+	wp_enqueue_script( 'fxt-tt-editor-lists', FXT_TT_URI . '/assets/js/editor-lists.js', array( 'wp-data', 'wp-blocks', 'wp-block-editor' ), FXT_TT_VERSION, true );
+}
+add_action( 'enqueue_block_editor_assets', 'fxt_tt_editor_lists' );

@@ -1234,12 +1234,128 @@ final class Repository {
 			'withdrawals' => $withdrawals,
 			'records'     => $records,
 			// 1.4.4 categories (rows with at least one value).
-			'spreads'     => array_values( array_filter( (array) $get( 'fxt_spread_tests' ), 'is_array' ) ),
+			'spreads'     => self::spread_tests( $get( 'fxt_spread_tests' ) ),
 			'executions'  => array_values( array_filter( (array) $get( 'fxt_execution_tests' ), 'is_array' ) ),
 			'support'     => array_values( array_filter( (array) $get( 'fxt_support_tests' ), 'is_array' ) ),
 			'author_id'   => (int) $post->post_author,
 			'modified'    => get_post_modified_time( 'Y-m-d', false, $post ),
 		);
+	}
+
+	/**
+	 * Spread tests as Account type -> Sessions -> Instruments (1.4.5).
+	 *
+	 * 1.4.4 stored one flat row per measurement (date, instrument, account,
+	 * session, spreads, images...). Those rows are read as: one account type
+	 * per account name (in order of first appearance), one session per
+	 * account + session text + date, one instrument per row; the session
+	 * keeps every image and description of its rows. The new structure is
+	 * written when the evidence is saved; images are never removed.
+	 * Empty instruments, sessions and account types are dropped.
+	 *
+	 * @param mixed $raw Saved meta.
+	 * @return array[] [ { account, note, sessions: [ { session, date, description, images: int[], instruments: [ { instrument, min, avg, max, samples, status, metrics: string[] } ] } ] } ]
+	 */
+	public static function spread_tests( $raw ) {
+		$rows = array_values( array_filter( is_array( $raw ) ? $raw : array(), 'is_array' ) );
+		$text = static function ( $row, $key ) {
+			return isset( $row[ $key ] ) && is_scalar( $row[ $key ] ) ? trim( (string) $row[ $key ] ) : '';
+		};
+		$instrument = static function ( $row ) use ( $text ) {
+			$out = array( 'metrics' => array_values( array_filter( array_map( 'strval', isset( $row['metrics'] ) ? (array) $row['metrics'] : array() ), 'strlen' ) ) );
+			foreach ( array( 'instrument', 'min', 'avg', 'max', 'samples', 'status' ) as $key ) {
+				$out[ $key ] = $text( $row, $key );
+			}
+			return $out;
+		};
+		$has = static function ( array $values ) {
+			foreach ( $values as $value ) {
+				if ( ( is_array( $value ) && $value ) || ( is_string( $value ) && '' !== $value ) ) {
+					return true;
+				}
+			}
+			return false;
+		};
+
+		$legacy = false;
+		foreach ( $rows as $row ) {
+			if ( ! isset( $row['sessions'] ) && array_intersect_key( $row, array_flip( array( 'instrument', 'min', 'avg', 'max', 'samples', 'session', 'date', 'images' ) ) ) ) {
+				$legacy = true;
+			}
+		}
+		if ( $legacy ) {
+			$accounts = array();
+			foreach ( $rows as $row ) {
+				if ( isset( $row['sessions'] ) ) {
+					continue;
+				}
+				$account = $text( $row, 'account' );
+				$key     = strtolower( $account );
+				if ( ! isset( $accounts[ $key ] ) ) {
+					$accounts[ $key ] = array( 'account' => $account, 'note' => '', 'sessions' => array() );
+				}
+				$skey = strtolower( $text( $row, 'session' ) ) . '|' . $text( $row, 'date' );
+				if ( ! isset( $accounts[ $key ]['sessions'][ $skey ] ) ) {
+					$accounts[ $key ]['sessions'][ $skey ] = array( 'session' => $text( $row, 'session' ), 'date' => $text( $row, 'date' ), 'description' => '', 'images' => array(), 'instruments' => array() );
+				}
+				$session =& $accounts[ $key ]['sessions'][ $skey ];
+				$desc    = $text( $row, 'description' );
+				if ( '' !== $desc && false === strpos( $session['description'], $desc ) ) {
+					$session['description'] = trim( $session['description'] . "\n\n" . $desc );
+				}
+				foreach ( isset( $row['images'] ) ? (array) $row['images'] : array() as $image ) {
+					$image = absint( $image );
+					if ( $image && ! in_array( $image, $session['images'], true ) ) {
+						$session['images'][] = $image;
+					}
+				}
+				$item = $instrument( $row );
+				if ( $has( $item ) ) {
+					$session['instruments'][] = $item;
+				}
+				unset( $session );
+			}
+			$rows = array();
+			foreach ( $accounts as $account ) {
+				$account['sessions'] = array_values( $account['sessions'] );
+				$rows[]              = $account;
+			}
+		}
+
+		$out = array();
+		foreach ( $rows as $row ) {
+			$sessions = array();
+			foreach ( isset( $row['sessions'] ) && is_array( $row['sessions'] ) ? $row['sessions'] : array() as $session ) {
+				if ( ! is_array( $session ) ) {
+					continue;
+				}
+				$instruments = array();
+				foreach ( isset( $session['instruments'] ) && is_array( $session['instruments'] ) ? $session['instruments'] : array() as $item ) {
+					$item = is_array( $item ) ? $instrument( $item ) : array();
+					if ( $item && $has( $item ) ) {
+						$instruments[] = $item;
+					}
+				}
+				$clean = array(
+					'session'     => $text( $session, 'session' ),
+					'date'        => $text( $session, 'date' ),
+					'description' => $text( $session, 'description' ),
+					'images'      => array_values( array_unique( array_filter( array_map( 'absint', isset( $session['images'] ) ? (array) $session['images'] : array() ) ) ) ),
+					'instruments' => $instruments,
+				);
+				if ( $instruments || $clean['images'] || '' !== $clean['description'] ) {
+					$sessions[] = $clean;
+				}
+			}
+			if ( $sessions ) {
+				$out[] = array(
+					'account'  => $text( $row, 'account' ),
+					'note'     => $text( $row, 'note' ),
+					'sessions' => $sessions,
+				);
+			}
+		}
+		return $out;
 	}
 
 	/**

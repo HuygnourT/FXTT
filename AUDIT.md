@@ -194,10 +194,22 @@ Migration: read-time `Accounts::migrate_costs()` for rows without `cost_eurusd`:
 | Calculator view | 3 columns, one cost per instrument | Spread / Commission / Total per instrument; phone cards (`data-label`); JS sums parts in cents |
 | List styles | check, lock, pros, cons (li = flex: inline labels stretched) | + `is-style-risk`, `is-style-numbered` (CSS counters, nested `2.1`); all icon lists use a positioned marker and inline content |
 | Entity lookup | Tested residents row `entity_key` = entity key, else first entity | `Repository::entity_codes()` + exact ISO match on the entity key list; then the row link; single-entity brokers without ISO keys as before |
-| Regulation section | Chain (brand, entity, regulator, licence, jurisdiction) for verified data + broker-wide entity map | One table "Entity map for {Country}" (serving entity) + protection note, verified tested residents only |
+| Regulation section | Chain (brand, entity, regulator, licence, jurisdiction) for verified data + broker-wide entity map | One table "Entity map for {Broker name}" with every entity (hotfix after 1.4.4; was briefly "Entity map for {Country}"), protection note of the serving entity for verified tested residents |
 | Evidence intro | `.page-hero__lead` 44rem | 64rem on evidence pages, `text-wrap: pretty`, shrinkable hero grid |
 | Media | `wp_enqueue_media()` on profile pages only | Also broker and evidence edit screens; field type `gallery` (attachment IDs) |
 | Evidence data | Summary, timeline, deposits, withdrawals | + `fxt_spread_tests`, `fxt_execution_tests`, `fxt_support_tests` (repeaters, metrics lines, gallery) and block sections `spreads`, `execution`, `support` |
 
 Migration: read-time `Accounts::split_commission()` for 1.4.3 rows. Demo: legal entity keys now list ISO codes, Tested residents rows no longer need an Entity key. Broker cache key `fxt_core_brokers_v5`.
 
+# Audit for version 1.4.5 (ordered numbered list, spread test hierarchy, evidence index intro)
+
+| Item | Before (1.4.4) | After (1.4.5) |
+|---|---|---|
+| Numbered list | Style on any list; `ul` possible | Editor forces `ordered` (`assets/js/editor-lists.js`); `render_block_core/list` prints `ol` for `is-style-numbered` (`inc/block-styles.php`) |
+| Spread data | `fxt_spread_tests`: flat rows (one instrument each, images per row) | Nested: account (`account`, `note`, `sessions`) > session (`session`, `date`, `description`, `instruments`, `images`) > instrument (`instrument`, `min`, `avg`, `max`, `samples`, `status`, `metrics`) |
+| Repeaters | One level, `__INDEX__` | Any depth: placeholder `__INDEX__`, `__INDEX1__`, `__INDEX2__`; item titles and add labels |
+| Gallery | Add, remove | + Replace and reorder (arrow buttons) |
+| Spread view | Generic category view, images per row | `views/evidence/spreads.php`: account heading, session cards, used columns only, images under each session |
+| Index intro | `padding-right: calc(100% - 44rem)` (grew with the parent) | `max(0px, calc(min(wide size, 100%) - 44rem))` |
+
+Migration: read-time `Repository::spread_tests()` groups 1.4.4 rows (account, then session + date), merges descriptions and images; the admin box shows the grouped data and saves it on update. No attachment is deleted. Demo: Exness VN spread tests use the new structure (sample data, no images).

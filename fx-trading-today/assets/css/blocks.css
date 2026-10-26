@@ -810,5 +810,14 @@ li > .fxt-source-label { align-self: auto; height: auto; vertical-align: 1px; }
 .evidence-index > .doc-section__title { margin-bottom: 0; }
 .author-social { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
 
-/* Wide pages: intro text aligns with the content edge, keeps a readable measure. */
-.page-body--wide > .is-style-lead { max-width: var(--wp--style--global--wide-size); padding-right: max(0px, calc(100% - 44rem)); }
+/* Wide pages: intro text aligns with the content edge, keeps a readable measure.
+   The box spans the wide column; the right padding leaves a 44rem measure.
+   1.4.5 fix: "100%" in a padding refers to the PARENT's width (the whole
+   page body), so on large screens the padding grew past the 75rem column and
+   squeezed the text to one word per line. The padding is now computed from
+   the paragraph's own width, min(wide size, available width). */
+.page-body--wide > .is-style-lead {
+  max-width: var(--wp--style--global--wide-size);
+  padding-right: max(0px, calc(min(var(--wp--style--global--wide-size), 100%) - 44rem));
+  text-wrap: pretty;
+}

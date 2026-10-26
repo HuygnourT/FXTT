@@ -181,3 +181,9 @@
 .fxt-gallery__item { display: grid; gap: 4px; justify-items: start; margin: 0; }
 .fxt-gallery__item img { width: 96px; height: 96px; object-fit: cover; border: 1px solid #dcdcde; border-radius: 4px; background: #fff; }
 .fxt-media__preview { max-width: 150px; height: auto; display: block; margin-bottom: 6px; }
+
+/* Nested repeaters (1.4.5): account type > session > instrument */
+.fxt-repeater__item { margin: 0 0 8px; font-weight: 600; font-size: 13px; color: #1d2327; }
+.fxt-repeater--depth-2 > .fxt-repeater__rows > .fxt-repeater__row { background: #fff; border-left: 3px solid #2271b1; }
+.fxt-repeater--depth-3 > .fxt-repeater__rows > .fxt-repeater__row { background: #f6f7f7; border-left: 3px solid #72aee6; }
+.fxt-gallery__tools { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; }

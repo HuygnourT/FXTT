@@ -49,7 +49,7 @@ The importer:
 | Broker + country message and **Trader verdict for this country** | Broker Reviews > *broker* > Broker data: tested residents > *country*: "Country context message", "Trader verdict for this country" | Highest priority for that broker and country |
 | Sections hidden when residents are not accepted | Gutenberg: wrap them in the **Country eligibility section** block (demo: Regulation and client protection, Deposit and withdrawal) | Review body |
 | **Data sources** of each fact (Tested / Verified at source / Broker-stated), reference link, check date | Broker Reviews > *broker* > **Broker data: sources**; per legal entity: "Source of entity and licence data"; per country: "Availability source" | Source labels on the review page, directory rows, comparison table; eligible countries of the directory filter |
-| Test evidence (broker × country): period, account, summary, timeline, **each deposit/withdrawal test** (method, amount, date, time, fee, result, status, steps, broker/bank status, masked details, **screenshot**, **verified by/on**, note); **spread, execution and customer support tests** (1.4.4: structured fields, other measurements, description, **several images**) | Broker Reviews > Test Evidence (sidebar: "Edit evidence data"); new box **Evidence: spread, execution and customer support tests** | Evidence page, evidence viewer, index, review "Research evidence", homepage snapshot |
+| Test evidence (broker × country): period, account, summary, timeline, **each deposit/withdrawal test** (method, amount, date, time, fee, result, status, steps, broker/bank status, masked details, **screenshot**, **verified by/on**, note); **spread, execution and customer support tests** (1.4.4: structured fields, other measurements, description, **several images**; 1.4.5: spread tests as **Account type > Session > Instrument**, images per session) | Broker Reviews > Test Evidence (sidebar: "Edit evidence data"); new box **Evidence: spread, execution and customer support tests** | Evidence page, evidence viewer, index, review "Research evidence", homepage snapshot |
 | Author: name, photo, role, short/long bio, expertise, figures, principles, disclosure, **profile links** | Users > *user* > section "FX Trading Today author profile" | Bylines, author boxes, author page, Query Loop bylines, structured data |
 | Header menu, mega menu, footer columns | Appearance > Menus | Header, mobile drawer, footer |
 | Header button, banner, risk warning, affiliate disclosure, key pages | Settings > FX Trading Today | Header, footer, links in blocks |
@@ -188,6 +188,19 @@ Upgrading from 1.3: brokers keep working without re-saving. Until a broker is sa
   - Shown by the Evidence data block (sections Spread tests / Execution tests / Customer support tests) with their own heading; a category without rows prints nothing. Deposit and withdrawal records are unchanged.
 - Small fix: form fields (e.g. the comment box) no longer overflow on phones.
 
+## 3i. Version 1.4.5 rules
+
+- **Numbered list is a real ordered list**: the Numbered list style (List block > Styles) is always saved and shown as `<ol>` / `<li>`, nested lists included. In the editor, choosing the style switches the list (and its nested lists) to ordered automatically; lists saved earlier as `<ul>` with this style are printed as `<ol>` on the site without editing. Styling (numbers, nested 2.1, 2.2) is unchanged.
+- **Spread tests: Account type > Session > Instrument** (box "Evidence: spread, execution and customer support tests"):
+  - Account type: name, optional note (e.g. how commission is charged), sessions.
+  - Session: session / market conditions, date and time, description, instruments, **Evidence images (this session)**.
+  - Instrument: instrument, lowest / average / highest spread, samples, status, other measurements.
+  - Each level has Add, Move up / Move down and Remove. Session images: Add images (upload or pick from the library, several at once), **Replace**, reorder with the arrow buttons, Remove.
+- **Spread tests on the site**: per account type a heading "{Account} account", then each session as a card (name, date, description), the instruments table and the session's images under it. Empty fields, columns, sessions and account types are not shown; there is no shared image section any more.
+- **Upgrading from 1.4.4**: flat spread rows are grouped when read: by account (same name, case ignored), then by session + date, one instrument per row; descriptions are kept and each row's images move to its session. Nothing is deleted (attachments stay in the media library) and the new structure is saved the next time the evidence post is updated.
+- **Test Evidence index intro**: fixed the paragraph that broke into one word per line on large screens. Cause: its right padding used `100%` (the parent width), so it grew with the window. It now uses the content width (`min(wide size, 100%) - 44rem`): the text keeps a readable measure on wide screens and fills the width on tablets and phones.
+- Theme and plugin version 1.4.5.
+
 ## 4. Country, cache, privacy
 
 - The country is a **preference**: `?country=XX` > cookie `fxt_country` > the default setting. The site **never reads location**.
@@ -248,6 +261,10 @@ Upgrading from 1.2: no re-import needed for the selector, evidence and button ch
 ## 6i. Acceptance checks (version 1.4.4)
 
 60/60 checks (after the entity map hotfix): commission fields and storage (numbers, 0 kept, empty N/A); calculator headings, totals at 1.00 / 0.01 / 10 / 2.55 lots, N/A rules, unit on every value, no reload, invalid lot, phone cards; ISO entity keys (trim, case, exact match, KHM not KH, outside Tested residents, legacy link and single-entity brokers, normalisation); Entity map for {Broker name} with every entity and licence numbers, same for every country, broker-stated rows labelled, chain removed; Risk and Numbered list styles offered, semantic tags, icons and counters incl. nested, no bullets; source label size identical in tall, long and nested list items and at 360 px; evidence intro at 1440 / 1920 / 2560 / 360 px; media library loaded, Choose image, gallery add / remove, saved and shown, cleared; new categories shown, edited, hidden when empty, added back, masking; 1.4.3 migration split; demo import. Earlier suites pass with their 1.4.3 / 1.4.2 / 1.4 checks updated to the 1.4.4 rules where the brief changed them (calculator columns, entity map per country, ISO keys): 1.4.3 46/46, 1.4.2 40/40, 1.4.1 20/20, 1.4 31/31, 1.3 51/51, 1.2 63/63, journeys 47/47, 1.1 22/22. Every demo item is valid in Gutenberg and the PHP log is clean.
+
+## 6j. Acceptance checks (version 1.4.5)
+
+38/38 checks: Numbered list saved and shown as `ol`/`li` incl. nested lists, editor switch to ordered, legacy `ul` printed as `ol`, styling unchanged, valid blocks; spread box hierarchy (account > session > instrument), add / edit / reorder / remove at every level, session images add / replace / reorder / remove, saved and shown in order under the right session; frontend headings, tables with only used columns, empty fields and sections hidden, no global image section; 1.4.4 migration (grouping, descriptions, images kept, attachments not deleted, saved on update); index intro at 360 / 768 / 1024 / 1440 / 1920 / 2560 / 3840 px; demo import; version. Earlier suites pass: 1.4.4 60/60, 1.4.3 46/46, 1.4.2 40/40, 1.4.1 20/20, 1.4 31/31, 1.3 51/51, 1.2 63/63, journeys 47/47, 1.1 22/22. Every demo item is valid in Gutenberg and the PHP log is clean.
 
 ## 7. Known differences from the prototype
 
