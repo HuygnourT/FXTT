@@ -18,6 +18,7 @@ define( 'FXT_TT_URI', get_template_directory_uri() );
 require FXT_TT_DIR . '/inc/setup.php';
 require FXT_TT_DIR . '/inc/assets.php';
 require FXT_TT_DIR . '/inc/block-styles.php';
+require FXT_TT_DIR . '/inc/headings.php';
 require FXT_TT_DIR . '/inc/template-tags.php';
 require FXT_TT_DIR . '/inc/navigation.php';
 require FXT_TT_DIR . '/inc/compat.php';

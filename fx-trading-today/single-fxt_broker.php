@@ -2,7 +2,7 @@
 /**
  * Broker review.
  *
- * Hero, country context and score card come from structured data (plugin
+ * Author line, General summary (1.4.6), then hero texts, country context and score card come from structured data (plugin
  * views); the body is the review's block content (editorial blocks and
  * fxt/broker-data sections) with a table of contents built from its H2s.
  *
@@ -56,6 +56,10 @@ while ( have_posts() ) :
 								'read'  => (bool) $fxt_broker['reviewed'],
 							)
 						);
+						// General summary of this review (Broker Reviews > "Review: general summary"); hidden when empty.
+						if ( function_exists( 'fxt_core_general_summary' ) ) {
+							echo fxt_core_general_summary(); // phpcs:ignore WordPress.Security.EscapeOutput -- filtered with wp_kses() in the plugin.
+						}
 						?>
 						<?php if ( has_excerpt() ) : ?>
 							<p class="page-hero__lead"><?php echo esc_html( get_the_excerpt() ); ?></p>

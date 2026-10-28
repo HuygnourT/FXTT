@@ -8,11 +8,21 @@
  * @package FXT\Core
  */
 
-use FXT\Core\Schema;
+use FXT\Core\Repository;
 
 defined( 'ABSPATH' ) || exit;
 
-$fxt_kinds = Schema::label_kinds();
+// Show / hide: this block's choice, else Settings > Source labels.
+$fxt_visibility = isset( $attributes['visibility'] ) ? (string) $attributes['visibility'] : '';
+if ( 'hide' === $fxt_visibility || ( 'show' !== $fxt_visibility && ! Repository::source_display()['show'] ) ) {
+	if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+		// Editor preview only.
+		echo '<p class="empty-state">' . esc_html__( 'Source label hidden on the site (block settings or Settings > FX Trading Today > Source labels).', 'fxt-core' ) . '</p>';
+	}
+	return;
+}
+
+$fxt_kinds = Repository::label_names();
 $fxt_kind  = isset( $attributes['kind'], $fxt_kinds[ $attributes['kind'] ] ) ? $attributes['kind'] : 'tested';
 $fxt_text  = '' !== trim( (string) $attributes['text'] ) ? (string) $attributes['text'] : $fxt_kinds[ $fxt_kind ];
 $fxt_class = 'source-tag source-tag--' . ( 'unverified' === $fxt_kind ? 'none' : $fxt_kind ) . ' fxt-source-label';

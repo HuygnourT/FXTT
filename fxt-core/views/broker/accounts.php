@@ -49,7 +49,7 @@ if ( 'above' === $place['position'] ) {
 			// The row's own source wins; "In each row" shows the table source otherwise.
 			$row_source = '' !== $account['source']
 				? Repository::resolve_source( array( 'source' => $account['source'], 'ref' => $account['source_ref'], 'checked' => $account['source_checked'] ), $broker )
-				: ( 'rows' === $place['position'] ? $source : null );
+				: ( 'rows' === $place['position'] ? fxt_core_source_named( $source ) : null );
 			?>
 			<tr>
 				<th scope="row">

@@ -25,6 +25,15 @@ if ( ! $fxt_broker ) {
 ?>
 <div <?php echo get_block_wrapper_attributes( array( 'class' => 'broker-data broker-data--' . $fxt_section ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 	<?php
+	// Source label display of this block (empty fields: Settings > Source labels).
+	fxt_core_source_display(
+		array(
+			'visibility' => isset( $attributes['sourceVisibility'] ) ? (string) $attributes['sourceVisibility'] : '',
+			'prefix'     => isset( $attributes['sourcePrefix'] ) ? (string) $attributes['sourcePrefix'] : '',
+			'name'       => isset( $attributes['sourceName'] ) ? (string) $attributes['sourceName'] : '',
+			'note'       => isset( $attributes['sourceNote'] ) ? (string) $attributes['sourceNote'] : '',
+		)
+	);
 	fxt_core_view(
 		'broker/' . $fxt_section,
 		array(
@@ -35,5 +44,6 @@ if ( ! $fxt_broker ) {
 			'source_after'    => isset( $attributes['sourceAfter'] ) ? (int) $attributes['sourceAfter'] : 1,
 		)
 	);
+	fxt_core_source_display( false );
 	?>
 </div>

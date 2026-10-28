@@ -117,7 +117,7 @@ final class Repository {
 				}
 			}
 		}
-		foreach ( array( 'directory_options', 'directory_ui', 'country_context' ) as $group ) {
+		foreach ( array( 'directory_options', 'directory_ui', 'country_context', 'source_labels' ) as $group ) {
 			// Empty fields fall back to the default wording, field by field.
 			$values             = isset( $saved[ $group ] ) && is_array( $saved[ $group ] ) ? $saved[ $group ] : array();
 			$settings[ $group ] = array_merge(
@@ -700,12 +700,61 @@ final class Repository {
 		if ( 'tested' === $source && ! self::has_published_tests( $broker['id'], $code ) ) {
 			$source = 'review';
 		}
-		$label = 'review' === $source ? __( 'Needs review', 'fxt-core' ) : ( '' === $source ? __( 'Source not classified', 'fxt-core' ) : $labels[ $source ] );
+		$label = self::source_name( 'review' === $source ? 'review' : ( '' === $source ? 'none' : $source ) );
 		return array(
 			'source'  => $source,
 			'ref'     => isset( $stored['ref'] ) ? (string) $stored['ref'] : '',
 			'checked' => isset( $stored['checked'] ) ? (string) $stored['checked'] : '',
 			'label'   => $label,
+		);
+	}
+
+	/**
+	 * Displayed name of a source kind: the name set in Settings > Source labels,
+	 * else the default. Display only: the kind (tested, verified, stated,
+	 * unverified, review, none) and its CSS class never change.
+	 *
+	 * @param string $kind Kind.
+	 * @return string Plain text.
+	 */
+	public static function source_name( $kind ) {
+		$defaults = array_merge(
+			Schema::label_kinds(),
+			array(
+				'review' => __( 'Needs review', 'fxt-core' ),
+				'none'   => __( 'Source not classified', 'fxt-core' ),
+			)
+		);
+		$kind     = isset( $defaults[ $kind ] ) ? $kind : 'none';
+		$settings = self::setting( 'source_labels' );
+		$custom   = is_array( $settings ) && isset( $settings[ 'name_' . $kind ] ) ? trim( wp_strip_all_tags( (string) $settings[ 'name_' . $kind ] ) ) : '';
+		return '' !== $custom ? $custom : $defaults[ $kind ];
+	}
+
+	/**
+	 * Displayed names of the label kinds offered in the editor.
+	 *
+	 * @return array kind => name.
+	 */
+	public static function label_names() {
+		$out = array();
+		foreach ( array_keys( Schema::label_kinds() ) as $kind ) {
+			$out[ $kind ] = self::source_name( $kind );
+		}
+		return $out;
+	}
+
+	/**
+	 * Site-wide display of source labels (Settings > Source labels).
+	 *
+	 * @return array { show: bool, prefix: string, note: string }
+	 */
+	public static function source_display() {
+		$s = wp_parse_args( (array) self::setting( 'source_labels' ), Schema::default_source_labels() );
+		return array(
+			'show'   => 'hide' !== $s['visibility'],
+			'prefix' => ! empty( $s['no_prefix'] ) ? '' : trim( wp_strip_all_tags( (string) $s['prefix'] ) ),
+			'note'   => trim( wp_strip_all_tags( (string) $s['note'] ) ),
 		);
 	}
 

@@ -5,7 +5,7 @@
 	"title": "Source label",
 	"category": "fxt",
 	"icon": "tag",
-	"description": "A line such as \"Source: Tested\" with one of the site's source labels (Tested, Verified at source, Broker-stated, Not tested / Not verified), an optional note and an optional link.",
+	"description": "A line such as \"Source: Tested\" with one of the site's source labels (Tested, Verified at source, Broker-stated, Not tested / Not verified), an optional note and an optional link. Can be shown or hidden.",
 	"textdomain": "fxt-core",
 	"attributes": {
 		"kind": { "type": "string", "enum": [ "tested", "verified", "stated", "unverified" ], "default": "tested" },
@@ -13,7 +13,8 @@
 		"prefix": { "type": "string", "default": "Source:" },
 		"note": { "type": "string", "default": "" },
 		"url": { "type": "string", "default": "" },
-		"newTab": { "type": "boolean", "default": false }
+		"newTab": { "type": "boolean", "default": false },
+		"visibility": { "type": "string", "enum": [ "", "show", "hide" ], "default": "" }
 	},
 	"supports": { "html": false },
 	"editorScript": "fxt-core-blocks",

@@ -16,7 +16,11 @@
 		},
 		"brokerId": { "type": "number", "default": 0 },
 		"sourcePosition": { "type": "string", "enum": [ "", "above", "below", "rows", "after" ], "default": "" },
-		"sourceAfter": { "type": "number", "default": 1 }
+		"sourceAfter": { "type": "number", "default": 1 },
+		"sourceVisibility": { "type": "string", "enum": [ "", "show", "hide" ], "default": "" },
+		"sourcePrefix": { "type": "string", "default": "" },
+		"sourceName": { "type": "string", "default": "" },
+		"sourceNote": { "type": "string", "default": "" }
 	},
 	"supports": { "html": false, "reusable": false },
 	"editorScript": "fxt-core-blocks",

@@ -284,7 +284,67 @@ function fxt_core_context_vars( array $broker, $code ) {
  * @return string HTML.
  */
 function fxt_core_source_line( array $state ) {
-	return '<p class="data-source">' . esc_html__( 'Source:', 'fxt-core' ) . ' ' . fxt_core_source_tag( $state ) . '</p>';
+	$inner = fxt_core_source_inner( $state );
+	return '' === $inner ? '' : '<p class="data-source">' . $inner . '</p>';
+}
+
+/**
+ * Display options of source labels: Settings > Source labels, overridden by
+ * the block being rendered (Broker data block > Source label display).
+ *
+ * @param array|null $override Set (array) or clear (false) the block override; null reads.
+ * @return array { show: bool, prefix: string, note: string, name: string }
+ */
+function fxt_core_source_display( $override = null ) {
+	static $block = array();
+	if ( false === $override ) {
+		$block = array();
+	} elseif ( is_array( $override ) ) {
+		$block = $override;
+	}
+	$out = array_merge( Repository::source_display(), array( 'name' => '' ) );
+	if ( isset( $block['visibility'] ) && in_array( $block['visibility'], array( 'show', 'hide' ), true ) ) {
+		$out['show'] = 'show' === $block['visibility'];
+	}
+	foreach ( array( 'prefix', 'note', 'name' ) as $key ) {
+		if ( isset( $block[ $key ] ) && '' !== trim( (string) $block[ $key ] ) ) {
+			$out[ $key ] = trim( wp_strip_all_tags( (string) $block[ $key ] ) );
+		}
+	}
+	return $out;
+}
+
+/**
+ * Section-wide source with the block's custom name (if any) as its text.
+ *
+ * @param array $state See Repository::resolve_source().
+ * @return array
+ */
+function fxt_core_source_named( array $state ) {
+	$name = fxt_core_source_display()['name'];
+	if ( '' !== $name ) {
+		$state['label'] = $name;
+	}
+	return $state;
+}
+
+/**
+ * "Source: [label] note" (text before, label, note after) or '' when source
+ * labels are hidden. A custom name changes the label text only; the kind,
+ * its class and the link stay.
+ *
+ * @param array $state See Repository::resolve_source().
+ * @return string HTML.
+ */
+function fxt_core_source_inner( array $state ) {
+	$display = fxt_core_source_display();
+	if ( ! $display['show'] ) {
+		return '';
+	}
+	$state = fxt_core_source_named( $state );
+	return ( '' !== $display['prefix'] ? esc_html( $display['prefix'] ) . ' ' : '' )
+		. fxt_core_source_tag( $state )
+		. ( '' !== $display['note'] ? ' <span class="data-source__note">' . esc_html( $display['note'] ) . '</span>' : '' );
 }
 
 /**
@@ -313,7 +373,8 @@ function fxt_core_source_position( array $args, $default = 'above' ) {
  * @return string HTML.
  */
 function fxt_core_source_row( array $state, $colspan ) {
-	return '<tr class="data-table__source-row"><td colspan="' . (int) $colspan . '"><span class="data-source">' . esc_html__( 'Source:', 'fxt-core' ) . ' ' . fxt_core_source_tag( $state ) . '</span></td></tr>';
+	$inner = fxt_core_source_inner( $state );
+	return '' === $inner ? '' : '<tr class="data-table__source-row"><td colspan="' . (int) $colspan . '"><span class="data-source">' . $inner . '</span></td></tr>';
 }
 
 /**
@@ -413,6 +474,9 @@ function fxt_core_score_pending_text() {
  * @return string HTML.
  */
 function fxt_core_source_tag( array $state ) {
+	if ( ! fxt_core_source_display()['show'] ) {
+		return '';
+	}
 	$source = '' === $state['source'] ? 'none' : $state['source'];
 	$date   = $state['checked'] ? fxt_core_date( $state['checked'] ) : '';
 	/* translators: %s: date */
@@ -617,4 +681,23 @@ function fxt_core_unverified( $value, $verified ) {
  */
 function fxt_core_text( $value ) {
 	return '' === (string) $value ? '<span class="muted">' . esc_html__( 'TBD', 'fxt-core' ) . '</span>' : esc_html( $value );
+}
+
+/**
+ * General summary of a broker review (box "Review: general summary"), shown
+ * under the author line. '' when empty. Independent of the meta description.
+ *
+ * @param int|WP_Post|null $post Post.
+ * @return string HTML (filtered with wp_kses()).
+ */
+function fxt_core_general_summary( $post = null ) {
+	$post = get_post( $post );
+	if ( ! $post || FXT\Core\Content_Types::BROKER !== $post->post_type ) {
+		return '';
+	}
+	$html = FXT\Core\Fields::clean_rich( (string) get_post_meta( $post->ID, 'fxt_general_summary', true ) );
+	if ( '' === trim( wp_strip_all_tags( $html ) ) ) {
+		return '';
+	}
+	return '<div class="review-summary">' . fxt_core_label_markup( wpautop( $html ) ) . '</div>';
 }

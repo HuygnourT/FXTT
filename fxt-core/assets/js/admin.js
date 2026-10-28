@@ -519,4 +519,95 @@
 		} );
 		frame.open();
 	} );
+
+	// Live character counter (e.g. meta description: about 150 to 160).
+	function count( field ) {
+		const out = document.getElementById( field.getAttribute( 'aria-describedby' ) );
+		if ( ! out ) {
+			return;
+		}
+		const range = field.getAttribute( 'data-fxt-counter' ).split( ',' ).map( Number );
+		// Count characters as people read them (emoji and accents count once).
+		const length = Array.from( field.value.replace( /\s+/g, ' ' ).trim() ).length;
+		let state = 'good';
+		if ( length < range[ 0 ] ) {
+			state = 'short';
+		} else if ( length > range[ 1 ] ) {
+			state = 'long';
+		}
+		const base = ( i18n.count || '%1$d characters. Recommended: %2$d to %3$d.' )
+			.replace( '%1$d', length ).replace( '%2$d', range[ 0 ] ).replace( '%3$d', range[ 1 ] );
+		const note = { short: i18n.countShort, good: i18n.countGood, long: i18n.countLong }[ state ] || '';
+		out.textContent = base + ( length ? ' ' + note : '' );
+		out.className = 'fxt-counter fxt-counter--' + ( length ? state : 'empty' );
+	}
+	document.addEventListener( 'input', ( e ) => {
+		if ( e.target.matches && e.target.matches( '[data-fxt-counter]' ) ) {
+			count( e.target );
+		}
+	} );
+	function initCounters() {
+		document.querySelectorAll( '[data-fxt-counter]' ).forEach( count );
+	}
+	if ( 'loading' === document.readyState ) {
+		document.addEventListener( 'DOMContentLoaded', initCounters );
+	} else {
+		initCounters();
+	}
+
+	// Rich text fields (classic WordPress editor) in meta boxes. The block
+	// editor moves meta boxes into place after the page has loaded, and a
+	// moved iframe loses the visual editor's document. When that happens
+	// (also after dragging a box) the editor is started again with its content.
+	function richEditors() {
+		if ( ! window.tinymce || ! window.tinyMCEPreInit ) {
+			return;
+		}
+		document.querySelectorAll( '.fxt-field--richtext textarea.wp-editor-area' ).forEach( ( area ) => {
+			const id = area.id;
+			const ed = window.tinymce.get( id );
+			const frame = document.getElementById( id + '_ifr' );
+			if ( ! ed || ! frame || ! ed.initialized || frame.contentDocument === ed.getDoc() ) {
+				return;
+			}
+			let content = '';
+			try {
+				content = ed.getContent();
+			} catch ( e ) {
+				content = area.value;
+			}
+			try {
+				ed.remove();
+			} catch ( e ) {
+				// A detached editor may fail to clean up; it is replaced below anyway.
+			}
+			area.value = content;
+			const settings = window.tinyMCEPreInit.mceInit[ id ];
+			if ( settings ) {
+				window.tinymce.init( settings );
+			}
+		} );
+	}
+	// A moved iframe loads again: that is the signal (load does not bubble, so capture).
+	document.addEventListener( 'load', ( e ) => {
+		if ( e.target && 'IFRAME' === e.target.tagName && e.target.closest && e.target.closest( '.fxt-field--richtext' ) ) {
+			window.setTimeout( richEditors, 0 );
+		}
+	}, true );
+	let checks = 0;
+	const timer = window.setInterval( () => {
+		richEditors();
+		if ( ++checks > 120 ) {
+			window.clearInterval( timer );
+		}
+	}, 250 );
+	if ( window.jQuery ) {
+		window.jQuery( document ).on( 'sortstop postbox-toggled postbox-moved', () => window.setTimeout( richEditors, 50 ) );
+	}
+	// Late moves (slow screens, a meta box pane opened later): check again on first contact.
+	[ 'pointerover', 'focusin' ].forEach( ( type ) => document.addEventListener( type, ( e ) => {
+		if ( e.target.closest && e.target.closest( '.fxt-field--richtext' ) ) {
+			richEditors();
+		}
+	}, true ) );
 }() );

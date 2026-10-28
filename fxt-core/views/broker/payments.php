@@ -81,7 +81,7 @@ if ( $rows && 'above' === $place['position'] ) {
 				}
 				?>
 				<tr>
-					<th scope="row"><?php echo esc_html( $r[0] ); ?><?php echo 'rows' === $place['position'] ? ' ' . fxt_core_source_tag( $source ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?></th>
+					<th scope="row"><?php echo esc_html( $r[0] ); ?><?php echo 'rows' === $place['position'] ? ' ' . fxt_core_source_tag( fxt_core_source_named( $source ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?></th>
 					<td><?php echo esc_html( $r[1] ); ?></td>
 					<td class="u-mono"><?php echo fxt_core_text( $r[2] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 					<td class="u-mono"><?php echo fxt_core_text( $r[3] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>

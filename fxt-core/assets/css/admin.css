@@ -187,3 +187,9 @@
 .fxt-repeater--depth-2 > .fxt-repeater__rows > .fxt-repeater__row { background: #fff; border-left: 3px solid #2271b1; }
 .fxt-repeater--depth-3 > .fxt-repeater__rows > .fxt-repeater__row { background: #f6f7f7; border-left: 3px solid #72aee6; }
 .fxt-gallery__tools { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; }
+
+/* 1.4.6: live character counter (meta description). */
+.fxt-counter { margin: 4px 0 0; color: #50575e; font-size: 12px; }
+.fxt-counter--good { color: #00703c; }
+.fxt-counter--short, .fxt-counter--long { color: #996800; }
+.fxt-field--richtext .wp-editor-wrap { margin-top: 4px; }

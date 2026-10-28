@@ -25,6 +25,8 @@ final class Admin {
 	private static function boxes() {
 		return array(
 			Content_Types::BROKER   => array(
+				'fxt-general-summary' => array( __( 'Review: general summary', 'fxt-core' ), array( 'fxt_general_summary' ) ),
+				'fxt-meta-description' => array( __( 'Review: meta description (SEO)', 'fxt-core' ), array( 'fxt_meta_description' ) ),
 				'fxt-research'  => array( __( 'Broker data: research summary', 'fxt-core' ), array( 'fxt_name', 'fxt_status', 'fxt_score', 'fxt_score_breakdown', 'fxt_reviewed', 'fxt_monogram', 'fxt_founded', 'fxt_min_deposit', 'fxt_currencies', 'fxt_other_platforms', 'fxt_affiliate_url', 'fxt_cta_label' ) ),
 				'fxt-trading'   => array( __( 'Broker data: trading conditions and costs', 'fxt-core' ), array( 'fxt_trading', 'fxt_costs', 'fxt_payments' ) ),
 				'fxt-accounts'  => array( __( 'Broker data: account types', 'fxt-core' ), 'render' => array( Accounts::class, 'render_fields_box' ) ),
@@ -234,7 +236,8 @@ final class Admin {
 				if ( null === $value || false === $value ) {
 					delete_post_meta( $post_id, $key );
 				} else {
-					update_post_meta( $post_id, $key, $value );
+					// update_post_meta() unslashes; keep backslashes typed in texts.
+					update_post_meta( $post_id, $key, wp_slash( $value ) );
 				}
 			}
 		}
@@ -549,6 +552,7 @@ final class Admin {
 			'general'   => __( 'General', 'fxt-core' ),
 			'review'    => __( 'Review page', 'fxt-core' ),
 			'directory' => __( 'Broker Reviews filters', 'fxt-core' ),
+			'sources'   => __( 'Source labels', 'fxt-core' ),
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- tab navigation only.
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'general';
@@ -568,6 +572,8 @@ final class Admin {
 		echo '</nav>';
 		if ( 'directory' === $tab ) {
 			echo '<p>' . esc_html__( 'Text of the filter panel and results on the Broker Reviews page. This only changes what visitors read: broker data, filter keys and filtering logic stay the same.', 'fxt-core' ) . '</p>';
+		} elseif ( 'sources' === $tab ) {
+			echo '<p>' . esc_html__( 'How source labels (Tested, Verified at source, Broker-stated...) look on the site. Display only: the source chosen for each fact, its colour and the "Needs review" rule do not change. Labels typed inside text with the Source label format keep their own text.', 'fxt-core' ) . '</p>';
 		} elseif ( 'review' === $tab ) {
 			echo '<p>' . esc_html__( 'Default texts of broker reviews that depend on the visitor\'s country. Per country: Broker Reviews > Countries. Per broker and country: Broker data: conditions by country on each review. When a broker does not accept residents of a country, review sections wrapped in a "Country eligibility section" block are hidden and the Trader verdict block shows the verdict below (or the country row\'s own verdict).', 'fxt-core' ) . '</p>';
 		} else {
@@ -667,6 +673,11 @@ final class Admin {
 				'replace'      => __( 'Replace', 'fxt-core' ),
 				'moveEarlier'  => __( 'Move earlier', 'fxt-core' ),
 				'moveLater'    => __( 'Move later', 'fxt-core' ),
+				/* translators: 1: number of characters, 2: lower bound, 3: upper bound */
+				'count'        => __( '%1$d characters. Recommended: %2$d to %3$d.', 'fxt-core' ),
+				'countShort'   => __( 'Shorter than recommended.', 'fxt-core' ),
+				'countGood'    => __( 'Good length.', 'fxt-core' ),
+				'countLong'    => __( 'Longer than recommended: search engines may cut it.', 'fxt-core' ),
 			)
 		);
 	}

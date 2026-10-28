@@ -26,7 +26,8 @@ $index = 0;
 		<?php
 		$on = isset( $broker['platforms'][ $slug ] );
 		if ( 'after' === $place['position'] && $index === $place['after'] ) {
-			echo '<li class="platform-grid__source">' . fxt_core_source_line( $source ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput
+			$fxt_line = fxt_core_source_line( $source );
+			echo '' !== $fxt_line ? '<li class="platform-grid__source">' . $fxt_line . '</li>' : ''; // phpcs:ignore WordPress.Security.EscapeOutput
 		}
 		++$index;
 		?>
@@ -34,12 +35,13 @@ $index = 0;
 			<?php echo fxt_core_yesno( $on ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<span class="platform-tile__name"><?php echo esc_html( $name ); ?></span>
 			<span class="platform-tile__state"><?php echo $on ? esc_html__( 'Available', 'fxt-core' ) : esc_html__( 'Not offered', 'fxt-core' ); ?></span>
-			<?php echo ( $on && 'rows' === $place['position'] ) ? fxt_core_source_tag( $source ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<?php echo ( $on && 'rows' === $place['position'] ) ? fxt_core_source_tag( fxt_core_source_named( $source ) ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 		</li>
 	<?php endforeach; ?>
 	<?php
 	if ( 'after' === $place['position'] && $place['after'] >= $index ) {
-		echo '<li class="platform-grid__source">' . fxt_core_source_line( $source ) . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput
+		$fxt_line = fxt_core_source_line( $source );
+		echo '' !== $fxt_line ? '<li class="platform-grid__source">' . $fxt_line . '</li>' : ''; // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 	?>
 </ul>

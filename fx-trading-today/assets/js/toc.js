@@ -8,7 +8,8 @@
 	'use strict';
 
 	function slugify( text ) {
-		return text.toLowerCase().normalize( 'NFD' ).replace( /[̀-ͯ]/g, '' ).replace( /[^a-z0-9]+/g, '-' ).replace( /^-|-$/g, '' ) || 'section';
+		// Same rule as fxt_tt_heading_slug() (the site normally adds the IDs already).
+		return text.replace( /[đĐ]/g, 'd' ).toLowerCase().normalize( 'NFD' ).replace( /[̀-ͯ]/g, '' ).replace( /[^a-z0-9]+/g, '-' ).replace( /^-|-$/g, '' ) || 'section';
 	}
 
 	const observers = new WeakMap();

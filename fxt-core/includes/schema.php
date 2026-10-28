@@ -214,6 +214,19 @@ final class Schema {
 		}
 
 		return array(
+			// 1.4.6: review texts edited in their own boxes (see Admin::boxes()).
+			'fxt_general_summary' => array(
+				'type'  => 'richtext',
+				'label' => __( 'General summary', 'fxt-core' ),
+				'help'  => __( 'Shown on the review page right under the author line, above the rest of the review header. Paragraphs, links, bold, italic and lists are kept. Empty: nothing is shown. Not used as the meta description.', 'fxt-core' ),
+			),
+			'fxt_meta_description' => array(
+				'type'        => 'textarea',
+				'label'       => __( 'Meta description', 'fxt-core' ),
+				'help'        => __( 'Plain text for search results, written for this review. Recommended: about 150 to 160 characters. Output as <meta name="description"> in the page head; not shown on the page. When an SEO plugin manages meta descriptions, the plugin\'s own tag is kept and this one is not added.', 'fxt-core' ),
+				'single_line' => true,
+				'counter'     => array( 150, 160 ),
+			),
 			'fxt_name'            => array( 'type' => 'text', 'label' => __( 'Broker name', 'fxt-core' ), 'help' => __( 'Short brand name used on buttons, in tables and in headings, e.g. "Exness". Empty: the post title without "review" and anything after it.', 'fxt-core' ) ),
 			'fxt_monogram'        => array( 'type' => 'text', 'label' => __( 'Monogram', 'fxt-core' ), 'help' => __( 'Two or three letters shown when no logo is set.', 'fxt-core' ) ),
 			'fxt_status'          => array( 'type' => 'select', 'label' => __( 'Review status', 'fxt-core' ), 'options' => self::review_status(), 'default' => 'published' ),
@@ -663,6 +676,27 @@ final class Schema {
 				),
 			),
 
+			// Tab "Source labels": display only. Source identifiers, classifications
+			// and the "Needs review" rule never change with these texts.
+			'source_labels'        => array(
+				'type'   => 'group',
+				'tab'    => 'sources',
+				'label'  => __( 'Source labels on the site', 'fxt-core' ),
+				'help'   => __( 'Applies to every "Source: [label]" line and every data label (review data sections, cards, compare table, country context). Each Broker data block and Source label block can override these in its block settings. Empty name fields use the default name.', 'fxt-core' ),
+				'fields' => array(
+					'visibility'      => array( 'type' => 'select', 'label' => __( 'Show source labels', 'fxt-core' ), 'options' => array( 'show' => __( 'Show', 'fxt-core' ), 'hide' => __( 'Hide', 'fxt-core' ) ), 'default' => 'show' ),
+					'prefix'          => array( 'type' => 'text', 'label' => __( 'Text before the label', 'fxt-core' ), 'help' => __( 'Default: "Source:". Empty: the default.', 'fxt-core' ) ),
+					'no_prefix'       => array( 'type' => 'checkbox', 'label' => __( 'No text before the label', 'fxt-core' ) ),
+					'note'            => array( 'type' => 'text', 'label' => __( 'Note after the label (optional)', 'fxt-core' ), 'help' => __( 'Added after the label on "Source:" lines, e.g. "Checked monthly".', 'fxt-core' ) ),
+					'name_tested'     => array( 'type' => 'text', 'label' => __( 'Name for: Tested', 'fxt-core' ) ),
+					'name_verified'   => array( 'type' => 'text', 'label' => __( 'Name for: Verified at source', 'fxt-core' ) ),
+					'name_stated'     => array( 'type' => 'text', 'label' => __( 'Name for: Broker-stated', 'fxt-core' ) ),
+					'name_unverified' => array( 'type' => 'text', 'label' => __( 'Name for: Not tested / Not verified', 'fxt-core' ) ),
+					'name_review'     => array( 'type' => 'text', 'label' => __( 'Name for: Needs review (marked Tested without published evidence)', 'fxt-core' ) ),
+					'name_none'       => array( 'type' => 'text', 'label' => __( 'Name for: Source not classified', 'fxt-core' ) ),
+				),
+			),
+
 			// Tab "Review page": country context and eligibility texts.
 			'country_context'      => array(
 				'type'   => 'group',
@@ -877,6 +911,27 @@ final class Schema {
 			'directory_filters'    => self::default_directory_filters(),
 			'directory_options'    => self::default_directory_options(),
 			'directory_ui'         => self::default_directory_ui(),
+			'source_labels'        => self::default_source_labels(),
+		);
+	}
+
+	/**
+	 * Default display of source labels (Settings > Source labels).
+	 *
+	 * @return array
+	 */
+	public static function default_source_labels() {
+		return array(
+			'visibility'      => 'show',
+			'prefix'          => __( 'Source:', 'fxt-core' ),
+			'no_prefix'       => false,
+			'note'            => '',
+			'name_tested'     => '',
+			'name_verified'   => '',
+			'name_stated'     => '',
+			'name_unverified' => '',
+			'name_review'     => '',
+			'name_none'       => '',
 		);
 	}
 }

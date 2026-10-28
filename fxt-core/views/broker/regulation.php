@@ -2,7 +2,8 @@
 /**
  * Broker data: Regulation and entities.
  *
- * One table: "Entity map for {Broker name}" listing every legal entity of
+ * One table captioned "Entity map for {Broker name}" (a <caption>, not a
+ * heading: 1.4.6) listing every legal entity of
  * the broker (entity, regulator with its source label, jurisdiction,
  * licence number), whatever the visitor's country. Placeholder licences
  * (TBD, N/A...) show "Not available". The client protection note of the
@@ -26,14 +27,10 @@ if ( ! $entities ) {
 	return;
 }
 ?>
-<h3 class="doc-subtitle">
-	<?php
-	/* translators: %s: broker name */
-	printf( esc_html__( 'Entity map for %s', 'fxt-core' ), esc_html( $broker['name'] ) );
-	?>
-</h3>
 <div class="table-scroll">
 	<table class="data-table data-table--entities">
+		<?php /* translators: %s: broker name */ ?>
+		<caption class="table-caption"><?php printf( esc_html__( 'Entity map for %s', 'fxt-core' ), esc_html( $broker['name'] ) ); ?></caption>
 		<thead><tr>
 			<th scope="col"><?php esc_html_e( 'Entity', 'fxt-core' ); ?></th>
 			<th scope="col"><?php esc_html_e( 'Regulator', 'fxt-core' ); ?></th>

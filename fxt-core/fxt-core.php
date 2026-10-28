@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       FX Trading Today Core
  * Description:       Broker reviews, test evidence, country data, blocks and demo import for the FX Trading Today theme. Content and data live here so they survive a theme change.
- * Version:           1.4.5
+ * Version:           1.4.6
  * Requires at least: 6.5
  * Requires PHP:      7.4
  * Author:            FX Trading Today
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FXT_CORE_VERSION', '1.4.5' );
+define( 'FXT_CORE_VERSION', '1.4.6' );
 define( 'FXT_CORE_FILE', __FILE__ );
 define( 'FXT_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'FXT_CORE_URL', plugin_dir_url( __FILE__ ) );
@@ -32,6 +32,7 @@ require_once FXT_CORE_DIR . 'includes/functions.php';
 require_once FXT_CORE_DIR . 'includes/class-blocks.php';
 require_once FXT_CORE_DIR . 'includes/class-assets.php';
 require_once FXT_CORE_DIR . 'includes/class-rest.php';
+require_once FXT_CORE_DIR . 'includes/class-seo.php';
 require_once FXT_CORE_DIR . 'includes/class-admin.php';
 require_once FXT_CORE_DIR . 'includes/class-importer.php';
 
@@ -46,6 +47,7 @@ add_action(
 		FXT\Core\Blocks::init();
 		FXT\Core\Assets::init();
 		FXT\Core\Rest::init();
+		FXT\Core\Seo::init();
 		FXT\Core\Importer::init();
 		if ( is_admin() ) {
 			FXT\Core\Admin::init();

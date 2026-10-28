@@ -263,6 +263,22 @@
 				onChange: ( v ) => set( { sourceAfter: v || 0 } ),
 			} ) : null,
 			'costs' === a.section ? el( 'p', { key: 'sh', className: 'components-base-control__help' }, __( 'Each cost row has its own source label (Broker data: sources).', 'fxt-core' ) ) : null,
+			-1 !== [ 'quick-facts', 'regulation', 'costs', 'platforms', 'payments', 'accounts' ].indexOf( a.section ) ? el( SelectControl, {
+				key: 'sv',
+				label: __( 'Source labels in this section', 'fxt-core' ),
+				value: a.sourceVisibility || '',
+				options: [
+					{ value: '', label: __( 'Site default (Settings > Source labels)', 'fxt-core' ) },
+					{ value: 'show', label: __( 'Show', 'fxt-core' ) },
+					{ value: 'hide', label: __( 'Hide', 'fxt-core' ) },
+				],
+				onChange: ( v ) => set( { sourceVisibility: v } ),
+			} ) : null,
+			'hide' !== a.sourceVisibility && -1 !== [ 'accounts', 'payments', 'platforms' ].indexOf( a.section ) ? [
+				el( TextControl, { key: 'spx', label: __( 'Text before the label', 'fxt-core' ), help: __( 'Empty: the site default (e.g. "Source:").', 'fxt-core' ), value: a.sourcePrefix, onChange: ( v ) => set( { sourcePrefix: v } ) } ),
+				el( TextControl, { key: 'snm', label: __( 'Custom source name', 'fxt-core' ), help: __( 'Replaces the label text of this section only. The source classification (e.g. Tested) and its colour stay the same. Empty: the label name.', 'fxt-core' ), value: a.sourceName, onChange: ( v ) => set( { sourceName: v } ) } ),
+				el( TextControl, { key: 'snt', label: __( 'Note after the label', 'fxt-core' ), help: __( 'Empty: the site default note (if any).', 'fxt-core' ), value: a.sourceNote, onChange: ( v ) => set( { sourceNote: v } ) } ),
+			] : null,
 			'score-card' === a.section ? el( 'p', { key: 'sc', className: 'components-base-control__help' }, __( 'Same score card as the review header: category scores (Broker data: research summary) x weights (Settings > FX Trading Today > Score categories).', 'fxt-core' ) ) : null,
 		],
 		'fxt/cost-calculator': ( a, set ) => [
@@ -336,7 +352,18 @@
 				options: Object.keys( config.labelKinds || {} ).map( ( k ) => ( { value: k, label: config.labelKinds[ k ] } ) ),
 				onChange: ( v ) => set( { kind: v } ),
 			} ),
-			el( TextControl, { key: 't', label: __( 'Label text (optional)', 'fxt-core' ), help: __( 'Empty: the label name.', 'fxt-core' ), value: a.text, onChange: ( v ) => set( { text: v } ) } ),
+			el( SelectControl, {
+				key: 'v',
+				label: __( 'Show on the site', 'fxt-core' ),
+				value: a.visibility || '',
+				options: [
+					{ value: '', label: __( 'Site default (Settings > Source labels)', 'fxt-core' ) },
+					{ value: 'show', label: __( 'Show', 'fxt-core' ) },
+					{ value: 'hide', label: __( 'Hide', 'fxt-core' ) },
+				],
+				onChange: ( v ) => set( { visibility: v } ),
+			} ),
+			el( TextControl, { key: 't', label: __( 'Custom source name (optional)', 'fxt-core' ), help: __( 'Replaces the label text only; the classification chosen above and its colour stay. Empty: the label name (Settings > Source labels).', 'fxt-core' ), value: a.text, onChange: ( v ) => set( { text: v } ) } ),
 			el( TextControl, { key: 'p', label: __( 'Text before the label', 'fxt-core' ), value: a.prefix, onChange: ( v ) => set( { prefix: v } ) } ),
 			el( TextControl, { key: 'n', label: __( 'Note after the label (optional)', 'fxt-core' ), value: a.note, onChange: ( v ) => set( { note: v } ) } ),
 			el( TextControl, { key: 'u', type: 'url', label: __( 'Link (optional)', 'fxt-core' ), help: __( 'Where a click on the label goes.', 'fxt-core' ), value: a.url, onChange: ( v ) => set( { url: v } ) } ),

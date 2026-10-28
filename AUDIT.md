@@ -213,3 +213,20 @@ Migration: read-time `Accounts::split_commission()` for 1.4.3 rows. Demo: legal 
 | Index intro | `padding-right: calc(100% - 44rem)` (grew with the parent) | `max(0px, calc(min(wide size, 100%) - 44rem))` |
 
 Migration: read-time `Repository::spread_tests()` groups 1.4.4 rows (account, then session + date), merges descriptions and images; the admin box shows the grouped data and saves it on update. No attachment is deleted. Demo: Exness VN spread tests use the new structure (sample data, no images).
+
+# Audit for version 1.4.6 (source label display, general summary, meta description)
+
+| Item | Before (1.4.5) | After (1.4.6) |
+|---|---|---|
+| Source label names | Fixed: `Schema::sources()`, "Needs review", "Source not classified" | `Repository::source_name()` reads Settings > Source labels (`source_labels.name_*`), default names otherwise; used by `resolve_source()` and the editor (`label_names()`) |
+| Source lines | "Source:" hard-coded in `fxt_core_source_line()` / `fxt_core_source_row()` | `fxt_core_source_inner()`: text before (or none), label, note after; '' when hidden |
+| Visibility | Always shown | Site: `source_labels.visibility`; block override via `fxt_core_source_display()` (set by the Broker data block render, cleared after); `fxt_core_source_tag()` returns '' when hidden |
+| Broker data block | `sourcePosition`, `sourceAfter` | + `sourceVisibility`, `sourcePrefix`, `sourceName` (section-wide label only, `fxt_core_source_named()`), `sourceNote` |
+| Source label block | kind, text, prefix, note, url, newTab | + `visibility`; empty text uses the site name of the kind |
+| Review header | Author line > intro > country context | Author line > **General summary** (`fxt_core_general_summary()`, meta `fxt_general_summary`, field type `richtext` = `wp_editor`, `Fields::clean_rich()`) > intro > country context |
+| Head | No description tag | `Seo::print_tag()` on broker reviews from meta `fxt_meta_description` (textarea, `single_line`, `counter` 150 to 160); skipped when an SEO plugin is detected; fallback filters for Yoast, Rank Math, AIOSEO, SEOPress |
+| Entity map title | `<h3 class="doc-subtitle">` above the table | `<caption class="table-caption">` inside `table.data-table--entities` |
+| H2 IDs | Only anchors set in the editor; others added by `toc.js` in the browser | Editor panel "Heading ID" (`assets/js/editor-headings.js`, writes the core `anchor`); `fxt_tt_heading_ids()` on `the_content` (priority 20) adds IDs to H2s without one, unique per page (`inc/headings.php`); `toc.js` uses the same slug rule as a fallback |
+| Meta box save | `update_post_meta( $value )` | `update_post_meta( wp_slash( $value ) )` so backslashes typed in texts are kept |
+
+No data migration: stored sources, broker data and block content are unchanged; new settings default to the 1.4.5 output. Demo: general summary and meta description (150 to 160 characters, labelled sample) for five reviews; FP Markets left empty to show the hidden state. The visual editor in a meta box is restarted with its content when the block editor moves the box (admin.js).

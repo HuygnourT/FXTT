@@ -57,6 +57,11 @@ The importer:
 | **Account types**: fields (add, remove, rename, reorder, type), values per account, row source label, **calculator values per 1.00 lot: spread cost and round-turn commission for EUR/USD and XAU/USD, Unit** | Broker Reviews > *broker* > **Broker data: account types** (box "Trading cost calculator: cost per 1.00 lot" in each account type) | Account types table, Quick Facts account list, Trading cost calculator |
 | **Legal entity per country**: "Countries served (ISO codes) or key" of each legal entity, e.g. `VN,TH,ID` | Broker Reviews > *broker* > **Broker data: legal entities** | Quick Facts "Legal entity for {Country}", country message, client protection note |
 | Which account fields the frontend table shows, their order, first column heading | **Broker data: account types display options** (box right below) | Account types table |
+| **Source label display, site-wide** (1.4.6): show / hide, text before the label (default "Source:", or none), note after the label, a **custom name for each label** (Tested, Verified at source, Broker-stated, Not tested / Not verified, Needs review, Source not classified) | **Settings > FX Trading Today > Source labels** | Every "Source:" line and data label (review sections, Broker Reviews cards, compare table, country context) and Source label blocks. Display only: the source chosen per fact, its colour and the "Needs review" rule stay |
+| Source label display **for one section** (1.4.6): show / hide; for Account types, Deposits and withdrawals, Platforms also text before, custom source name and note after | Gutenberg: select the **Broker data** block > sidebar **Source labels in this section** (+ the three text fields) | That block (empty fields use the site settings) |
+| **General summary** of a review (1.4.6): paragraphs, links, bold, italic, lists | Broker Reviews > *broker* > box **Review: general summary** (WordPress editor, Visual / Text) | Review page, right under the author line, above the rest of the review header; hidden when empty |
+| **ID of an H2** (1.4.6), e.g. `#fees` | Gutenberg: select the H2 > sidebar **Heading ID** (empty: made from the heading text) | Links to that section, table of contents |
+| **Meta description** of a review (1.4.6), plain text, live counter (recommended 150 to 160 characters) | Broker Reviews > *broker* > box **Review: meta description (SEO)** | `<meta name="description">` in the page head; not shown on the page; not added when an SEO plugin manages descriptions |
 | Position of the source label in a data table (above, below, in each row, between rows after row N) | Gutenberg: select the **Broker data** block (Account types, Deposits and withdrawals, Platforms) > sidebar **Source label position** | That block |
 | **Content under the author line** (default for the whole site) | **Settings > FX Trading Today > General > Content under the author line**: text (links, bold, italic and source labels allowed) + where it shows (broker reviews, test evidence, articles, pages) | Every page of the ticked types, directly below the author line at the top |
 | Content under the author line for **one page** | Editor sidebar box **"Under the author line"**: Use the site default / Custom text for this page / Hide on this page | That page only |
@@ -93,7 +98,7 @@ On pages that use the theme's templates, consecutive blocks at the **top** of th
 | Test evidence index | Published evidence + tests in progress | All countries (with country filter) or only the selected country; headings; show/hide in progress |
 | Post byline | Author + role + date + read time (inside Query Loop) | Show role, text before the date, read-time format |
 | Trading cost calculator | LOT input (default 1.00, min 0.01, steps of 0.01) + spread cost, round-turn commission and total for EUR/USD and XAU/USD of every account type, recalculated as the visitor types | Title, broker (optional) |
-| Source label | One line "Source: [label] note" | Label, label text, text before the label, note, link, open in a new tab |
+| Source label | One line "Source: [label] note" | Label, show on the site (site default / show / hide), custom source name, text before the label, note, link, open in a new tab |
 
 Every block is server-rendered; data is never copied into the post content.
 
@@ -201,6 +206,23 @@ Upgrading from 1.3: brokers keep working without re-saving. Until a broker is sa
 - **Test Evidence index intro**: fixed the paragraph that broke into one word per line on large screens. Cause: its right padding used `100%` (the parent width), so it grew with the window. It now uses the content width (`min(wide size, 100%) - 44rem`): the text keeps a readable measure on wide screens and fills the width on tablets and phones.
 - Theme and plugin version 1.4.5.
 
+## 3j. Version 1.4.6 rules
+
+- **Source labels: customisation** (Settings > FX Trading Today > **Source labels**):
+  - **Show / Hide** every source label of the site: "Source:" lines, rows between table rows, labels in each row, labels next to facts (Quick facts, costs, regulation, Broker Reviews cards, compare table, country context) and Source label blocks.
+  - **Text before the label** (default "Source:"; "No text before the label" removes it) and an optional **Note after the label** on "Source:" lines.
+  - **Custom name** for each label: Tested, Verified at source, Broker-stated, Not tested / Not verified, Needs review, Source not classified. Empty: the default name. Also used by the editor (Source label block and toolbar button).
+  - Display only: the source stored for each fact, its kind (`source-tag--tested` etc.), its colour, its link and the "Needs review" rule do not change.
+  - Per block: **Broker data** block > "Source labels in this section" (site default / show / hide); for Account types, Deposits and withdrawals and Platforms also text before, custom source name (that section only) and note after. **Source label** block: "Show on the site" (site default / show / hide) and "Custom source name". Empty block fields use the site settings.
+  - Labels typed inside text with the Source label toolbar button are part of the sentence: they keep the text you typed and are not hidden.
+- **General summary** (box **Review: general summary** on each broker review): the WordPress editor (Visual / Text) with paragraphs, bold, italic, underline, strikethrough, lists, quotes and links (scripts and other markup removed on save). Shown on the review page right under the author line (and its "Under the author line" note), above the rest of the review header (intro, country context, buttons); same width as the header text (44rem), body text size, full width on phones. Empty: nothing is output. Each review has its own summary; it is not used as the meta description.
+- **Meta description** (box **Review: meta description (SEO)**): plain text on one line (line breaks become spaces, HTML removed), a live counter (recommended about 150 to 160 characters: short / good / long). Output as one `<meta name="description" content="...">` in the head of that review only, escaped. Empty: no tag (nothing is generated from the summary, excerpt or content). When an SEO plugin is active (Yoast SEO, Rank Math, All in One SEO, SEOPress, The SEO Framework, Slim SEO, Squirrly), its own tag is kept and this plugin prints none; for Yoast, Rank Math, AIOSEO and SEOPress the review's description is offered to the SEO plugin only when it has none for that page. Developers: filter `fxt_core_seo_plugin_active`.
+- **Entity map caption** (Regulation and entities): "Entity map for {Broker name}" is now the table's `<caption>` (shown above the table, left aligned, same style as other table captions) instead of a separate H3 that only introduced the table. Content and rules unchanged.
+- **IDs of H2 headings**:
+  - Select an H2 in the editor: sidebar panel **Heading ID**. Type the ID (spaces become "-", only letters, numbers, "-" and "_" are kept), or click "Use the heading text". The placeholder shows the ID the site will use when the field is empty. A warning appears when another block of the page already uses the same ID. It is the Heading block's own anchor (same value as Advanced > HTML anchor), saved as `<h2 id="...">`.
+  - H2s without an ID get one made from their text when the page is built (accents removed, e.g. "Phí giao dịch & đòn bẩy" becomes `phi-giao-dich-don-bay`). Repeated text or an ID already used on the page gets `-2`, `-3`... IDs set by editors are never changed, and the stored content is not modified. The table of contents links to these IDs.
+- Theme and plugin version 1.4.6.
+
 ## 4. Country, cache, privacy
 
 - The country is a **preference**: `?country=XX` > cookie `fxt_country` > the default setting. The site **never reads location**.
@@ -265,6 +287,36 @@ Upgrading from 1.2: no re-import needed for the selector, evidence and button ch
 ## 6j. Acceptance checks (version 1.4.5)
 
 38/38 checks: Numbered list saved and shown as `ol`/`li` incl. nested lists, editor switch to ordered, legacy `ul` printed as `ol`, styling unchanged, valid blocks; spread box hierarchy (account > session > instrument), add / edit / reorder / remove at every level, session images add / replace / reorder / remove, saved and shown in order under the right session; frontend headings, tables with only used columns, empty fields and sections hidden, no global image section; 1.4.4 migration (grouping, descriptions, images kept, attachments not deleted, saved on update); index intro at 360 / 768 / 1024 / 1440 / 1920 / 2560 / 3840 px; demo import; version. Earlier suites pass: 1.4.4 60/60, 1.4.3 46/46, 1.4.2 40/40, 1.4.1 20/20, 1.4 31/31, 1.3 51/51, 1.2 63/63, journeys 47/47, 1.1 22/22. Every demo item is valid in Gutenberg and the PHP log is clean.
+
+## 6k. Acceptance checks (version 1.4.6)
+
+51/51 checks on WordPress 6.7 and 51/51 on WordPress 7.1, plus 21/21 on both versions for the entity map caption and H2 IDs:
+- **Entity map caption:** `<caption>` as the first child of the table, no separate heading, visible above the table, same for every broker.
+- **H2 IDs:**
+  - Every H2 of a review has an ID; IDs set in the editor are kept; the table of contents uses them.
+  - Generated IDs remove accents (Vietnamese) and are unique on the page (repeated text, IDs set further down); H3 untouched; stored content unchanged.
+  - Editor panel: placeholder, cleaning, duplicate warning, "Use the heading text", no panel for H3, saved as core markup, blocks valid after reload, IDs used on the site.
+- **Source labels:**
+  - Settings tab saved from the admin form, other tabs kept.
+  - Text before, custom names, note after on review lines, data labels, cards and the "Needs review" state.
+  - Stored sources unchanged; inline labels keep their text.
+  - "No text before the label"; site-wide hide (no lines, rows or labels).
+  - Broker data and Source label block overrides (show, hide, custom name, text before, note).
+  - Editor controls and names; valid blocks; 360 px.
+- **General summary:**
+  - Visual and Text editor in the box, saved through Gutenberg (paragraphs, bold, italic, link, list; script removed).
+  - Placement author line > summary > hero; same width as the header text.
+  - Independent per review; hidden when empty or blank; 360 and 768 px.
+- **Meta description:**
+  - Live counter short / good / long; one line of plain text.
+  - One escaped tag in the head; not shown on the page; not generated from the summary.
+  - Simulated SEO plugin: its own tag kept, our text offered only when it has none; no tag on other pages.
+- **Other:**
+  - Other broker data unchanged by a save.
+  - Demo import (five reviews with summary and a 150 to 160 character description, FP Markets empty).
+  - Version 1.4.6.
+
+Earlier suites pass: 1.4.5 38/38, 1.4.4 60/60, 1.4.3 46/46, 1.4.2 40/40, 1.4.1 20/20, 1.4 31/31, 1.3 51/51, 1.2 63/63, journeys 47/47, 1.1 22/22. Every demo item is valid in Gutenberg and the PHP log is clean.
 
 ## 7. Known differences from the prototype
 

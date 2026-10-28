@@ -60,7 +60,15 @@ final class Fields {
 
 			case 'textarea':
 				$value = is_scalar( $raw ) ? sanitize_textarea_field( (string) $raw ) : '';
+				if ( ! empty( $field['single_line'] ) ) {
+					// One line of plain text (e.g. a meta description).
+					$value = trim( preg_replace( '/\s+/u', ' ', $value ) );
+				}
 				return '' === $value ? null : $value;
+
+			case 'richtext':
+				$value = is_scalar( $raw ) ? self::clean_rich( (string) $raw ) : '';
+				return '' === trim( wp_strip_all_tags( $value ) ) ? null : $value;
 
 			case 'html':
 				$value = is_scalar( $raw ) ? self::clean_inline( (string) $raw ) : '';
@@ -207,6 +215,30 @@ final class Fields {
 		// Drop script/style blocks with their contents, then keep the allowed inline tags.
 		$html = preg_replace( '#<(script|style)\b[^>]*>.*?</\1\s*>#is', '', (string) $html );
 		return trim( wp_kses( $html, self::inline_html() ) );
+	}
+
+	/**
+	 * Rich text (classic WordPress editor): paragraphs, line breaks, links,
+	 * bold, italic, underline, lists, quotes, code and source labels.
+	 *
+	 * @param string $html HTML.
+	 * @return string
+	 */
+	public static function clean_rich( $html ) {
+		$html  = preg_replace( '#<(script|style)\b[^>]*>.*?</\1\s*>#is', '', (string) $html );
+		$tags  = array_merge(
+			self::inline_html(),
+			array(
+				'p'          => array(),
+				'u'          => array(),
+				's'          => array(),
+				'ul'         => array(),
+				'ol'         => array(),
+				'li'         => array(),
+				'blockquote' => array(),
+			)
+		);
+		return trim( wp_kses( $html, $tags ) );
 	}
 
 	/**
@@ -388,7 +420,7 @@ final class Fields {
 		$type = $field['type'];
 		echo '<div class="fxt-field fxt-field--' . esc_attr( $type ) . '">';
 
-		if ( in_array( $type, array( 'group', 'repeater', 'market_map', 'sources', 'country_checklist', 'gallery' ), true ) ) {
+		if ( in_array( $type, array( 'group', 'repeater', 'market_map', 'sources', 'country_checklist', 'gallery', 'richtext' ), true ) ) {
 			echo '<p class="fxt-field__label">' . esc_html( $field['label'] ) . '</p>';
 		} elseif ( 'checkbox' !== $type ) {
 			echo '<label class="fxt-field__label" for="' . esc_attr( $id ) . '">' . esc_html( $field['label'] ) . '</label>';
@@ -414,7 +446,41 @@ final class Fields {
 		switch ( $field['type'] ) {
 			case 'textarea':
 			case 'html':
-				printf( '<textarea class="widefat" rows="3" id="%s" name="%s">%s</textarea>', esc_attr( $id ), esc_attr( $name ), esc_textarea( (string) $value ) );
+				$counter = isset( $field['counter'] ) && is_array( $field['counter'] ) ? $field['counter'] : null;
+				printf(
+					'<textarea class="widefat" rows="3" id="%s" name="%s"%s>%s</textarea>',
+					esc_attr( $id ),
+					esc_attr( $name ),
+					$counter ? ' data-fxt-counter="' . esc_attr( (int) $counter[0] . ',' . (int) $counter[1] ) . '" aria-describedby="' . esc_attr( $id . '-count' ) . '"' : '',
+					esc_textarea( (string) $value )
+				);
+				if ( $counter ) {
+					$length = function_exists( 'mb_strlen' ) ? mb_strlen( (string) $value ) : strlen( (string) $value );
+					/* translators: 1: number of characters, 2: lower bound, 3: upper bound */
+					printf( '<p class="fxt-counter" id="%s" aria-live="polite">%s</p>', esc_attr( $id . '-count' ), esc_html( sprintf( __( '%1$d characters. Recommended: %2$d to %3$d.', 'fxt-core' ), $length, (int) $counter[0], (int) $counter[1] ) ) );
+				}
+				break;
+
+			case 'richtext':
+				// Classic WordPress editor (Visual / Text tabs); saved through the meta box form.
+				wp_editor(
+					(string) $value,
+					preg_replace( '/[^a-z0-9_]/', '_', strtolower( $id ) ),
+					array(
+						'textarea_name' => $name,
+						'textarea_rows' => 8,
+						'media_buttons' => false,
+						'teeny'         => false,
+						'tinymce'       => array(
+							'toolbar1'      => 'bold,italic,underline,strikethrough,bullist,numlist,blockquote,link,unlink,removeformat,undo,redo',
+							'toolbar2'      => '',
+							'block_formats' => 'Paragraph=p',
+							// Plain WordPress editor look, not the theme's block editor styles.
+							'content_css'   => includes_url( 'css/dashicons.min.css' ) . ',' . includes_url( 'js/tinymce/skins/wordpress/wp-content.css' ),
+						),
+						'quicktags'     => array( 'buttons' => 'strong,em,link,ul,ol,li,block,code,close' ),
+					)
+				);
 				break;
 
 			case 'number':
