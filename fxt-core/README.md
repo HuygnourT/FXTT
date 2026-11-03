@@ -62,6 +62,9 @@ The importer:
 | **General summary** of a review (1.4.6): paragraphs, links, bold, italic, lists | Broker Reviews > *broker* > box **Review: general summary** (WordPress editor, Visual / Text) | Review page, right under the author line, above the rest of the review header; hidden when empty |
 | **ID of an H2** (1.4.6), e.g. `#fees` | Gutenberg: select the H2 > sidebar **Heading ID** (empty: made from the heading text) | Links to that section, table of contents |
 | **Meta description** of a review (1.4.6), plain text, live counter (recommended 150 to 160 characters) | Broker Reviews > *broker* > box **Review: meta description (SEO)** | `<meta name="description">` in the page head; not shown on the page; not added when an SEO plugin manages descriptions |
+| **Trading cost calculator footnote** (1.4.7): links, bold, italic | Broker Reviews > *broker* > box **Broker data: trading cost calculator footnote** (WordPress editor) | Directly under the calculator table of that review; hidden when empty |
+| **Markdown import** (1.4.7): upload a .md file or paste Markdown, preview, append or replace the content | Broker Review or Test Evidence editor > sidebar (Post tab) > panel **Markdown import** | That post's content (`post_content`) only, as editable core blocks |
+| **Markdown templates** (1.4.7): `broker-review-template.md`, `test-evidence-template.md` | **Broker Reviews > Markdown import** (download buttons and the Markdown to block table), or the links in the editor panel | Starting point for new imports |
 | Position of the source label in a data table (above, below, in each row, between rows after row N) | Gutenberg: select the **Broker data** block (Account types, Deposits and withdrawals, Platforms) > sidebar **Source label position** | That block |
 | **Content under the author line** (default for the whole site) | **Settings > FX Trading Today > General > Content under the author line**: text (links, bold, italic and source labels allowed) + where it shows (broker reviews, test evidence, articles, pages) | Every page of the ticked types, directly below the author line at the top |
 | Content under the author line for **one page** | Editor sidebar box **"Under the author line"**: Use the site default / Custom text for this page / Hide on this page | That page only |
@@ -223,6 +226,24 @@ Upgrading from 1.3: brokers keep working without re-saving. Until a broker is sa
   - H2s without an ID get one made from their text when the page is built (accents removed, e.g. "Phí giao dịch & đòn bẩy" becomes `phi-giao-dich-don-bay`). Repeated text or an ID already used on the page gets `-2`, `-3`... IDs set by editors are never changed, and the stored content is not modified. The table of contents links to these IDs.
 - Theme and plugin version 1.4.6.
 
+## 3k. Version 1.4.7 rules
+
+- **Trading cost calculator footnote**: each broker review has its own footnote (box **Broker data: trading cost calculator footnote**, WordPress editor with bold, italic and links; other markup and scripts are removed on save). It is shown directly under the calculator table, before the standard calculation note, in the calculator's small text style, and wraps on phones. Empty: no container is output.
+- **Markdown import** (Broker Reviews and Test Evidence only):
+  1. In the editor sidebar (Post tab), panel **Markdown import** > **Import Markdown…**.
+  2. Upload a `.md` file (also `.markdown` or `.txt`, UTF-8, up to 1 MB) or paste Markdown; the file text can be edited before importing.
+  3. Choose **Append to existing content** (default, added at the end) or **Replace existing content**.
+  4. **Preview**: a summary (e.g. "41 blocks: 15 headings, 16 paragraphs…"), the blocks with the site styles, notes (skipped images, H1 imported as H2) and where the blocks will go.
+  5. **Import**. Replacing asks for confirmation first: it says how many blocks will be removed (and how many are site blocks such as Broker data or Evidence data, whose data stays in the boxes), and the **Replace content** button stays disabled until "I understand…" is ticked.
+  6. Check the content and save the post as usual. Nothing is saved before that, and Undo restores the previous content.
+- **What becomes which block** (core blocks only, never one Custom HTML block): `##` to `######` Heading H2 to H6 (`#` becomes H2, since the post title is the H1); paragraphs; `**bold**`, `*italic*`, `~~strike~~`, `` `code` ``, links and `<https://…>` inside text; lists `-`/`*`/`+` and `1.` with nesting (2 spaces) and a start number; `>` Quote (paragraphs and lists inside); pipe tables with a header row and column alignment as Table with the theme style **Data table**; `---`, `***`, `___` Separator; `![alt](url "caption")` on its own line as Image; fenced code as Code. YAML front matter at the top is skipped.
+- **Safety**: only users who can edit that post can convert Markdown (REST `fxt/v1/markdown`, checked per post; other post types refused). HTML written in the Markdown is shown as text, links keep http(s), mailto, tel, relative and `#anchor` targets only (`javascript:` links become plain text), and every converted text passes through `wp_kses`. Images are imported only when they exist: an image of the media library (linked to the attachment), a file in the uploads folder, or a remote address that answers with an image; others are listed in the preview and skipped. An image inside a sentence becomes a link to the image.
+- **Only the post content changes**: Broker data, Test Evidence data, the summary, meta description, footnote, custom fields and post settings are not touched. Imported headings get IDs on the site like any H2 and join the table of contents.
+- **Templates**: `broker-review-template.md` (introduction, H2/H3 sections, lists, tables, links, FAQ, conclusion) and `test-evidence-template.md` (test overview, testing methodology, account registration, deposit and withdrawal tests, spread tests, execution tests, customer support tests, evidence notes, conclusion). Placeholders are in square brackets and the example values are marked as sample; each ends with a "Template guide" section (Markdown to block table) to delete before publishing. Download them from **Broker Reviews > Markdown import** or from the editor panel. Files: `fxt-core/templates/markdown/`.
+- Plain lists also show their bullets and numbers in the block editor (and in the import preview), as on the site.
+- Small fixes: line breaks typed in multi-line fields are stored the same way whatever the browser sends; translations are no longer loaded before WordPress is ready in the admin (notice in the PHP log).
+- Theme and plugin version 1.4.7.
+
 ## 4. Country, cache, privacy
 
 - The country is a **preference**: `?country=XX` > cookie `fxt_country` > the default setting. The site **never reads location**.
@@ -317,6 +338,39 @@ Upgrading from 1.2: no re-import needed for the selector, evidence and button ch
   - Version 1.4.6.
 
 Earlier suites pass: 1.4.5 38/38, 1.4.4 60/60, 1.4.3 46/46, 1.4.2 40/40, 1.4.1 20/20, 1.4 31/31, 1.3 51/51, 1.2 63/63, journeys 47/47, 1.1 22/22. Every demo item is valid in Gutenberg and the PHP log is clean.
+
+## 6l. Acceptance checks (version 1.4.7, WordPress 6.8.3, PHP 8.3, SQLite)
+
+58/58 checks:
+- **Footnote**:
+  - Box with the WordPress editor and a basic toolbar.
+  - Saved with links, bold and italic; lists, images and scripts removed; other broker data unchanged.
+  - Shown directly under the calculator table, formatting kept; independent per review; hidden when empty.
+  - Calculator still recalculates; 360 px wraps without horizontal scroll.
+- **Templates**:
+  - Admin page with both download buttons and the mapping table; files downloaded identical to the plugin files.
+  - Not served without login or without the security token.
+  - Required sections present, no em dashes.
+- **Conversion and access**:
+  - H1 to H6 (H1 as H2 with a note); paragraph formatting; raw HTML shown as text.
+  - Nested and ordered lists, quote, table with alignment, separator.
+  - Media library image with attachment and caption; missing image skipped with a note; `javascript:` link removed; core blocks only.
+  - Over 1 MB and other post types refused; visitors refused, contributors refused on a published review.
+- **Editor**:
+  - Panel on Broker Review and Test Evidence, not on articles.
+  - Empty and wrong-file messages; file upload into the text box; Append by default.
+  - Preview with summary, rendered blocks and destination, nothing changed during the preview.
+  - Append keeps existing blocks and adds at the end, with a snackbar.
+  - Saved as native blocks; meta unchanged; valid after reload; edited and saved; theme styles, H2 ID and table of contents on the site; 360 px.
+  - Replace on a test evidence record: preview counts, confirmation step (button disabled, data blocks explained), leaving without confirming changes nothing, only imported blocks after replace, evidence data unchanged, valid after reload, Undo restores the content.
+- **Other**: demo footnotes; version 1.4.7.
+
+Also run on this version:
+- 1.4.6 suite: 51/51.
+- 1.4.6 additions (entity map caption, H2 IDs): 21/21.
+- A rebuilt regression smoke suite: every published item and archive renders without PHP errors, no horizontal scroll at 360 px on seven page types, table of contents and H2 IDs, numbered lists as `<ol>`, entity map caption, source labels, score card, summary, meta description, calculator at LOT 10 and invalid lot, country regions through the REST route, directory, compare, nested spread tests, Test Evidence index width, every demo item valid in Gutenberg, PHP log clean.
+
+The per-version suites of 1.1 to 1.4.5 were not available in this build environment; their main behaviours are covered by the smoke suite.
 
 ## 7. Known differences from the prototype
 

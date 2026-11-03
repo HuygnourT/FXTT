@@ -1,0 +1,15 @@
+/* Markdown import dialog and panel (1.4.7). */
+.components-modal__frame.fxt-md { width: min(56rem, calc(100vw - 32px)); max-width: none; }
+.components-modal__frame.fxt-md--confirm { width: min(34rem, calc(100vw - 32px)); }
+.fxt-md .components-modal__content { box-sizing: border-box; }
+.fxt-md .components-base-control, .fxt-md textarea { max-width: 100%; box-sizing: border-box; }
+.fxt-md__intro, .fxt-md__summary, .fxt-md__where { margin: 0 0 12px; }
+.fxt-md__file { margin: 0 0 16px; }
+.fxt-md__label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 500; text-transform: uppercase; }
+.fxt-md__hint { margin: 6px 0 0; color: #50575e; }
+.fxt-md__text textarea { font-family: Menlo, Consolas, monospace; font-size: 13px; }
+.fxt-md__preview { max-height: 26rem; overflow: auto; margin: 0 0 12px; border: 1px solid #dcdcde; border-radius: 4px; background: #fff; }
+.fxt-md__warnings ul { margin: 0; padding-left: 18px; list-style: disc; }
+.fxt-md__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.fxt-md-panel__label { margin: 16px 0 4px; font-weight: 600; }
+.fxt-md-panel__templates { margin: 0 0 8px; }

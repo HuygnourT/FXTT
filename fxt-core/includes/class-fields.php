@@ -59,7 +59,7 @@ final class Fields {
 				return '' === $value ? null : $value;
 
 			case 'textarea':
-				$value = is_scalar( $raw ) ? sanitize_textarea_field( (string) $raw ) : '';
+				$value = is_scalar( $raw ) ? sanitize_textarea_field( str_replace( array( "\r\n", "\r" ), "\n", (string) $raw ) ) : '';
 				if ( ! empty( $field['single_line'] ) ) {
 					// One line of plain text (e.g. a meta description).
 					$value = trim( preg_replace( '/\s+/u', ' ', $value ) );
@@ -67,7 +67,7 @@ final class Fields {
 				return '' === $value ? null : $value;
 
 			case 'richtext':
-				$value = is_scalar( $raw ) ? self::clean_rich( (string) $raw ) : '';
+				$value = is_scalar( $raw ) ? self::clean_rich( (string) $raw, ! empty( $field['basic'] ) ) : '';
 				return '' === trim( wp_strip_all_tags( $value ) ) ? null : $value;
 
 			case 'html':
@@ -221,12 +221,18 @@ final class Fields {
 	 * Rich text (classic WordPress editor): paragraphs, line breaks, links,
 	 * bold, italic, underline, lists, quotes, code and source labels.
 	 *
-	 * @param string $html HTML.
+	 * @param string $html  HTML.
+	 * @param bool   $basic Paragraphs, links, bold and italic only.
 	 * @return string
 	 */
-	public static function clean_rich( $html ) {
-		$html  = preg_replace( '#<(script|style)\b[^>]*>.*?</\1\s*>#is', '', (string) $html );
-		$tags  = array_merge(
+	public static function clean_rich( $html, $basic = false ) {
+		$html = preg_replace( '#<(script|style)\b[^>]*>.*?</\1\s*>#is', '', (string) $html );
+		if ( $basic ) {
+			// Basic formatting only (e.g. a footnote): paragraphs, line breaks, links, bold, italic.
+			$html = wp_kses( $html, array_merge( self::inline_html(), array( 'p' => array() ) ) );
+			return trim( preg_replace( '#<p>(\s|&nbsp;)*</p>#i', '', $html ) );
+		}
+		$tags = array_merge(
 			self::inline_html(),
 			array(
 				'p'          => array(),
@@ -468,17 +474,17 @@ final class Fields {
 					preg_replace( '/[^a-z0-9_]/', '_', strtolower( $id ) ),
 					array(
 						'textarea_name' => $name,
-						'textarea_rows' => 8,
+						'textarea_rows' => isset( $field['rows'] ) ? (int) $field['rows'] : 8,
 						'media_buttons' => false,
 						'teeny'         => false,
 						'tinymce'       => array(
-							'toolbar1'      => 'bold,italic,underline,strikethrough,bullist,numlist,blockquote,link,unlink,removeformat,undo,redo',
+							'toolbar1'      => ! empty( $field['basic'] ) ? 'bold,italic,link,unlink,removeformat,undo,redo' : 'bold,italic,underline,strikethrough,bullist,numlist,blockquote,link,unlink,removeformat,undo,redo',
 							'toolbar2'      => '',
 							'block_formats' => 'Paragraph=p',
 							// Plain WordPress editor look, not the theme's block editor styles.
 							'content_css'   => includes_url( 'css/dashicons.min.css' ) . ',' . includes_url( 'js/tinymce/skins/wordpress/wp-content.css' ),
 						),
-						'quicktags'     => array( 'buttons' => 'strong,em,link,ul,ol,li,block,code,close' ),
+						'quicktags'     => array( 'buttons' => ! empty( $field['basic'] ) ? 'strong,em,link,close' : 'strong,em,link,ul,ol,li,block,code,close' ),
 					)
 				);
 				break;

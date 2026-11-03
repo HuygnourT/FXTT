@@ -99,5 +99,12 @@ $value       = static function ( array $account, $key ) {
 			</tbody>
 		</table>
 	</div>
+	<?php
+	// 1.4.7: this review's footnote (Broker data: trading cost calculator footnote); nothing when empty.
+	$footnote = fxt_core_cost_footnote( $broker['id'] );
+	if ( '' !== $footnote ) :
+		?>
+		<div class="cost-calc__footnote"><?php echo $footnote; // phpcs:ignore WordPress.Security.EscapeOutput -- filtered with wp_kses(). ?></div>
+	<?php endif; ?>
 	<p class="cost-calc__note"><?php esc_html_e( 'Spread cost and commission = value per 1.00 lot x LOT, from the account type data; total = spread cost + commission. Commission is round turn: opening and closing the position together. N/A: a value has not been entered. Swaps and other fees are not included.', 'fxt-core' ); ?></p>
 </div>

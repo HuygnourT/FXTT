@@ -227,6 +227,14 @@ final class Schema {
 				'single_line' => true,
 				'counter'     => array( 150, 160 ),
 			),
+			// 1.4.7: note under the Trading cost calculator table of this review.
+			'fxt_cost_footnote'   => array(
+				'type'  => 'richtext',
+				'basic' => true,
+				'rows'  => 4,
+				'label' => __( 'Footnote under the calculator', 'fxt-core' ),
+				'help'  => __( 'Shown directly below the Trading cost calculator table of this review. Links, bold and italic are kept. Empty: nothing is shown.', 'fxt-core' ),
+			),
 			'fxt_name'            => array( 'type' => 'text', 'label' => __( 'Broker name', 'fxt-core' ), 'help' => __( 'Short brand name used on buttons, in tables and in headings, e.g. "Exness". Empty: the post title without "review" and anything after it.', 'fxt-core' ) ),
 			'fxt_monogram'        => array( 'type' => 'text', 'label' => __( 'Monogram', 'fxt-core' ), 'help' => __( 'Two or three letters shown when no logo is set.', 'fxt-core' ) ),
 			'fxt_status'          => array( 'type' => 'select', 'label' => __( 'Review status', 'fxt-core' ), 'options' => self::review_status(), 'default' => 'published' ),

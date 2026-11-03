@@ -31,6 +31,7 @@ final class Admin {
 				'fxt-trading'   => array( __( 'Broker data: trading conditions and costs', 'fxt-core' ), array( 'fxt_trading', 'fxt_costs', 'fxt_payments' ) ),
 				'fxt-accounts'  => array( __( 'Broker data: account types', 'fxt-core' ), 'render' => array( Accounts::class, 'render_fields_box' ) ),
 				'fxt-accounts-display' => array( __( 'Broker data: account types display options', 'fxt-core' ), 'render' => array( Accounts::class, 'render_display_box' ) ),
+				'fxt-cost-footnote' => array( __( 'Broker data: trading cost calculator footnote', 'fxt-core' ), array( 'fxt_cost_footnote' ) ),
 				'fxt-entities'  => array( __( 'Broker data: legal entities', 'fxt-core' ), array( 'fxt_entities' ) ),
 				'fxt-accepting' => array( __( 'Broker data: accepting residents', 'fxt-core' ), array( 'fxt_accepting' ) ),
 				'fxt-markets'   => array( __( 'Broker data: tested residents', 'fxt-core' ), array( 'fxt_markets' ) ),
@@ -52,7 +53,8 @@ final class Admin {
 		add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_boxes' ) );
 		add_action( 'save_post', array( __CLASS__, 'save_post' ), 10, 2 );
 
-		foreach ( array_keys( self::term_schemas() ) as $taxonomy ) {
+		// Taxonomy names only: building the field schemas here would load translations too early.
+		foreach ( array( Content_Types::MARKET, Content_Types::PLATFORM ) as $taxonomy ) {
 			add_action( $taxonomy . '_add_form_fields', array( __CLASS__, 'term_add_fields' ) );
 			add_action( $taxonomy . '_edit_form_fields', array( __CLASS__, 'term_edit_fields' ), 10, 2 );
 			add_action( 'created_' . $taxonomy, array( __CLASS__, 'save_term' ) );

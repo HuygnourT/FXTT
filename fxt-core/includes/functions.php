@@ -701,3 +701,17 @@ function fxt_core_general_summary( $post = null ) {
 	}
 	return '<div class="review-summary">' . fxt_core_label_markup( wpautop( $html ) ) . '</div>';
 }
+
+/**
+ * Footnote under the Trading cost calculator of a broker (1.4.7), or ''.
+ *
+ * @param int $post_id Broker post ID.
+ * @return string HTML (filtered with wp_kses()).
+ */
+function fxt_core_cost_footnote( $post_id ) {
+	$html = FXT\Core\Fields::clean_rich( (string) get_post_meta( (int) $post_id, 'fxt_cost_footnote', true ), true );
+	if ( '' === trim( wp_strip_all_tags( $html ) ) ) {
+		return '';
+	}
+	return fxt_core_label_markup( wpautop( $html ) );
+}

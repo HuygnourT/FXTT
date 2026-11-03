@@ -89,16 +89,23 @@
   text-underline-offset: 3px;
 }
 
-/* Plain lists inside reading content keep their markers. */
+/* Plain lists inside reading content keep their markers (also in the
+   block editor and its previews, e.g. the Markdown import preview). */
 .prose ul.wp-block-list:not([class*="is-style-"]),
-.prose ol.wp-block-list:not([class*="is-style-"]) {
+.prose ol.wp-block-list:not([class*="is-style-"]),
+.editor-styles-wrapper ul.wp-block-list:not([class*="is-style-"]),
+.editor-styles-wrapper ol.wp-block-list:not([class*="is-style-"]) {
   padding-left: 1.25rem;
   list-style: disc;
 }
 
-.prose ol.wp-block-list:not([class*="is-style-"]) { list-style: decimal; }
+.prose ol.wp-block-list:not([class*="is-style-"]),
+.editor-styles-wrapper ol.wp-block-list:not([class*="is-style-"]) { list-style: decimal; }
 .prose ul.wp-block-list:not([class*="is-style-"]) li + li,
-.prose ol.wp-block-list:not([class*="is-style-"]) li + li { margin-top: var(--space-2); }
+.prose ol.wp-block-list:not([class*="is-style-"]) li + li,
+.editor-styles-wrapper ul.wp-block-list:not([class*="is-style-"]) li + li,
+.editor-styles-wrapper ol.wp-block-list:not([class*="is-style-"]) li + li { margin-top: var(--space-2); }
+.editor-styles-wrapper ul.wp-block-list:not([class*="is-style-"]) ul.wp-block-list:not([class*="is-style-"]) { list-style: circle; }
 
 .prose > .author-box { margin-block-start: var(--space-8); }
 
