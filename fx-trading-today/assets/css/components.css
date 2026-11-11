@@ -1007,3 +1007,7 @@ a.source-tag[href]::after { content: " \2197"; }
 .prose .spread-session__head > * { margin: 0; }
 .prose .spread-session__text > p { margin: 0; }
 .prose .spread-session__text > p + p { margin-top: var(--space-2); }
+/* 1.4.8: custom source type and several labels on one line. */
+.source-tag--custom,
+.fxt-source-label[data-kind="custom"] { color: var(--color-ink-2); }
+.data-source--multi .source-tag { margin-inline: 1px; }

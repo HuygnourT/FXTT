@@ -391,11 +391,11 @@ final class Schema {
 				'fields' => self::test_fields( true ),
 			),
 			// 1.4.4: more evidence categories. Empty categories are not shown.
-			// 1.4.5: Account type -> Sessions -> Instruments (images per session).
+			// 1.4.5: Account type -> Sessions -> Instruments; 1.4.8: images per instrument.
 			'fxt_spread_tests'    => array(
 				'type'      => 'repeater',
 				'label'     => __( 'Spread tests', 'fxt-core' ),
-				'help'      => __( 'Account type > sessions > instruments. Each session keeps its own evidence images. Leave empty to hide "Spread tests" on the evidence page.', 'fxt-core' ),
+				'help'      => __( 'Account type > sessions > instruments. Each instrument keeps its own evidence images. Leave empty to hide "Spread tests" on the evidence page.', 'fxt-core' ),
 				'item'      => __( 'Account type', 'fxt-core' ),
 				'add_label' => __( 'Add account type', 'fxt-core' ),
 				'fields'    => array(
@@ -423,9 +423,19 @@ final class Schema {
 									'samples'    => array( 'type' => 'text', 'label' => __( 'Samples / duration', 'fxt-core' ) ),
 									'status'     => array( 'type' => 'select', 'label' => __( 'Status', 'fxt-core' ), 'options' => self::test_status() ),
 									'metrics'    => self::metrics_field(),
+									// 1.4.8: evidence images of this instrument in this session.
+									'images'     => array( 'type' => 'gallery', 'label' => __( 'Evidence images (this instrument)', 'fxt-core' ), 'help' => __( 'Screenshots of this instrument in this session, personal data already blurred. Add (upload or Media Library), replace, reorder (arrows) or remove. Shown on the site with a "View evidence" button.', 'fxt-core' ) ),
 								),
 							),
-							'images'      => array( 'type' => 'gallery', 'label' => __( 'Evidence images (this session)', 'fxt-core' ), 'help' => __( 'Screenshots with personal data already blurred. Add, replace, reorder (arrows) or remove.', 'fxt-core' ) ),
+							// Before 1.4.8 images belonged to the session. They stay here, not shown
+							// on the site, until each one is assigned to its instrument.
+							'images'      => array(
+								'type'       => 'gallery',
+								'label'      => __( 'Unassigned evidence images (from earlier versions)', 'fxt-core' ),
+								'help'       => __( 'These images were saved for the whole session, so the instrument they show is not known. They are not shown on the site. Use "Assign to" on each image to move it to its instrument, or remove it.', 'fxt-core' ),
+								'hide_empty' => true,
+								'assign'     => true,
+							),
 						),
 					),
 				),

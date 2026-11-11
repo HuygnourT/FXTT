@@ -424,6 +424,9 @@ final class Fields {
 	 */
 	public static function render( array $field, $name, $value, $id ) {
 		$type = $field['type'];
+		if ( ! empty( $field['hide_empty'] ) && ( null === $value || '' === $value || array() === array_filter( (array) $value ) ) ) {
+			return; // Nothing to show (e.g. no unassigned images left).
+		}
 		echo '<div class="fxt-field fxt-field--' . esc_attr( $type ) . '">';
 
 		if ( in_array( $type, array( 'group', 'repeater', 'market_map', 'sources', 'country_checklist', 'gallery', 'richtext' ), true ) ) {
@@ -561,7 +564,7 @@ final class Fields {
 
 			case 'gallery':
 				$ids = array_filter( array_map( 'absint', is_array( $value ) ? $value : array() ) );
-				printf( '<div class="fxt-gallery" data-fxt-gallery data-name="%s">', esc_attr( $name . '[]' ) );
+				printf( '<div class="fxt-gallery%s" data-fxt-gallery data-name="%s">', ! empty( $field['assign'] ) ? ' fxt-gallery--unassigned' : '', esc_attr( $name . '[]' ) );
 				// Empty marker: removing every image saves an empty gallery.
 				printf( '<input type="hidden" name="%s" value="">', esc_attr( $name . '[]' ) );
 				echo '<ul class="fxt-gallery__items" data-fxt-gallery-items>';
@@ -570,7 +573,7 @@ final class Fields {
 					if ( ! $src ) {
 						continue;
 					}
-					echo self::gallery_item( (int) $att, $src, $name . '[]' ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in gallery_item().
+					echo self::gallery_item( (int) $att, $src, $name . '[]', ! empty( $field['assign'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in gallery_item().
 				}
 				echo '</ul>';
 				printf( '<button type="button" class="button" id="%s" data-fxt-gallery-add>%s</button>', esc_attr( $id ), esc_html__( 'Add images', 'fxt-core' ) );
@@ -770,16 +773,19 @@ final class Fields {
 	 * @param string $name Input name (with []).
 	 * @return string HTML.
 	 */
-	public static function gallery_item( $att, $src, $name ) {
+	public static function gallery_item( $att, $src, $name, $assign = false ) {
+		// "Assign to" (1.4.8): admin.js fills the list with the instruments of the same session.
+		$select = $assign ? '<label class="fxt-gallery__assign"><span class="screen-reader-text">' . esc_html__( 'Assign this image to an instrument', 'fxt-core' ) . '</span><select data-fxt-gallery-assign><option value="">' . esc_html__( 'Assign to…', 'fxt-core' ) . '</option></select></label>' : '';
 		return sprintf(
-			'<li class="fxt-gallery__item" data-id="%1$d"><img src="%2$s" alt=""><input type="hidden" name="%3$s" value="%1$d"><span class="fxt-gallery__tools"><button type="button" class="button-link" data-fxt-gallery-prev aria-label="%5$s">&larr;</button><button type="button" class="button-link" data-fxt-gallery-next aria-label="%6$s">&rarr;</button><button type="button" class="button-link" data-fxt-gallery-replace>%7$s</button><button type="button" class="button-link button-link-delete" data-fxt-gallery-remove>%4$s</button></span></li>',
+			'<li class="fxt-gallery__item" data-id="%1$d"><img src="%2$s" alt=""><input type="hidden" name="%3$s" value="%1$d">%8$s<span class="fxt-gallery__tools"><button type="button" class="button-link" data-fxt-gallery-prev aria-label="%5$s">&larr;</button><button type="button" class="button-link" data-fxt-gallery-next aria-label="%6$s">&rarr;</button><button type="button" class="button-link" data-fxt-gallery-replace>%7$s</button><button type="button" class="button-link button-link-delete" data-fxt-gallery-remove>%4$s</button></span></li>',
 			(int) $att,
 			esc_url( $src ),
 			esc_attr( $name ),
 			esc_html__( 'Remove', 'fxt-core' ),
 			esc_attr__( 'Move earlier', 'fxt-core' ),
 			esc_attr__( 'Move later', 'fxt-core' ),
-			esc_html__( 'Replace', 'fxt-core' )
+			esc_html__( 'Replace', 'fxt-core' ),
+			$select
 		);
 	}
 

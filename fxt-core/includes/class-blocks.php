@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Blocks {
 
-	const BLOCKS = array( 'country-brokers', 'broker-cards', 'broker-compare', 'broker-data', 'evidence-data', 'score-weights', 'broker-directory', 'evidence-list', 'evidence-snapshot', 'post-byline', 'eligibility-section', 'trader-verdict', 'source-label', 'cost-calculator' );
+	const BLOCKS = array( 'country-brokers', 'broker-cards', 'broker-compare', 'broker-data', 'evidence-data', 'score-weights', 'broker-directory', 'evidence-list', 'evidence-snapshot', 'post-byline', 'eligibility-section', 'trader-verdict', 'source-label', 'cost-calculator', 'affiliate-cta' );
 
 	/** @var bool Whether the evidence viewer markup still has to be printed. */
 	private static $viewer_pending = false;

@@ -13,3 +13,5 @@
 .fxt-md__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 .fxt-md-panel__label { margin: 16px 0 4px; font-weight: 600; }
 .fxt-md-panel__templates { margin: 0 0 8px; }
+.fxt-md-sidebar__body { padding: 16px; }
+.fxt-md-sidebar__body > p:first-child { margin-top: 0; }

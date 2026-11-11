@@ -85,6 +85,8 @@ Summarise what our test evidence shows and link to the full record, for example 
 
 Close with the verdict in plain words: who should consider [Broker name], who should not, and what we will re-check in the next update.
 
+[[affiliate-cta]]
+
 ---
 
 ## Template guide (delete this section before publishing)
@@ -101,5 +103,6 @@ How the Markdown in this file becomes blocks when you import it:
 | Rows with `\|` and a `---` row under the header | Table (style "Data table") |
 | `---` on its own line | Separator |
 | `![alt text](https://.../image.jpg "Caption")` on its own line | Image |
+| `[[affiliate-cta]]` or `[[affiliate-cta label="Open an account"]]` on its own line | Affiliate CTA button (the link is the broker's Affiliate URL, never typed here) |
 
 Broker data (scores, account types, legal entities, sources) is not imported from Markdown: edit it in the Broker data boxes below the editor, and show it with the Broker data blocks.

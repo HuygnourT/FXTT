@@ -53,6 +53,28 @@ final class Assets {
 		wp_register_script( 'fxt-core-directory', $js . 'directory.js', array( 'fxt-core-country' ), FXT_CORE_VERSION, $args );
 		wp_register_script( 'fxt-core-evidence', $js . 'evidence.js', array(), FXT_CORE_VERSION, $args );
 		wp_register_script( 'fxt-core-cost-calc', $js . 'cost-calc.js', array(), FXT_CORE_VERSION, $args );
+		// 1.4.8: instrument evidence images in a dialog (spread tests).
+		wp_register_script( 'fxt-core-evidence-gallery', $js . 'evidence-gallery.js', array(), FXT_CORE_VERSION, $args );
+		wp_localize_script(
+			'fxt-core-evidence-gallery',
+			'fxtEvidenceGallery',
+			array(
+				'label'    => __( 'Evidence', 'fxt-core' ),
+				'close'    => __( 'Close evidence', 'fxt-core' ),
+				'prev'     => __( 'Previous', 'fxt-core' ),
+				'next'     => __( 'Next', 'fxt-core' ),
+				'prevImg'  => __( 'Previous image', 'fxt-core' ),
+				'nextImg'  => __( 'Next image', 'fxt-core' ),
+				/* translators: 1: current image, 2: number of images */
+				'position' => __( 'Image %1$d of %2$d', 'fxt-core' ),
+				'full'     => __( 'Open full size', 'fxt-core' ),
+				'newTab'   => __( '(opens in a new tab)', 'fxt-core' ),
+				'sample'   => fxt_core_sample(),
+				'iconX'    => fxt_core_icon( 'close' ),
+				'iconPrev' => fxt_core_icon( 'chevron-right', 'icon--flip' ),
+				'iconNext' => fxt_core_icon( 'chevron-right' ),
+			)
+		);
 	}
 
 	/**

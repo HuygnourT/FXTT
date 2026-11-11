@@ -15,6 +15,7 @@
  *   --- *** ___   core/separator
  *   ![alt](url)   core/image (alone on its line; only valid, reachable images)
  *   ```           core/code
+ *   [[affiliate-cta label="..."]]  fxt/affiliate-cta (Broker Reviews; link from Broker data)
  *   **b** *i* ~~s~~ `code` [link](url) <https://...>   inline formatting
  *
  * Raw HTML in the Markdown is shown as text, never as markup. Links only
@@ -50,9 +51,13 @@ class Markdown {
 	/**
 	 * @param callable|null $image_check Returns { url, id } for a usable image, null otherwise.
 	 */
-	public function __construct( $image_check = null ) {
+	public function __construct( $image_check = null, $allow_cta = true ) {
 		$this->image_check = $image_check;
+		$this->allow_cta   = (bool) $allow_cta;
 	}
+
+	/** @var bool [[affiliate-cta]] lines become Affiliate CTA blocks (Broker Reviews). */
+	private $allow_cta = true;
 
 	/**
 	 * Convert Markdown to a block tree.
@@ -177,6 +182,21 @@ class Markdown {
 			if ( $this->list_marker( $line ) ) {
 				list( $block, $i ) = $this->parse_list( $lines, $i );
 				$out[]             = $block;
+				continue;
+			}
+
+			// Affiliate CTA button (1.4.8): [[affiliate-cta]] or [[affiliate-cta label="..."]] on its own line.
+			if ( preg_match( '/^\s*\[\[\s*affiliate-cta(?:\s+label\s*=\s*"([^"]*)")?\s*\]\]\s*$/i', $line, $m ) ) {
+				if ( $this->allow_cta ) {
+					$attrs = array();
+					if ( isset( $m[1] ) && '' !== trim( $m[1] ) ) {
+						$attrs['label'] = sanitize_text_field( $m[1] );
+					}
+					$out[] = $this->block( 'fxt/affiliate-cta', $attrs );
+				} else {
+					$this->warnings[] = __( 'The affiliate button ([[affiliate-cta]]) is available in Broker Reviews only; it was not imported here.', 'fxt-core' );
+				}
+				++$i;
 				continue;
 			}
 

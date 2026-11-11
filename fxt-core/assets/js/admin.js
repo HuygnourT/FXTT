@@ -610,4 +610,71 @@
 			richEditors();
 		}
 	}, true ) );
+
+	// 1.4.8: "Assign to" on unassigned evidence images (saved for a whole
+	// session before images belonged to instruments). Lists the instruments
+	// of the same session and moves the image into that instrument's gallery.
+	function sessionInstruments( select ) {
+		const session = select.closest( '[data-fxt-row]' );
+		if ( ! session ) {
+			return [];
+		}
+		return Array.from( session.querySelectorAll( '.fxt-repeater--depth-3 > [data-fxt-rows] > [data-fxt-row]' ) ).map( ( row, n ) => {
+			const nameInput = row.querySelector( 'input[name$="[instrument]"]' );
+			return {
+				label: ( nameInput && nameInput.value.trim() ) || ( ( i18n.instrument || 'Instrument' ) + ' ' + ( n + 1 ) ),
+				gallery: row.querySelector( '[data-fxt-gallery]' ),
+			};
+		} ).filter( ( item ) => item.gallery );
+	}
+	function fillAssign( select ) {
+		const keep = select.options[ 0 ];
+		select.innerHTML = '';
+		select.appendChild( keep );
+		const items = sessionInstruments( select );
+		items.forEach( ( item, n ) => {
+			const option = document.createElement( 'option' );
+			option.value = String( n );
+			option.textContent = item.label;
+			select.appendChild( option );
+		} );
+		if ( ! items.length ) {
+			const none = document.createElement( 'option' );
+			none.disabled = true;
+			none.textContent = i18n.noInstrument || 'Add an instrument to this session first';
+			select.appendChild( none );
+		}
+	}
+	[ 'focusin', 'mousedown' ].forEach( ( type ) => document.addEventListener( type, ( e ) => {
+		if ( e.target.matches && e.target.matches( '[data-fxt-gallery-assign]' ) ) {
+			fillAssign( e.target );
+		}
+	} ) );
+	document.addEventListener( 'change', ( e ) => {
+		const select = e.target.closest && e.target.closest( '[data-fxt-gallery-assign]' );
+		if ( ! select || '' === select.value ) {
+			return;
+		}
+		const target = sessionInstruments( select )[ parseInt( select.value, 10 ) ];
+		const item = select.closest( '.fxt-gallery__item' );
+		const from = select.closest( '[data-fxt-gallery]' );
+		if ( ! target || ! item ) {
+			return;
+		}
+		const list = target.gallery.querySelector( '[data-fxt-gallery-items]' );
+		const id = item.getAttribute( 'data-id' );
+		if ( ! list.querySelector( '[data-id="' + id + '"]' ) ) {
+			item.querySelector( 'input[type="hidden"]' ).name = target.gallery.getAttribute( 'data-name' );
+			select.closest( '.fxt-gallery__assign' ).remove();
+			list.appendChild( item );
+		} else {
+			item.remove(); // Already in that instrument's gallery.
+		}
+		if ( from && ! from.querySelector( '.fxt-gallery__item' ) ) {
+			const note = document.createElement( 'p' );
+			note.className = 'description';
+			note.textContent = i18n.allAssigned || 'All images are assigned. Save to keep the change.';
+			from.appendChild( note );
+		}
+	} );
 }() );

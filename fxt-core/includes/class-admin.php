@@ -126,7 +126,17 @@ final class Admin {
 							}
 							if ( 'fxt_spread_tests' === $key && is_array( $value ) ) {
 								// 1.4.4 flat rows -> account type / session / instrument (saved on update).
-								$value = Repository::spread_tests( $value );
+								$value      = Repository::spread_tests( $value );
+								$unassigned = 0;
+								foreach ( $value as $account ) {
+									foreach ( $account['sessions'] as $session ) {
+										$unassigned += count( $session['images'] );
+									}
+								}
+								if ( $unassigned ) {
+									/* translators: %d: number of images */
+									echo '<div class="notice notice-warning inline fxt-unassigned-notice"><p>' . esc_html( sprintf( _n( '%d spread test image was saved for a whole session before images belonged to instruments. It is not shown on the site until you assign it to its instrument ("Assign to" under the image, in "Unassigned evidence images"), then save.', '%d spread test images were saved for whole sessions before images belonged to instruments. They are not shown on the site until you assign each one to its instrument ("Assign to" under the image, in "Unassigned evidence images"), then save.', $unassigned, 'fxt-core' ), $unassigned ) ) . '</p></div>';
+								}
 							}
 							if ( 'fxt_entities' === $key && is_array( $value ) ) {
 								// Version 1.1 "verified" checkbox -> source select.
@@ -675,6 +685,9 @@ final class Admin {
 				'replace'      => __( 'Replace', 'fxt-core' ),
 				'moveEarlier'  => __( 'Move earlier', 'fxt-core' ),
 				'moveLater'    => __( 'Move later', 'fxt-core' ),
+				'instrument'   => __( 'Instrument', 'fxt-core' ),
+				'noInstrument' => __( 'Add an instrument to this session first', 'fxt-core' ),
+				'allAssigned'  => __( 'All images are assigned. Save to keep the change.', 'fxt-core' ),
 				/* translators: 1: number of characters, 2: lower bound, 3: upper bound */
 				'count'        => __( '%1$d characters. Recommended: %2$d to %3$d.', 'fxt-core' ),
 				'countShort'   => __( 'Shorter than recommended.', 'fxt-core' ),

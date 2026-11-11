@@ -63,8 +63,11 @@ The importer:
 | **ID of an H2** (1.4.6), e.g. `#fees` | Gutenberg: select the H2 > sidebar **Heading ID** (empty: made from the heading text) | Links to that section, table of contents |
 | **Meta description** of a review (1.4.6), plain text, live counter (recommended 150 to 160 characters) | Broker Reviews > *broker* > box **Review: meta description (SEO)** | `<meta name="description">` in the page head; not shown on the page; not added when an SEO plugin manages descriptions |
 | **Trading cost calculator footnote** (1.4.7): links, bold, italic | Broker Reviews > *broker* > box **Broker data: trading cost calculator footnote** (WordPress editor) | Directly under the calculator table of that review; hidden when empty |
-| **Markdown import** (1.4.7): upload a .md file or paste Markdown, preview, append or replace the content | Broker Review or Test Evidence editor > sidebar (Post tab) > panel **Markdown import** | That post's content (`post_content`) only, as editable core blocks |
+| **Markdown import** (1.4.7): upload a .md file or paste Markdown, preview, append or replace the content | List row action **Import Markdown**, or **Broker Reviews > Markdown import** > choose the record; in the editor: Markdown button at the top right, ⋮ menu > Import Markdown…, or sidebar panel **Markdown import** | That post's content (`post_content`) only, as editable core blocks |
 | **Markdown templates** (1.4.7): `broker-review-template.md`, `test-evidence-template.md` | **Broker Reviews > Markdown import** (download buttons and the Markdown to block table), or the links in the editor panel | Starting point for new imports |
+| **Source label block with several labels** (1.4.8): per label source type (Tested, Verified at source, Broker-stated, Not tested / Not verified, Custom), name, link, new tab, text before / after, show / hide; add, remove, reorder | Gutenberg: select the **Source label** block > sidebar **Labels** | That line |
+| **Affiliate CTA button** (1.4.8): label (default "Visit {broker}"), style, position, new tab | Gutenberg: block **Affiliate CTA button** (or `[[affiliate-cta]]` in Markdown import). The link is always the broker's **Affiliate URL** (Broker data: research summary) | Anywhere in a broker review; hidden while the broker has no Affiliate URL |
+| **Evidence images per instrument** (1.4.8) | Test Evidence > *record* > box **Evidence: spread, execution and customer support tests** > Account type > Session > Instrument > **Evidence images (this instrument)**; older session images: **Unassigned evidence images** > "Assign to" | "View evidence" button in the instrument row, images in a dialog |
 | Position of the source label in a data table (above, below, in each row, between rows after row N) | Gutenberg: select the **Broker data** block (Account types, Deposits and withdrawals, Platforms) > sidebar **Source label position** | That block |
 | **Content under the author line** (default for the whole site) | **Settings > FX Trading Today > General > Content under the author line**: text (links, bold, italic and source labels allowed) + where it shows (broker reviews, test evidence, articles, pages) | Every page of the ticked types, directly below the author line at the top |
 | Content under the author line for **one page** | Editor sidebar box **"Under the author line"**: Use the site default / Custom text for this page / Hide on this page | That page only |
@@ -230,7 +233,10 @@ Upgrading from 1.3: brokers keep working without re-saving. Until a broker is sa
 
 - **Trading cost calculator footnote**: each broker review has its own footnote (box **Broker data: trading cost calculator footnote**, WordPress editor with bold, italic and links; other markup and scripts are removed on save). It is shown directly under the calculator table, before the standard calculation note, in the calculator's small text style, and wraps on phones. Empty: no container is output.
 - **Markdown import** (Broker Reviews and Test Evidence only):
-  1. In the editor sidebar (Post tab), panel **Markdown import** > **Import Markdown…**.
+  1. Open the import dialog, any of these ways:
+     - **Broker Reviews** or **Test Evidence** list: **Import Markdown** under the post name (opens the editor with the dialog).
+     - **Broker Reviews > Markdown import**: choose the record, then **Open editor and import**.
+     - In the editor: the **Markdown button (M↓)** at the top right (opens the Markdown import sidebar), the **⋮ menu > Import Markdown…**, or the panel **Markdown import** in the sidebar (Post tab).
   2. Upload a `.md` file (also `.markdown` or `.txt`, UTF-8, up to 1 MB) or paste Markdown; the file text can be edited before importing.
   3. Choose **Append to existing content** (default, added at the end) or **Replace existing content**.
   4. **Preview**: a summary (e.g. "41 blocks: 15 headings, 16 paragraphs…"), the blocks with the site styles, notes (skipped images, H1 imported as H2) and where the blocks will go.
@@ -243,6 +249,31 @@ Upgrading from 1.3: brokers keep working without re-saving. Until a broker is sa
 - Plain lists also show their bullets and numbers in the block editor (and in the import preview), as on the site.
 - Small fixes: line breaks typed in multi-line fields are stored the same way whatever the browser sends; translations are no longer loaded before WordPress is ready in the admin (notice in the PHP log).
 - Theme and plugin version 1.4.7.
+
+## 3l. Version 1.4.8 rules
+
+- **Source label block, several labels**: one block can hold several labels on the same line, e.g. "Sources: [Broker-stated] for entity and licence details, checked as described in our [Methodology]".
+  - Block: text before the labels (e.g. "Source:"), the labels, note after the labels, show / hide (site default, show, hide).
+  - Each label: **source type** (Tested, Verified at source, Broker-stated, Not tested / Not verified, or **Custom**), **label name** (empty: the name of the type from Settings > Source labels; Custom without a name shows "Source"), **link** (http, https or mailto; other addresses such as `javascript:` are ignored) with **Open in a new tab** (`target="_blank" rel="noopener noreferrer"`), **text before** and **text after** (text between two labels), **show / hide** (a hidden label and its texts are not output).
+  - Add, remove and reorder labels in the block sidebar. The source type sets the class and colour (`source-tag--tested`, `data-kind="custom"`...); the name only changes the text.
+  - Blocks saved before 1.4.8 (one label) look the same; editing one stores it as a list of labels.
+- **Affiliate CTA button** (block "Affiliate CTA button", category FX Trading Today):
+  - Insert it anywhere in a broker review. The link is always the broker's **Affiliate URL** (Broker data: research summary); the block has no address field, so changing the URL updates every button.
+  - `rel="sponsored nofollow"` (plus `noopener` and `target="_blank"` when "Open in a new tab" is on, the default).
+  - Label: the block's own text, else the broker's "Affiliate button label", else "Visit {broker}"; `{broker}` is replaced with the broker name.
+  - Theme button styles (primary or secondary), position left, center, right or full width; full width on phones.
+  - No Affiliate URL: nothing is output (no empty or "#" link); the editor shows a note. Outside a broker review the block needs a broker chosen in its settings.
+  - Markdown import: a line `[[affiliate-cta]]` or `[[affiliate-cta label="Open an account with {broker}"]]` becomes the block (Broker Reviews only).
+- **Evidence images per instrument** (Test Evidence > spread tests): Account type > Session > Instrument > **Evidence images (this instrument)**: upload or choose from the Media Library, replace, reorder (arrows), remove. Images belong to one instrument in one session and are never mixed.
+  - Images saved per session by 1.4.5 to 1.4.7 are kept as **Unassigned evidence images** (the instrument is not known): a notice lists them, they are not shown on the site, and **Assign to** under each image moves it to an instrument of the same session (then save). Rows saved by 1.4.4 (one instrument per row) give their images to that instrument automatically. No attachment is deleted.
+- **Evidence dialog** on the evidence page:
+  - The session's instrument table gets an **Evidence** column (right after Instrument, so it is in view on phones) with **View evidence (n)** for each instrument that has images. Without images there is no button; a table where no instrument has images has no Evidence column. The images under each session are gone.
+  - The dialog shows that instrument's images one at a time, with the title (instrument and session), **Previous** / **Next**, the position ("2 / 5", also announced to screen readers), the caption and "Open full size".
+  - Close with the close button, Escape or a click outside. Left / Right arrow keys and swiping on touch screens change the image. Focus moves into the dialog and back to the "View evidence" button when it closes; the page behind does not scroll.
+  - Images load only when shown (large size with srcset, plus the next one), keep their aspect ratio and fit the screen on phones.
+- **Markdown import is easier to find** (answer to "where do I import?"): "Import Markdown" under each post in the Broker Reviews / Test Evidence lists; Broker Reviews > Markdown import > choose the record > "Open editor and import"; in the editor the Markdown button at the top right, the ⋮ menu > Import Markdown…, or the "Markdown import" panel.
+- Demo: Exness has a sample Affiliate URL (example.com) and a Source label block with two labels; every review has an Affiliate CTA block (shown only where an Affiliate URL exists); Exness Vietnam evidence has six generated sample images per instrument, clearly marked "Sample data, not a real screenshot". Removing the demo deletes them.
+- Theme and plugin version 1.4.8.
 
 ## 4. Country, cache, privacy
 
@@ -371,6 +402,36 @@ Also run on this version:
 - A rebuilt regression smoke suite: every published item and archive renders without PHP errors, no horizontal scroll at 360 px on seven page types, table of contents and H2 IDs, numbered lists as `<ol>`, entity map caption, source labels, score card, summary, meta description, calculator at LOT 10 and invalid lot, country regions through the REST route, directory, compare, nested spread tests, Test Evidence index width, every demo item valid in Gutenberg, PHP log clean.
 
 The per-version suites of 1.1 to 1.4.5 were not available in this build environment; their main behaviours are covered by the smoke suite.
+
+## 6m. Acceptance checks (version 1.4.8, WordPress 6.8.3)
+
+67/67 checks:
+- **Source labels**:
+  - Demo line with two labels.
+  - Each label's own type and link; new tab with `noopener noreferrer`.
+  - Custom name keeps the type; `javascript:` link ignored; text before, between and after in order; hidden label and its texts removed.
+  - Blocks from before 1.4.8 unchanged; site-wide Hide still applies.
+  - Editor: one panel per label, add, reorder, remove, edit, old block converted on edit, valid after reload, result on the site.
+- **Affiliate CTA**:
+  - Link from the broker's Affiliate URL with `rel="sponsored nofollow"`; theme button style.
+  - No URL: no button and no placeholder link; changing the URL updates every button.
+  - Default label "Visit {broker}"; options (label with `{broker}`, secondary, full width, same tab); nothing outside a broker review.
+  - Editor: valid blocks, controls without an address field, preview.
+  - Markdown `[[affiliate-cta]]` (Broker Reviews only); full width without horizontal scroll at 360 px.
+- **Evidence**:
+  - No session gallery and no image loaded with the page; Evidence column after Instrument with the right counts; no column when no instrument has images.
+  - Dialog per instrument and session: title, 1 / 2, Previous / Next disabled at the ends, position announced, arrow keys, large image with its aspect ratio.
+  - Escape, close button and click outside close it; focus inside, then back on the button; page scroll locked, then restored.
+  - Images never mixed between instruments or sessions; 768 px and 390 px (button in view, dialog fits, swipe, no horizontal scroll).
+- **Admin data**:
+  - Session images from earlier versions not shown and not auto-assigned; notice and Unassigned gallery.
+  - Gallery per instrument; "Assign to" lists only that session's instruments and moves the image.
+  - Reorder; saved per instrument with order kept; attachments kept; 1.4.4 rows give images to their instrument.
+  - Add from the Media Library; button shown on the site.
+- **Markdown import entry points**: list row action opening the dialog, header button, ⋮ menu item, admin page record picker.
+- **Demo and version**: six labelled sample images not duplicated on re-import, demo blocks, version 1.4.8.
+
+Also on this version: 1.4.7 suite 58/58, 1.4.6 suite 51/51, 1.4.6 additions 21/21, regression smoke suite 13/13 (every demo item valid in Gutenberg, PHP log clean). Checks of earlier suites that read UI texts changed on purpose in 1.4.8 (Source label sidebar, Markdown import page buttons, the demo "Sources:" line) were updated.
 
 ## 7. Known differences from the prototype
 

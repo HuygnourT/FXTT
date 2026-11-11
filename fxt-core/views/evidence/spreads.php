@@ -4,8 +4,11 @@
  *
  *   Account type
  *     Session (date, description)
- *       Instruments and spread results
- *       Evidence images of this session
+ *       Instruments and spread results, column "Evidence" (1.4.8, right
+ *       after the instrument): a
+ *       "View evidence" button per instrument with images, opening that
+ *       instrument's images (this session only) one at a time in a dialog
+ *       (assets/js/evidence-gallery.js). Images load only when opened.
  *
  * Empty values, columns, sessions and account types are not shown. The
  * block prints nothing when there are no spread tests.
@@ -32,6 +35,39 @@ $columns = array(
 	'metrics'    => __( 'Other measurements', 'fxt-core' ),
 );
 $mono    = array( 'min', 'avg', 'max', 'samples' );
+
+/**
+ * Images of one instrument for the evidence dialog (loaded only when opened).
+ *
+ * @param int[]  $ids   Attachment IDs.
+ * @param string $title Dialog title, e.g. "EUR/USD, London open".
+ * @return array[]
+ */
+$fxt_gallery = static function ( array $ids, $title ) {
+	$out = array();
+	foreach ( $ids as $n => $id ) {
+		if ( ! wp_attachment_is_image( $id ) ) {
+			continue;
+		}
+		$large = wp_get_attachment_image_src( $id, 'large' );
+		$full  = wp_get_attachment_image_src( $id, 'full' );
+		if ( ! $large || ! $full ) {
+			continue;
+		}
+		$alt   = trim( (string) get_post_meta( $id, '_wp_attachment_image_alt', true ) );
+		$out[] = array(
+			'src'     => $large[0],
+			'w'       => (int) $large[1],
+			'h'       => (int) $large[2],
+			'srcset'  => (string) wp_get_attachment_image_srcset( $id, 'large' ),
+			'full'    => $full[0],
+			'alt'     => '' !== $alt ? $alt : sprintf( /* translators: 1: instrument and session, 2: image number */ __( 'Evidence for %1$s, image %2$d', 'fxt-core' ), $title, count( $out ) + 1 ),
+			'caption' => trim( wp_strip_all_tags( (string) wp_get_attachment_caption( $id ) ) ),
+		);
+	}
+	return $out;
+};
+$fxt_has_gallery = false;
 $single  = 1 === count( $accounts );
 ?>
 <div class="spread-tests">
@@ -64,6 +100,27 @@ $single  = 1 === count( $accounts );
 						}
 					}
 				}
+				// Evidence images of each instrument (this session only).
+				$galleries = array();
+				foreach ( $session['instruments'] as $i_index => $item ) {
+					$name                  = '' !== $item['instrument'] ? $item['instrument'] : sprintf( /* translators: %d: instrument number */ __( 'Instrument %d', 'fxt-core' ), $i_index + 1 );
+					$title                 = $name . ', ' . $label;
+					$galleries[ $i_index ] = array(
+						'title'  => $title,
+						'images' => $fxt_gallery( isset( $item['images'] ) ? (array) $item['images'] : array(), $title ),
+					);
+				}
+				$with_images = array_filter(
+					$galleries,
+					static function ( $g ) {
+						return (bool) $g['images'];
+					}
+				);
+				if ( $with_images ) {
+					// Right after the instrument, so the button is in view on every screen width.
+					$used            = array_slice( $used, 0, 1, true ) + array( 'evidence' => __( 'Evidence', 'fxt-core' ) ) + array_slice( $used, 1, null, true );
+					$fxt_has_gallery = true;
+				}
 				?>
 				<div class="spread-session card">
 					<div class="spread-session__head">
@@ -80,16 +137,32 @@ $single  = 1 === count( $accounts );
 						<div class="table-scroll">
 							<table class="data-table data-table--spreads">
 								<thead><tr>
-									<?php foreach ( $used as $heading ) : ?>
-										<th scope="col"><?php echo esc_html( $heading ); ?></th>
+									<?php foreach ( $used as $key => $heading ) : ?>
+										<th scope="col"<?php echo 'evidence' === $key ? ' class="spread-evidence"' : ''; ?>><?php echo esc_html( $heading ); ?></th>
 									<?php endforeach; ?>
 								</tr></thead>
 								<tbody>
-								<?php foreach ( $session['instruments'] as $item ) : ?>
+								<?php foreach ( $session['instruments'] as $i_index => $item ) : ?>
 									<tr>
 										<?php foreach ( array_keys( $used ) as $key ) : ?>
-											<?php if ( 'instrument' === $key ) : ?>
-												<th scope="row"><?php echo esc_html( $item['instrument'] ); ?></th>
+											<?php if ( 'evidence' === $key ) : ?>
+												<td class="spread-evidence">
+													<?php
+													$gallery = $galleries[ $i_index ];
+													if ( $gallery['images'] ) :
+														?>
+														<button type="button" class="btn btn--secondary btn--sm evidence-gallery__open" aria-haspopup="dialog" data-fxt-evidence-gallery="<?php echo esc_attr( wp_json_encode( $gallery ) ); ?>">
+															<?php echo fxt_core_icon( 'image', 'icon--sm' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+															<span><?php esc_html_e( 'View evidence', 'fxt-core' ); ?></span>
+															<span class="evidence-gallery__n">(<?php echo (int) count( $gallery['images'] ); ?>)</span>
+															<span class="u-visually-hidden"><?php echo esc_html( sprintf( /* translators: 1: number of images, 2: instrument and session */ _n( '%1$d image for %2$s', '%1$d images for %2$s', count( $gallery['images'] ), 'fxt-core' ), count( $gallery['images'] ), $gallery['title'] ) ); ?></span>
+														</button>
+													<?php endif; ?>
+												</td>
+											<?php elseif ( 'instrument' === $key ) : ?>
+												<th scope="row">
+													<?php echo esc_html( $item['instrument'] ); ?>
+												</th>
 											<?php elseif ( 'status' === $key ) : ?>
 												<td><?php echo '' !== $item['status'] ? fxt_core_badge( 'test', $item['status'] ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 											<?php elseif ( 'metrics' === $key ) : ?>
@@ -114,26 +187,13 @@ $single  = 1 === count( $accounts );
 						</div>
 					<?php endif; ?>
 
-					<?php
-					$images = array_values( array_filter( $session['images'], 'wp_attachment_is_image' ) );
-					if ( $images ) :
-						?>
-						<div class="spread-session__images">
-							<p class="u-label"><?php esc_html_e( 'Evidence images', 'fxt-core' ); ?></p>
-							<ul class="evidence-detail__images">
-								<?php foreach ( $images as $image ) : ?>
-									<li>
-										<a href="<?php echo esc_url( (string) wp_get_attachment_image_url( $image, 'full' ) ); ?>" target="_blank" rel="noopener">
-											<?php echo wp_get_attachment_image( $image, 'medium', false, array( 'loading' => 'lazy', 'alt' => sprintf( /* translators: %s: session */ __( 'Spread test evidence: %s', 'fxt-core' ), $label ) ) ); ?>
-											<span class="u-visually-hidden"><?php esc_html_e( '(opens the full image in a new tab)', 'fxt-core' ); ?></span>
-										</a>
-									</li>
-								<?php endforeach; ?>
-							</ul>
-						</div>
-					<?php endif; ?>
+					<?php // Session-level images saved before 1.4.8 are not shown: their instrument is not known (assign them in the admin). ?>
 				</div>
 			<?php endforeach; ?>
 		</section>
 	<?php endforeach; ?>
 </div>
+<?php
+if ( $fxt_has_gallery ) {
+	wp_enqueue_script( 'fxt-core-evidence-gallery' );
+}

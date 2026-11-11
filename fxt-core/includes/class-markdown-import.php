@@ -38,6 +38,31 @@ class Markdown_Import {
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'editor_assets' ) );
 		add_action( 'admin_post_fxt_markdown_template', array( __CLASS__, 'download_template' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+		add_filter( 'post_row_actions', array( __CLASS__, 'row_action' ), 10, 2 );
+	}
+
+	/**
+	 * Editor link that opens the import dialog straight away.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return string
+	 */
+	public static function import_url( $post_id ) {
+		return add_query_arg( 'fxt-md-import', 1, get_edit_post_link( $post_id, 'raw' ) );
+	}
+
+	/**
+	 * Row action "Import Markdown" on the Broker Reviews and Test Evidence lists.
+	 *
+	 * @param array    $actions Actions.
+	 * @param \WP_Post $post    Post.
+	 * @return array
+	 */
+	public static function row_action( $actions, $post ) {
+		if ( in_array( $post->post_type, self::post_types(), true ) && current_user_can( 'edit_post', $post->ID ) && 'trash' !== $post->post_status ) {
+			$actions['fxt_md_import'] = '<a href="' . esc_url( self::import_url( $post->ID ) ) . '">' . esc_html__( 'Import Markdown', 'fxt-core' ) . '</a>';
+		}
+		return $actions;
 	}
 
 	/**
@@ -152,7 +177,7 @@ class Markdown_Import {
 		if ( '' === trim( $markdown ) ) {
 			return new \WP_Error( 'fxt_markdown_empty', __( 'There is no Markdown to import.', 'fxt-core' ), array( 'status' => 400 ) );
 		}
-		$converter = new Markdown( array( __CLASS__, 'check_image' ) );
+		$converter = new Markdown( array( __CLASS__, 'check_image' ), Content_Types::BROKER === get_post_type( (int) $request['post_id'] ) );
 		$result    = $converter->convert( $markdown );
 		$counts    = array();
 		self::count( $result['blocks'], $counts );
@@ -242,7 +267,7 @@ class Markdown_Import {
 		wp_enqueue_script(
 			'fxt-core-markdown-import',
 			FXT_CORE_URL . 'assets/js/markdown-import.js',
-			array( 'wp-plugins', 'wp-element', 'wp-components', 'wp-data', 'wp-blocks', 'wp-block-editor', 'wp-api-fetch', 'wp-i18n', 'wp-notices', 'wp-editor', 'wp-edit-post' ),
+			array( 'wp-plugins', 'wp-element', 'wp-components', 'wp-data', 'wp-blocks', 'wp-block-editor', 'wp-api-fetch', 'wp-i18n', 'wp-notices', 'wp-editor', 'wp-edit-post', 'wp-dom-ready' ),
 			FXT_CORE_VERSION,
 			true
 		);
@@ -301,9 +326,26 @@ class Markdown_Import {
 			array( '---', __( 'Separator', 'fxt-core' ) ),
 			array( '![alt text](https://.../image.jpg "Caption")', __( 'Image (on its own line; only valid, reachable images)', 'fxt-core' ) ),
 			array( '```', __( 'Code', 'fxt-core' ) ),
+			array( '[[affiliate-cta]] or [[affiliate-cta label="Open an account"]]', __( 'Affiliate CTA button (Broker Reviews; the link is the broker\'s Affiliate URL)', 'fxt-core' ) ),
 		);
 		echo '<div class="wrap"><h1>' . esc_html__( 'Markdown import', 'fxt-core' ) . '</h1>';
-		echo '<p>' . esc_html__( 'Open a Broker Review or a Test Evidence record, then in the editor sidebar (Post tab) use the "Markdown import" panel: upload a .md file or paste Markdown, check the preview, then append it to the content or replace the content. The result is ordinary blocks you can edit. Only the post content changes: Broker data, Test Evidence data and other settings are not touched.', 'fxt-core' ) . '</p>';
+		echo '<p>' . esc_html__( 'Markdown is imported inside the editor of a Broker Review or a Test Evidence record: upload a .md file or paste Markdown, check the preview, then append it to the content or replace the content. The result is ordinary blocks you can edit. Only the post content changes: Broker data, Test Evidence data and other settings are not touched.', 'fxt-core' ) . '</p>';
+		echo '<h2>' . esc_html__( 'Import into a post', 'fxt-core' ) . '</h2>';
+		echo '<ol><li>' . esc_html__( 'Choose the Broker Review or Test Evidence record below (or use "Import Markdown" under its name in the Broker Reviews / Test Evidence list).', 'fxt-core' ) . '</li><li>' . esc_html__( 'The editor opens with the "Import Markdown" dialog. In the editor you can also open it with the Markdown button at the top right, in the ⋮ menu (Import Markdown…), or in the sidebar panel "Markdown import".', 'fxt-core' ) . '</li><li>' . esc_html__( 'Upload the .md file or paste the Markdown, choose Append or Replace, check the preview, import, then save (Update).', 'fxt-core' ) . '</li></ol>';
+		echo '<form method="get" action="' . esc_url( admin_url( 'admin.php' ) ) . '" class="fxt-md-pick">';
+		foreach ( self::post_types() as $type ) {
+			$object = get_post_type_object( $type );
+			$posts  = get_posts( array( 'post_type' => $type, 'post_status' => array( 'publish', 'draft', 'pending', 'future', 'private' ), 'numberposts' => 200, 'orderby' => 'title', 'order' => 'ASC' ) );
+			$posts  = array_filter( $posts, static function ( $p ) { return current_user_can( 'edit_post', $p->ID ); } );
+			echo '<p><label for="fxt-md-pick-' . esc_attr( $type ) . '"><strong>' . esc_html( $object ? $object->labels->singular_name : $type ) . '</strong></label><br>';
+			echo '<select id="fxt-md-pick-' . esc_attr( $type ) . '" data-fxt-md-pick><option value="">' . esc_html__( 'Choose…', 'fxt-core' ) . '</option>';
+			foreach ( $posts as $item ) {
+				echo '<option value="' . esc_url( self::import_url( $item->ID ) ) . '">' . esc_html( get_the_title( $item ) . ( 'publish' !== $item->post_status ? ' (' . $item->post_status . ')' : '' ) ) . '</option>';
+			}
+			echo '</select> <a class="button button-primary" data-fxt-md-go href="#" aria-disabled="true">' . esc_html__( 'Open editor and import', 'fxt-core' ) . '</a></p>';
+		}
+		echo '</form>';
+		echo '<script>document.querySelectorAll("[data-fxt-md-pick]").forEach(function(s){var b=s.parentNode.querySelector("[data-fxt-md-go]");function u(){b.href=s.value||"#";b.setAttribute("aria-disabled",s.value?"false":"true");}s.addEventListener("change",u);b.addEventListener("click",function(e){if(!s.value){e.preventDefault();s.focus();}});u();});</script>';
 		echo '<h2>' . esc_html__( 'Templates', 'fxt-core' ) . '</h2><p>';
 		foreach ( self::templates() as $key => $template ) {
 			printf( '<a class="button" href="%1$s">%2$s</a> ', esc_url( self::template_url( $key ) ), esc_html( sprintf( /* translators: %s: file name */ __( 'Download %s', 'fxt-core' ), $template['file'] ) ) );

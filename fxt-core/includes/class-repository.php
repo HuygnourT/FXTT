@@ -1297,13 +1297,17 @@ final class Repository {
 	 * 1.4.4 stored one flat row per measurement (date, instrument, account,
 	 * session, spreads, images...). Those rows are read as: one account type
 	 * per account name (in order of first appearance), one session per
-	 * account + session text + date, one instrument per row; the session
-	 * keeps every image and description of its rows. The new structure is
-	 * written when the evidence is saved; images are never removed.
+	 * account + session text + date, one instrument per row (with that row's
+	 * images, 1.4.8); the session keeps the descriptions of its rows. The new
+	 * structure is written when the evidence is saved; images are never removed.
+	 *
+	 * 1.4.8: images belong to an instrument. Session "images" saved by
+	 * 1.4.5 to 1.4.7 are kept as unassigned (the instrument is not known):
+	 * shown in the admin for manual assignment, not on the site.
 	 * Empty instruments, sessions and account types are dropped.
 	 *
 	 * @param mixed $raw Saved meta.
-	 * @return array[] [ { account, note, sessions: [ { session, date, description, images: int[], instruments: [ { instrument, min, avg, max, samples, status, metrics: string[] } ] } ] } ]
+	 * @return array[] [ { account, note, sessions: [ { session, date, description, images: int[] (unassigned), instruments: [ { instrument, min, avg, max, samples, status, metrics: string[], images: int[] } ] } ] } ]
 	 */
 	public static function spread_tests( $raw ) {
 		$rows = array_values( array_filter( is_array( $raw ) ? $raw : array(), 'is_array' ) );
@@ -1315,6 +1319,8 @@ final class Repository {
 			foreach ( array( 'instrument', 'min', 'avg', 'max', 'samples', 'status' ) as $key ) {
 				$out[ $key ] = $text( $row, $key );
 			}
+			// 1.4.8: evidence images of this instrument in this session.
+			$out['images'] = array_values( array_unique( array_filter( array_map( 'absint', isset( $row['images'] ) ? (array) $row['images'] : array() ) ) ) );
 			return $out;
 		};
 		$has = static function ( array $values ) {
@@ -1352,12 +1358,7 @@ final class Repository {
 				if ( '' !== $desc && false === strpos( $session['description'], $desc ) ) {
 					$session['description'] = trim( $session['description'] . "\n\n" . $desc );
 				}
-				foreach ( isset( $row['images'] ) ? (array) $row['images'] : array() as $image ) {
-					$image = absint( $image );
-					if ( $image && ! in_array( $image, $session['images'], true ) ) {
-						$session['images'][] = $image;
-					}
-				}
+				// A 1.4.4 row was one instrument: its images belong to that instrument.
 				$item = $instrument( $row );
 				if ( $has( $item ) ) {
 					$session['instruments'][] = $item;

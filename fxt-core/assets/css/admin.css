@@ -193,3 +193,9 @@
 .fxt-counter--good { color: #00703c; }
 .fxt-counter--short, .fxt-counter--long { color: #996800; }
 .fxt-field--richtext .wp-editor-wrap { margin-top: 4px; }
+
+/* 1.4.8: unassigned evidence images (assign each one to its instrument). */
+.fxt-gallery--unassigned { padding: 8px; border: 1px dashed #c3c4c7; background: #fcf9e8; }
+.fxt-gallery--unassigned [data-fxt-gallery-add] { display: none; }
+.fxt-gallery__assign select { max-width: 100%; margin: 4px 0; font-size: 12px; min-height: 26px; }
+.fxt-unassigned-notice { margin: 0 0 12px; }

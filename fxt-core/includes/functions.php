@@ -430,7 +430,7 @@ function fxt_core_label_markup( $html ) {
 		static function ( $m ) {
 			$attrs = $m[1];
 			$kind  = preg_match( '/\bdata-kind="([a-z]+)"/', $attrs, $k ) ? $k[1] : 'stated';
-			$kinds = Schema::label_kinds();
+			$kinds = Schema::label_kinds() + array( 'custom' => '' ); // 1.4.8: custom source type.
 			$kind  = isset( $kinds[ $kind ] ) ? $kind : 'stated';
 			$class = 'source-tag source-tag--' . ( 'unverified' === $kind ? 'none' : $kind ) . ' fxt-source-label';
 			$href  = preg_match( '/\bhref="([^"]*)"/', $attrs, $h ) ? html_entity_decode( $h[1] ) : '';
@@ -438,7 +438,7 @@ function fxt_core_label_markup( $html ) {
 				return '<span class="' . esc_attr( $class ) . '" data-kind="' . esc_attr( $kind ) . '">' . $m[2] . '</span>';
 			}
 			$blank = (bool) preg_match( '/\btarget="_blank"/', $attrs );
-			return '<a class="' . esc_attr( $class ) . '" data-kind="' . esc_attr( $kind ) . '" href="' . esc_url( $href ) . '"' . ( $blank ? ' target="_blank" rel="noopener"' : '' ) . '>' . $m[2] . '</a>';
+			return '<a class="' . esc_attr( $class ) . '" data-kind="' . esc_attr( $kind ) . '" href="' . esc_url( $href ) . '"' . ( $blank ? ' target="_blank" rel="noopener noreferrer"' : '' ) . '>' . $m[2] . '</a>';
 		},
 		$html
 	);
@@ -714,4 +714,78 @@ function fxt_core_cost_footnote( $post_id ) {
 		return '';
 	}
 	return fxt_core_label_markup( wpautop( $html ) );
+}
+
+/**
+ * Labels of a Source label block (1.4.8), normalized. Blocks saved before
+ * 1.4.8 keep one label in kind / text / url / newTab.
+ *
+ * @param array $attributes Block attributes.
+ * @return array[] Each: kind, name, url, newTab, before, after, hidden.
+ */
+function fxt_core_source_block_labels( array $attributes ) {
+	$kinds  = array_merge( array_keys( Schema::label_kinds() ), array( 'custom' ) );
+	$labels = isset( $attributes['labels'] ) && is_array( $attributes['labels'] ) ? $attributes['labels'] : array();
+	if ( ! $labels ) {
+		$labels = array(
+			array(
+				'kind'   => isset( $attributes['kind'] ) ? $attributes['kind'] : 'tested',
+				'name'   => isset( $attributes['text'] ) ? $attributes['text'] : '',
+				'url'    => isset( $attributes['url'] ) ? $attributes['url'] : '',
+				'newTab' => ! empty( $attributes['newTab'] ),
+			),
+		);
+	}
+	$out = array();
+	foreach ( $labels as $label ) {
+		if ( ! is_array( $label ) ) {
+			continue;
+		}
+		$get   = static function ( $key ) use ( $label ) {
+			return isset( $label[ $key ] ) && is_scalar( $label[ $key ] ) ? trim( wp_strip_all_tags( (string) $label[ $key ] ) ) : '';
+		};
+		$kind  = in_array( $get( 'kind' ), $kinds, true ) ? $get( 'kind' ) : 'tested';
+		$out[] = array(
+			'kind'   => $kind,
+			'name'   => $get( 'name' ),
+			'url'    => $get( 'url' ),
+			'newTab' => ! empty( $label['newTab'] ),
+			'before' => $get( 'before' ),
+			'after'  => $get( 'after' ),
+			'hidden' => ! empty( $label['hidden'] ),
+		);
+	}
+	return $out;
+}
+
+/**
+ * One label of a Source label block: a <span>, or an <a> when it has a link.
+ * The class and data-kind come from the source type, never from the name.
+ *
+ * @param array $label See fxt_core_source_block_labels().
+ * @return string HTML.
+ */
+function fxt_core_source_block_tag( array $label ) {
+	$kind = $label['kind'];
+	if ( '' !== $label['name'] ) {
+		$text = $label['name'];
+	} elseif ( 'custom' === $kind ) {
+		$text = __( 'Source', 'fxt-core' );
+	} else {
+		$text = Repository::source_name( $kind );
+	}
+	$class = 'source-tag source-tag--' . ( 'unverified' === $kind ? 'none' : $kind ) . ' fxt-source-label';
+	$url   = '' !== $label['url'] ? esc_url( $label['url'], array( 'http', 'https', 'mailto' ) ) : '';
+	if ( '' === $url ) {
+		return sprintf( '<span class="%1$s" data-kind="%2$s">%3$s</span>', esc_attr( $class ), esc_attr( $kind ), esc_html( $text ) );
+	}
+	return sprintf(
+		'<a class="%1$s" data-kind="%2$s" href="%3$s"%4$s>%5$s%6$s</a>',
+		esc_attr( $class ),
+		esc_attr( $kind ),
+		$url,
+		$label['newTab'] ? ' target="_blank" rel="noopener noreferrer"' : '',
+		esc_html( $text ),
+		$label['newTab'] ? '<span class="u-visually-hidden"> ' . esc_html__( '(opens in a new tab)', 'fxt-core' ) . '</span>' : ''
+	);
 }

@@ -27,9 +27,6 @@
 	const Panel = ( wp.editor && wp.editor.PluginDocumentSettingPanel ) || ( wp.editPost && wp.editPost.PluginDocumentSettingPanel );
 	const cfg = window.fxtMarkdownImport || { templates: [], maxBytes: 1048576 };
 
-	if ( ! Panel ) {
-		return;
-	}
 
 	const NAMES = {
 		'core/heading': [ 'heading', 'headings' ],
@@ -40,6 +37,7 @@
 		'core/separator': [ 'separator', 'separators' ],
 		'core/image': [ 'image', 'images' ],
 		'core/code': [ 'code block', 'code blocks' ],
+		'fxt/affiliate-cta': [ 'affiliate button', 'affiliate buttons' ],
 	};
 
 	// Tree from the server -> editor blocks (unknown block types are skipped).
@@ -254,23 +252,76 @@
 		);
 	}
 
-	function MarkdownPanel() {
-		const [ open, setOpen ] = useState( false );
+	// Several ways in, one dialog: header button (Markdown icon), the ⋮ menu,
+	// the sidebar panel, and "?fxt-md-import=1" in the editor URL (row action
+	// "Import Markdown" on the Broker Reviews / Test Evidence lists).
+	const OPEN = 'fxt-md-open';
+	const openDialog = () => window.dispatchEvent( new window.CustomEvent( OPEN ) );
+	const { useEffect } = wp.element;
+	const MoreItem = ( wp.editor && wp.editor.PluginMoreMenuItem ) || ( wp.editPost && wp.editPost.PluginMoreMenuItem );
+	const Sidebar = ( wp.editor && wp.editor.PluginSidebar ) || ( wp.editPost && wp.editPost.PluginSidebar );
+	const SidebarItem = ( wp.editor && wp.editor.PluginSidebarMoreMenuItem ) || ( wp.editPost && wp.editPost.PluginSidebarMoreMenuItem );
+	const ICON = el(
+		'svg',
+		{ xmlns: 'http://www.w3.org/2000/svg', viewBox: '0 0 24 24', width: 24, height: 24, 'aria-hidden': true },
+		el( 'path', { d: 'M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11Zm1.5 0v11h15v-11h-15ZM6 15.5v-7h1.6l1.9 2.4 1.9-2.4H13v7h-1.6v-4.6l-1.9 2.4-1.9-2.4v4.6H6Zm10.2 0-2.7-3.2h1.8V8.5h1.8v3.8h1.8l-2.7 3.2Z' } )
+	);
+
+	function Body() {
 		return el(
-			Panel,
-			{ name: 'fxt-markdown-import', title: __( 'Markdown import', 'fxt-core' ), className: 'fxt-md-panel' },
+			Fragment,
+			null,
 			el( 'p', null, __( 'Add content from a Markdown (.md) file as editable blocks.', 'fxt-core' ) ),
-			el( Button, { variant: 'secondary', onClick: () => setOpen( true ) }, __( 'Import Markdown…', 'fxt-core' ) ),
+			el( Button, { variant: 'primary', onClick: openDialog, className: 'fxt-md-open' }, __( 'Import Markdown…', 'fxt-core' ) ),
 			el( 'p', { className: 'fxt-md-panel__label' }, __( 'Templates', 'fxt-core' ) ),
 			el(
 				'ul',
 				{ className: 'fxt-md-panel__templates' },
 				( cfg.templates || [] ).map( ( t ) => el( 'li', { key: t.key }, el( 'a', { href: t.url, download: t.file }, t.file ) ) )
 			),
-			cfg.helpUrl ? el( 'p', null, el( 'a', { href: cfg.helpUrl }, __( 'How Markdown becomes blocks', 'fxt-core' ) ) ) : null,
+			cfg.helpUrl ? el( 'p', null, el( 'a', { href: cfg.helpUrl }, __( 'How Markdown becomes blocks', 'fxt-core' ) ) ) : null
+		);
+	}
+
+	function MarkdownImport() {
+		const [ open, setOpen ] = useState( false );
+		useEffect( () => {
+			const show = () => setOpen( true );
+			window.addEventListener( OPEN, show );
+			// Opened from the list row action: open once the editor is ready.
+			if ( /[?&]fxt-md-import=1(&|$)/.test( window.location.search ) ) {
+				const wait = window.setInterval( () => {
+					if ( wp.data.select( 'core/editor' ).getCurrentPostId() && wp.data.select( 'core/block-editor' ).getBlocks().length ) {
+						window.clearInterval( wait );
+						setOpen( true );
+					}
+				}, 300 );
+				window.setTimeout( () => window.clearInterval( wait ), 20000 );
+			}
+			return () => window.removeEventListener( OPEN, show );
+		}, [] );
+		return el(
+			Fragment,
+			null,
+			Panel ? el( Panel, { name: 'fxt-markdown-import', title: __( 'Markdown import', 'fxt-core' ), className: 'fxt-md-panel' }, el( Body ) ) : null,
+			Sidebar ? el( Sidebar, { name: 'fxt-markdown-import-sidebar', title: __( 'Markdown import', 'fxt-core' ), icon: ICON, className: 'fxt-md-sidebar' }, el( 'div', { className: 'fxt-md-sidebar__body' }, el( Body ) ) ) : null,
+			SidebarItem ? el( SidebarItem, { target: 'fxt-markdown-import-sidebar', icon: ICON }, __( 'Markdown import', 'fxt-core' ) ) : null,
+			MoreItem ? el( MoreItem, { icon: ICON, onClick: openDialog }, __( 'Import Markdown…', 'fxt-core' ) ) : null,
 			open ? el( ImportDialog, { onClose: () => setOpen( false ) } ) : null
 		);
 	}
 
-	wp.plugins.registerPlugin( 'fxt-markdown-import', { render: MarkdownPanel, icon: 'media-text' } );
+	wp.plugins.registerPlugin( 'fxt-markdown-import', { render: MarkdownImport, icon: ICON } );
+
+	// Show the Markdown button in the editor header (pinned) the first time.
+	wp.domReady && wp.domReady( () => {
+		try {
+			const key = 'fxt-md-pinned';
+			if ( ! window.localStorage.getItem( key ) && wp.data.dispatch( 'core/interface' ) ) {
+				wp.data.dispatch( 'core/interface' ).pinItem( 'core', 'fxt-markdown-import/fxt-markdown-import-sidebar' );
+				wp.data.dispatch( 'core/interface' ).pinItem( 'core/edit-post', 'fxt-markdown-import/fxt-markdown-import-sidebar' );
+				window.localStorage.setItem( key, '1' );
+			}
+		} catch ( e ) {}
+	} );
 }( window.wp ) );

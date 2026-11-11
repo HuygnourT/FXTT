@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "fxt/affiliate-cta",
+	"title": "Affiliate CTA button",
+	"category": "fxt",
+	"icon": "external",
+	"description": "Button to the broker's affiliate link (Broker data: research summary > Affiliate URL), with rel=\"sponsored nofollow\". Nothing is shown while the broker has no affiliate URL.",
+	"keywords": [ "affiliate", "cta", "button", "open account" ],
+	"textdomain": "fxt-core",
+	"usesContext": [ "postId", "postType" ],
+	"attributes": {
+		"label": { "type": "string", "default": "" },
+		"brokerId": { "type": "number", "default": 0 },
+		"style": { "type": "string", "enum": [ "primary", "secondary" ], "default": "primary" },
+		"justify": { "type": "string", "enum": [ "left", "center", "right", "full" ], "default": "left" },
+		"newTab": { "type": "boolean", "default": true }
+	},
+	"supports": { "html": false, "reusable": true },
+	"editorScript": "fxt-core-blocks",
+	"render": "file:./render.php"
+}

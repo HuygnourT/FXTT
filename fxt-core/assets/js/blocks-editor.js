@@ -144,6 +144,20 @@
 		} );
 	}
 
+	// Broker by ID; empty = the broker of the review being edited.
+	function BrokerIdSelect( props ) {
+		const brokers = useBrokers();
+		if ( ! brokers ) {
+			return el( Spinner );
+		}
+		return el( SelectControl, {
+			label: props.label,
+			value: props.value ? String( props.value ) : '',
+			options: [ { value: '', label: __( 'This review (default)', 'fxt-core' ) } ].concat( brokers.map( ( b ) => ( { value: String( b.id ), label: titleOf( b ) } ) ) ),
+			onChange: props.onChange,
+		} );
+	}
+
 	/* ---------------------------------------------------------------------
 	 * Sidebar controls per block
 	 * ------------------------------------------------------------------ */
@@ -344,30 +358,97 @@
 			el( ToggleControl, { key: 'sp', label: __( 'Show tests still in progress', 'fxt-core' ), checked: !! a.showPending, onChange: ( v ) => set( { showPending: v } ) } ),
 			a.showPending ? el( TextControl, { key: 'pd', label: __( 'Heading: tests in progress', 'fxt-core' ), placeholder: __( 'Testing in progress', 'fxt-core' ), value: a.pendingTitle, onChange: ( v ) => set( { pendingTitle: v } ) } ) : null,
 		],
-		'fxt/source-label': ( a, set ) => [
+		'fxt/source-label': ( a, set ) => {
+			// 1.4.8: several labels. Blocks saved before keep one label in
+			// kind / text / url / newTab; the first change stores them as labels.
+			const labels = ( a.labels && a.labels.length )
+				? a.labels
+				: [ { kind: a.kind || 'tested', name: a.text || '', url: a.url || '', newTab: !! a.newTab, before: '', after: '', hidden: false } ];
+			const kinds = Object.keys( config.labelKinds || {} ).map( ( k ) => ( { value: k, label: config.labelKinds[ k ] } ) ).concat( [ { value: 'custom', label: __( 'Custom', 'fxt-core' ) } ] );
+			const save = ( next ) => set( { labels: next, kind: next[ 0 ] ? next[ 0 ].kind : 'tested', text: '', url: '', newTab: false } );
+			const change = ( n, patch ) => save( labels.map( ( l, i ) => ( i === n ? Object.assign( {}, l, patch ) : l ) ) );
+			const move = ( n, by ) => {
+				const next = labels.slice();
+				const [ item ] = next.splice( n, 1 );
+				next.splice( n + by, 0, item );
+				save( next );
+			};
+			return [
+				el( SelectControl, {
+					key: 'v',
+					label: __( 'Show on the site', 'fxt-core' ),
+					value: a.visibility || '',
+					options: [
+						{ value: '', label: __( 'Site default (Settings > Source labels)', 'fxt-core' ) },
+						{ value: 'show', label: __( 'Show', 'fxt-core' ) },
+						{ value: 'hide', label: __( 'Hide', 'fxt-core' ) },
+					],
+					onChange: ( v ) => set( { visibility: v } ),
+				} ),
+				el( TextControl, { key: 'p', label: __( 'Text before the labels', 'fxt-core' ), help: __( 'e.g. "Source:". Empty: none.', 'fxt-core' ), value: a.prefix, onChange: ( v ) => set( { prefix: v } ) } ),
+				el( 'p', { key: 'lh', className: 'fxt-labels__heading' }, __( 'Labels', 'fxt-core' ) ),
+				labels.map( ( l, n ) => el(
+					'div',
+					{ key: 'l' + n, className: 'fxt-labels__item' + ( l.hidden ? ' is-hidden' : '' ) },
+					el( 'p', { className: 'fxt-labels__title' }, __( 'Label', 'fxt-core' ) + ' ' + ( n + 1 ) + ( l.hidden ? ' (' + __( 'hidden', 'fxt-core' ) + ')' : '' ) ),
+					el( TextControl, { label: __( 'Text before this label', 'fxt-core' ), help: n ? __( 'Shown between the previous label and this one, e.g. "and".', 'fxt-core' ) : null, value: l.before || '', onChange: ( v ) => change( n, { before: v } ) } ),
+					el( SelectControl, { label: __( 'Source type', 'fxt-core' ), value: l.kind || 'tested', options: kinds, onChange: ( v ) => change( n, { kind: v } ) } ),
+					el( TextControl, {
+						label: __( 'Label name', 'fxt-core' ),
+						help: 'custom' === l.kind
+							? __( 'Name shown in the label, e.g. "Regulator register".', 'fxt-core' )
+							: __( 'Optional. Only the shown text changes; the source type and its colour stay. Empty: the name of the source type.', 'fxt-core' ),
+						placeholder: 'custom' === l.kind ? '' : ( config.labelKinds || {} )[ l.kind || 'tested' ],
+						value: l.name || '',
+						onChange: ( v ) => change( n, { name: v } ),
+					} ),
+					el( TextControl, { type: 'url', label: __( 'Link (optional)', 'fxt-core' ), help: __( 'http(s) address the label opens.', 'fxt-core' ), value: l.url || '', onChange: ( v ) => change( n, { url: v } ) } ),
+					l.url ? el( ToggleControl, { label: __( 'Open in a new tab', 'fxt-core' ), checked: !! l.newTab, onChange: ( v ) => change( n, { newTab: v } ) } ) : null,
+					el( TextControl, { label: __( 'Text after this label', 'fxt-core' ), value: l.after || '', onChange: ( v ) => change( n, { after: v } ) } ),
+					el( ToggleControl, { label: __( 'Show this label', 'fxt-core' ), checked: ! l.hidden, onChange: ( v ) => change( n, { hidden: ! v } ) } ),
+					el(
+						'div',
+						{ className: 'fxt-labels__actions' },
+						el( Button, { variant: 'tertiary', size: 'small', disabled: 0 === n, onClick: () => move( n, -1 ), label: __( 'Move label up', 'fxt-core' ) }, __( 'Move up', 'fxt-core' ) ),
+						el( Button, { variant: 'tertiary', size: 'small', disabled: n === labels.length - 1, onClick: () => move( n, 1 ), label: __( 'Move label down', 'fxt-core' ) }, __( 'Move down', 'fxt-core' ) ),
+						el( Button, { variant: 'tertiary', size: 'small', isDestructive: true, disabled: 1 === labels.length, onClick: () => save( labels.filter( ( x, i ) => i !== n ) ) }, __( 'Remove', 'fxt-core' ) )
+					)
+				) ),
+				el( Button, { key: 'add', variant: 'secondary', className: 'fxt-labels__add', onClick: () => save( labels.concat( [ { kind: 'verified', name: '', url: '', newTab: false, before: labels.length ? __( 'and', 'fxt-core' ) : '', after: '', hidden: false } ] ) ) }, __( 'Add label', 'fxt-core' ) ),
+				el( TextControl, { key: 'n', label: __( 'Note after the labels (optional)', 'fxt-core' ), value: a.note, onChange: ( v ) => set( { note: v } ) } ),
+			];
+		},
+		'fxt/affiliate-cta': ( a, set ) => [
+			el( TextControl, {
+				key: 'l',
+				label: __( 'Button label', 'fxt-core' ),
+				help: __( 'Empty: the broker\'s "Affiliate button label", else "Visit {broker}". {broker} is replaced with the broker name.', 'fxt-core' ),
+				placeholder: __( 'Visit {broker}', 'fxt-core' ),
+				value: a.label,
+				onChange: ( v ) => set( { label: v } ),
+			} ),
+			el( 'p', { key: 'u', className: 'components-base-control__help' }, __( 'The link is always the broker\'s Affiliate URL (Broker data: research summary), with rel="sponsored nofollow". No URL: the button is not shown.', 'fxt-core' ) ),
 			el( SelectControl, {
-				key: 'k',
-				label: __( 'Label', 'fxt-core' ),
-				value: a.kind,
-				options: Object.keys( config.labelKinds || {} ).map( ( k ) => ( { value: k, label: config.labelKinds[ k ] } ) ),
-				onChange: ( v ) => set( { kind: v } ),
+				key: 's',
+				label: __( 'Button style', 'fxt-core' ),
+				value: a.style,
+				options: [ { value: 'primary', label: __( 'Primary', 'fxt-core' ) }, { value: 'secondary', label: __( 'Secondary', 'fxt-core' ) } ],
+				onChange: ( v ) => set( { style: v } ),
 			} ),
 			el( SelectControl, {
-				key: 'v',
-				label: __( 'Show on the site', 'fxt-core' ),
-				value: a.visibility || '',
+				key: 'j',
+				label: __( 'Position', 'fxt-core' ),
+				value: a.justify,
 				options: [
-					{ value: '', label: __( 'Site default (Settings > Source labels)', 'fxt-core' ) },
-					{ value: 'show', label: __( 'Show', 'fxt-core' ) },
-					{ value: 'hide', label: __( 'Hide', 'fxt-core' ) },
+					{ value: 'left', label: __( 'Left', 'fxt-core' ) },
+					{ value: 'center', label: __( 'Center', 'fxt-core' ) },
+					{ value: 'right', label: __( 'Right', 'fxt-core' ) },
+					{ value: 'full', label: __( 'Full width', 'fxt-core' ) },
 				],
-				onChange: ( v ) => set( { visibility: v } ),
+				onChange: ( v ) => set( { justify: v } ),
 			} ),
-			el( TextControl, { key: 't', label: __( 'Custom source name (optional)', 'fxt-core' ), help: __( 'Replaces the label text only; the classification chosen above and its colour stay. Empty: the label name (Settings > Source labels).', 'fxt-core' ), value: a.text, onChange: ( v ) => set( { text: v } ) } ),
-			el( TextControl, { key: 'p', label: __( 'Text before the label', 'fxt-core' ), value: a.prefix, onChange: ( v ) => set( { prefix: v } ) } ),
-			el( TextControl, { key: 'n', label: __( 'Note after the label (optional)', 'fxt-core' ), value: a.note, onChange: ( v ) => set( { note: v } ) } ),
-			el( TextControl, { key: 'u', type: 'url', label: __( 'Link (optional)', 'fxt-core' ), help: __( 'Where a click on the label goes.', 'fxt-core' ), value: a.url, onChange: ( v ) => set( { url: v } ) } ),
-			a.url ? el( ToggleControl, { key: 'b', label: __( 'Open in a new tab', 'fxt-core' ), checked: !! a.newTab, onChange: ( v ) => set( { newTab: v } ) } ) : null,
+			el( ToggleControl, { key: 't', label: __( 'Open in a new tab', 'fxt-core' ), checked: false !== a.newTab, onChange: ( v ) => set( { newTab: v } ) } ),
+			el( BrokerIdSelect, { key: 'b', label: __( 'Broker', 'fxt-core' ), value: a.brokerId, onChange: ( v ) => set( { brokerId: parseInt( v, 10 ) || 0 } ) } ),
 		],
 		'fxt/post-byline': ( a, set ) => [
 			el( ToggleControl, { key: 'r', label: __( 'Show author role', 'fxt-core' ), checked: !! a.showRole, onChange: ( v ) => set( { showRole: v } ) } ),
@@ -405,6 +486,7 @@
 		'fxt/post-byline',
 		'fxt/source-label',
 		'fxt/cost-calculator',
+		'fxt/affiliate-cta',
 	];
 
 	/* ---------------------------------------------------------------------

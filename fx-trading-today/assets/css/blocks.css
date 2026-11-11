@@ -828,3 +828,12 @@ li > .fxt-source-label { align-self: auto; height: auto; vertical-align: 1px; }
   padding-right: max(0px, calc(min(var(--wp--style--global--wide-size), 100%) - 44rem));
   text-wrap: pretty;
 }
+
+/* 1.4.8: Affiliate CTA button block (theme .btn styles). */
+.affiliate-cta { display: flex; justify-content: flex-start; }
+.affiliate-cta--center { justify-content: center; }
+.affiliate-cta--right { justify-content: flex-end; }
+.affiliate-cta__link { gap: var(--space-2); max-width: 100%; white-space: normal; text-align: center; }
+@media (max-width: 599px) {
+  .affiliate-cta .affiliate-cta__link { width: 100%; }
+}

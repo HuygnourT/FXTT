@@ -455,10 +455,167 @@ final class Importer {
 				continue;
 			}
 			$this->posts[ 'evidence:' . $item['slug'] ] = $id;
+			$item['meta'] = $this->demo_images( $item['meta'], $id );
 			$this->write_meta( $id, array_merge( $item['meta'], array( 'fxt_broker_id' => $broker_id ) ), Schema::evidence() );
 		}
 		/* translators: %d: number of evidence records */
 		$this->log[] = sprintf( __( '%d test evidence records', 'fxt-core' ), count( $items ) );
+	}
+
+	/**
+	 * Sample evidence images of spread test instruments (1.4.8). In the demo
+	 * data an image is "demo:key|caption"; it becomes a generated PNG in the
+	 * media library, clearly marked as sample data (no real screenshot is
+	 * shipped). Re-importing reuses the same attachment.
+	 *
+	 * @param array $meta      Evidence meta from the demo file.
+	 * @param int   $parent_id Evidence post ID.
+	 * @return array
+	 */
+	private function demo_images( array $meta, $parent_id ) {
+		if ( empty( $meta['fxt_spread_tests'] ) || ! is_array( $meta['fxt_spread_tests'] ) ) {
+			return $meta;
+		}
+		foreach ( $meta['fxt_spread_tests'] as $a => $account ) {
+			foreach ( isset( $account['sessions'] ) ? (array) $account['sessions'] : array() as $s => $session ) {
+				foreach ( isset( $session['instruments'] ) ? (array) $session['instruments'] : array() as $n => $instrument ) {
+					$ids = array();
+					foreach ( isset( $instrument['images'] ) ? (array) $instrument['images'] : array() as $image ) {
+						if ( is_string( $image ) && 0 === strpos( $image, 'demo:' ) ) {
+							$parts = explode( '|', substr( $image, 5 ), 2 );
+							$image = $this->demo_image( sanitize_key( $parts[0] ), isset( $parts[1] ) ? $parts[1] : '', $parent_id );
+						}
+						if ( $image ) {
+							$ids[] = (int) $image;
+						}
+					}
+					$meta['fxt_spread_tests'][ $a ]['sessions'][ $s ]['instruments'][ $n ]['images'] = $ids;
+				}
+			}
+		}
+		return $meta;
+	}
+
+	/**
+	 * One generated sample image (GD), or 0 when it cannot be made.
+	 *
+	 * @param string $key       Unique key.
+	 * @param string $caption   Caption, e.g. "EUR/USD, London open: quotes 08:00 to 08:30".
+	 * @param int    $parent_id Evidence post ID.
+	 * @return int Attachment ID.
+	 */
+	private function demo_image( $key, $caption, $parent_id ) {
+		$marker = 'image:' . $key;
+		$found  = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'meta_key'       => self::MARKER, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- admin-only import.
+				'meta_value'     => $marker, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- admin-only import.
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+			)
+		);
+		if ( $found ) {
+			return (int) $found[0];
+		}
+		if ( ! function_exists( 'imagecreatetruecolor' ) ) {
+			return 0;
+		}
+		$w   = 1200;
+		$h   = 750;
+		$im  = imagecreatetruecolor( $w, $h );
+		$bg  = imagecolorallocate( $im, 245, 243, 238 );
+		$ink = imagecolorallocate( $im, 21, 23, 28 );
+		$mut = imagecolorallocate( $im, 110, 108, 100 );
+		$acc = imagecolorallocate( $im, 15, 90, 71 );
+		$lin = imagecolorallocate( $im, 214, 209, 198 );
+		$smp = imagecolorallocate( $im, 255, 244, 214 );
+		imagefill( $im, 0, 0, $bg );
+		// Banner: this is sample data, not a screenshot.
+		imagefilledrectangle( $im, 0, 0, $w, 90, $smp );
+		$this->demo_text( $im, 'SAMPLE DATA - NOT A REAL SCREENSHOT', 40, 23, 3, $ink );
+		foreach ( array_slice( explode( "\n", wordwrap( remove_accents( $caption ), 60, "\n", true ) ), 0, 3 ) as $n => $line ) {
+			$this->demo_text( $im, $line, 40, 112 + $n * 36, 2, $ink );
+		}
+		// Chart frame and a deterministic bid / ask line pair.
+		imagerectangle( $im, 40, 220, $w - 40, $h - 90, $lin );
+		for ( $y = 260; $y < $h - 90; $y += 60 ) {
+			imageline( $im, 41, $y, $w - 41, $y, $lin );
+		}
+		mt_srand( crc32( $key ) );
+		$prev = null;
+		imagesetthickness( $im, 3 );
+		for ( $x = 60; $x <= $w - 60; $x += 20 ) {
+			$y = (int) ( 430 + 120 * sin( $x / 140 ) + mt_rand( -25, 25 ) );
+			if ( $prev ) {
+				imageline( $im, $prev[0], $prev[1], $x, $y, $acc );
+				imageline( $im, $prev[0], $prev[1] + 28, $x, $y + 28, $mut );
+			}
+			$prev = array( $x, $y );
+		}
+		imagesetthickness( $im, 1 );
+		$this->demo_text( $im, 'FX Trading Today demo content', 40, $h - 60, 2, $mut );
+		ob_start();
+		imagepng( $im );
+		$png = ob_get_clean();
+		imagedestroy( $im );
+
+		$upload = wp_upload_bits( 'sample-evidence-' . $key . '.png', null, $png );
+		if ( ! empty( $upload['error'] ) ) {
+			$this->log[] = $upload['error'];
+			return 0;
+		}
+		$title = __( 'Sample evidence image', 'fxt-core' ) . ( '' !== $caption ? ': ' . $caption : '' );
+		$id    = wp_insert_attachment(
+			array(
+				'post_mime_type' => 'image/png',
+				'post_title'     => $title,
+				'post_excerpt'   => sprintf( /* translators: %s: caption */ __( 'Sample data (generated image): %s', 'fxt-core' ), $caption ),
+				'post_status'    => 'inherit',
+			),
+			$upload['file'],
+			$parent_id
+		);
+		if ( ! $id || is_wp_error( $id ) ) {
+			return 0;
+		}
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $upload['file'] ) );
+		update_post_meta( $id, '_wp_attachment_image_alt', sprintf( /* translators: %s: caption */ __( 'Sample evidence image (generated, not a real screenshot): %s', 'fxt-core' ), $caption ) );
+		update_post_meta( $id, self::MARKER, $marker );
+		return (int) $id;
+	}
+
+	/**
+	 * Large text on a GD image: the built-in font drawn small, then scaled up.
+	 *
+	 * @param resource|\GdImage $im    Image.
+	 * @param string            $text  Text (ASCII; other characters are simplified).
+	 * @param int               $x     Left.
+	 * @param int               $y     Top.
+	 * @param int               $scale Scale factor.
+	 * @param int               $color Color.
+	 */
+	private function demo_text( $im, $text, $x, $y, $scale, $color ) {
+		$text = remove_accents( (string) $text );
+		$text = preg_replace( '/[^\x20-\x7E]/', '', $text );
+		$cw   = imagefontwidth( 5 );
+		$ch   = imagefontheight( 5 );
+		$max  = (int) floor( ( imagesx( $im ) - $x - 20 ) / ( $cw * $scale ) );
+		$text = strlen( $text ) > $max ? substr( $text, 0, max( 0, $max - 3 ) ) . '...' : $text;
+		if ( '' === $text ) {
+			return;
+		}
+		$tmp   = imagecreatetruecolor( $cw * strlen( $text ), $ch );
+		$clear = imagecolorallocatealpha( $tmp, 0, 0, 0, 127 );
+		imagealphablending( $tmp, false );
+		imagefill( $tmp, 0, 0, $clear );
+		imagesavealpha( $tmp, true );
+		imagestring( $tmp, 5, 0, 0, $text, $color );
+		imagealphablending( $im, true );
+		imagecopyresized( $im, $tmp, $x, $y, 0, 0, $cw * strlen( $text ) * $scale, $ch * $scale, $cw * strlen( $text ), $ch );
+		imagedestroy( $tmp );
 	}
 
 	/**
@@ -868,6 +1025,19 @@ final class Importer {
 				'posts_per_page' => -1,
 			)
 		);
+		// Generated sample evidence images (1.4.8).
+		$images = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'meta_key'       => self::MARKER, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- admin-only.
+				'fields'         => 'ids',
+				'posts_per_page' => -1,
+			)
+		);
+		foreach ( $images as $image ) {
+			$count += wp_delete_attachment( $image, true ) ? 1 : 0;
+		}
 		foreach ( $ids as $id ) {
 			if ( (int) get_option( 'page_on_front' ) === (int) $id ) {
 				update_option( 'show_on_front', 'posts' );
